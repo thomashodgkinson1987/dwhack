@@ -10,7 +10,6 @@ static size_t vtable_capacity = 0;
 static struct scene_funcs *vtable = NULL;
 
 size_t SCENE_TAG_1;
-size_t SCENE_TAG_2;
 
 void scene_vtable_init(void)
 {
