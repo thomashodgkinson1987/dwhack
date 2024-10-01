@@ -83,10 +83,8 @@ struct scene scene_1_create(int x, int y)
     assert(data != NULL);
     memset(data, 0, sizeof *data);
 
-    *data = (struct scene_data_1){
-        .x = x,
-        .y = y
-    };
+    data->x = x;
+    data->y = y;
 
     struct scene scene =
         {
