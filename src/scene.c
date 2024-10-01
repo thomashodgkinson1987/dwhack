@@ -52,29 +52,29 @@ size_t scene_register_type(struct scene_funcs scene_funcs)
     return vtable_count - 1;
 }
 
-void scene_on_enter(struct scene *scene)
-{
-    vtable[scene->tag].on_enter(scene);
-}
-void scene_on_exit(struct scene *scene)
-{
-    vtable[scene->tag].on_exit(scene);
-}
-void scene_on_tick(struct scene *scene, float delta)
-{
-    vtable[scene->tag].on_tick(scene, delta);
-}
-void scene_on_draw(struct scene *scene)
-{
-    vtable[scene->tag].on_draw(scene);
-}
-void scene_on_free(struct scene *scene)
+void scene_free(struct scene *scene)
 {
     vtable[scene->tag].on_free(scene);
 
     scene->tag = 0;
     free(scene->data);
     scene->data = NULL;
+}
+void scene_enter(struct scene *scene)
+{
+    vtable[scene->tag].on_enter(scene);
+}
+void scene_exit(struct scene *scene)
+{
+    vtable[scene->tag].on_exit(scene);
+}
+void scene_tick(struct scene *scene, float delta)
+{
+    vtable[scene->tag].on_tick(scene, delta);
+}
+void scene_draw(struct scene *scene)
+{
+    vtable[scene->tag].on_draw(scene);
 }
 
 struct scene scene_1_create(int x, int y)
@@ -83,8 +83,14 @@ struct scene scene_1_create(int x, int y)
     assert(data != NULL);
     memset(data, 0, sizeof *data);
 
-    data->x = x;
-    data->y = y;
+    // data->x = x;
+    // data->y = y;
+
+    *data = (struct scene_data_1)
+    {
+        .x = x,
+        .y = y
+    };
 
     struct scene scene =
         {

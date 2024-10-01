@@ -11,11 +11,11 @@ struct scene
 
 struct scene_funcs
 {
+    void(*on_free)(struct scene *scene);
     void(*on_enter)(struct scene *scene);
     void(*on_exit)(struct scene *scene);
     void(*on_tick)(struct scene *scene, float delta);
     void(*on_draw)(struct scene *scene);
-    void(*on_free)(struct scene *scene);
 };
 
 void scene_vtable_init(void);
@@ -23,11 +23,11 @@ void scene_vtable_free(void);
 
 size_t scene_register_type(struct scene_funcs scene_funcs);
 
-void scene_on_enter(struct scene *scene);
-void scene_on_exit(struct scene *scene);
-void scene_on_tick(struct scene *scene, float delta);
-void scene_on_draw(struct scene *scene);
-void scene_on_free(struct scene *scene);
+void scene_free(struct scene *scene);
+void scene_enter(struct scene *scene);
+void scene_exit(struct scene *scene);
+void scene_tick(struct scene *scene, float delta);
+void scene_draw(struct scene *scene);
 
 // SCENE 1
 
