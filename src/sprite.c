@@ -28,51 +28,72 @@ void sprite_free(struct sprite *sprite)
     sprite->tint = BLANK;
 }
 
-float sprite_x_get(struct sprite *sprite)
+bool sprite_get_is_visible(struct sprite *sprite)
+{
+    return sprite->is_visible;
+}
+
+Texture2D sprite_get_texture(struct sprite *sprite)
+{
+    return sprite->texture;
+}
+
+float sprite_get_x(struct sprite *sprite)
 {
     return sprite->dest.x;
 }
-float sprite_y_get(struct sprite *sprite)
+float sprite_get_y(struct sprite *sprite)
 {
     return sprite->dest.y;
 }
-float sprite_w_get(struct sprite *sprite)
+float sprite_get_w(struct sprite *sprite)
 {
     return sprite->dest.width;
 }
-float sprite_h_get(struct sprite *sprite)
+float sprite_get_h(struct sprite *sprite)
 {
     return sprite->dest.height;
 }
 
-void sprite_x_set(struct sprite *sprite, float x)
+void sprite_set_is_visible(struct sprite *sprite, bool is_visible)
+{
+    sprite->is_visible = is_visible;
+}
+
+void sprite_set_texture(struct sprite *sprite, Texture2D texture)
+{
+    sprite->texture = texture;
+}
+
+void sprite_set_x(struct sprite *sprite, float x)
 {
     sprite->dest.x = x;
 }
-void sprite_y_set(struct sprite *sprite, float y)
+void sprite_set_y(struct sprite *sprite, float y)
 {
     sprite->dest.y = y;
 }
-void sprite_w_set(struct sprite *sprite, float w)
+void sprite_set_w(struct sprite *sprite, float w)
 {
     sprite->dest.width = w;
 }
-void sprite_h_set(struct sprite *sprite, float h)
+void sprite_set_h(struct sprite *sprite, float h)
 {
     sprite->dest.height = h;
 }
+
 void sprite_set_position(struct sprite *sprite, float x, float y)
 {
-    sprite_x_set(sprite, x);
-    sprite_y_set(sprite, y);
+    sprite_set_x(sprite, x);
+    sprite_set_y(sprite, y);
 }
 void sprite_set_size(struct sprite *sprite, float w, float h)
 {
-    sprite_w_set(sprite, w);
-    sprite_h_set(sprite, h);
+    sprite_set_w(sprite, w);
+    sprite_set_h(sprite, h);
 }
 
-void sprite_is_visible_toggle(struct sprite *sprite)
+void sprite_toggle_is_visible(struct sprite *sprite)
 {
     sprite->is_visible = !sprite->is_visible;
 }

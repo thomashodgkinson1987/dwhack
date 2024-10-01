@@ -17,19 +17,28 @@ struct sprite
 struct sprite sprite_create(Texture2D texture, float x, float y, float w, float h);
 void sprite_free(struct sprite *sprite);
 
-float sprite_x_get(struct sprite *sprite);
-float sprite_y_get(struct sprite *sprite);
-float sprite_w_get(struct sprite *sprite);
-float sprite_h_get(struct sprite *sprite);
+bool sprite_get_is_visible(struct sprite *sprite);
 
-void sprite_x_set(struct sprite *sprite, float x);
-void sprite_y_set(struct sprite *sprite, float y);
-void sprite_w_set(struct sprite *sprite, float w);
-void sprite_h_set(struct sprite *sprite, float h);
+Texture2D sprite_get_texture(struct sprite *sprite);
+
+float sprite_get_x(struct sprite *sprite);
+float sprite_get_y(struct sprite *sprite);
+float sprite_get_w(struct sprite *sprite);
+float sprite_get_h(struct sprite *sprite);
+
+void sprite_set_is_visible(struct sprite *sprite, bool is_visible);
+
+void sprite_set_texture(struct sprite *sprite, Texture2D texture);
+
+void sprite_set_x(struct sprite *sprite, float x);
+void sprite_set_y(struct sprite *sprite, float y);
+void sprite_set_w(struct sprite *sprite, float w);
+void sprite_set_h(struct sprite *sprite, float h);
+
 void sprite_set_position(struct sprite *sprite, float x, float y);
 void sprite_set_size(struct sprite *sprite, float w, float h);
 
-void sprite_is_visible_toggle(struct sprite *sprite);
+void sprite_toggle_is_visible(struct sprite *sprite);
 
 void sprite_draw(struct sprite *sprite);
 

@@ -243,10 +243,10 @@ static void game_init(void)
     game_init_sprites();
     game_init_map();
 
-    sprite_ui_character_sheet.is_visible = false;
-    sprite_ui_spells.is_visible = false;
+    sprite_set_is_visible(&sprite_ui_character_sheet, false);
+    sprite_set_is_visible(&sprite_ui_spells, false);
 
-    sprite_backdrop.texture = array_backdrop_textures[GetRandomValue(0, array_backdrop_textures_length - 1)];
+    sprite_set_texture(&sprite_backdrop, array_backdrop_textures[GetRandomValue(0, array_backdrop_textures_length - 1)]);
 
     player_x = 1;
     player_y = map_get_height(&map) - 2;
@@ -613,15 +613,6 @@ static void game_init_map(void)
             map_data_set_at(&map, x, y, GetRandomValue(0, 100) > 60 ? 1 : 0);
         }
     }
-
-    for (size_t y = 0; y < map_get_height(&map); ++y)
-    {
-        for (size_t x = 0; x < map_get_width(&map); ++x)
-        {
-            printf("%i", map_data_get_at(&map, x, y));
-        }
-        printf("\n");
-    }
 }
 
 static void game_free(void)
@@ -643,8 +634,6 @@ static void game_free_coors(void)
 
 static void game_free_textures(void)
 {
-    memset(array_backdrop_textures, 0, sizeof(Texture2D) * array_backdrop_textures_length);
-
     for (size_t i = 0; i < array_textures_count; ++i)
     {
         Texture2D *texture = array_textures[i];
@@ -655,6 +644,8 @@ static void game_free_textures(void)
     array_textures_capacity = 0;
     free(array_textures);
     array_textures = NULL;
+
+    memset(array_backdrop_textures, 0, sizeof(Texture2D) * array_backdrop_textures_length);
 
     render_texture_virtual_screen_is_dirty = false;
     UnloadRenderTexture(render_texture_virtual_screen);
@@ -667,11 +658,6 @@ static void game_free_textures(void)
 
 static void game_free_sprites(void)
 {
-    array_wall_sprites_capacity = 0;
-    array_wall_sprites_count = 0;
-    free(array_wall_sprites);
-    array_wall_sprites = NULL;
-
     for (size_t i = 0; i < array_sprites_count; ++i)
     {
         struct sprite *sprite = array_sprites[i];
@@ -682,6 +668,11 @@ static void game_free_sprites(void)
     array_sprites_capacity = 0;
     free(array_sprites);
     array_sprites = NULL;
+
+    array_wall_sprites_capacity = 0;
+    array_wall_sprites_count = 0;
+    free(array_wall_sprites);
+    array_wall_sprites = NULL;
 }
 
 static void game_free_map(void)
@@ -707,7 +698,14 @@ static void game_tick(float delta)
     int map_width = (int)map_get_width(&map);
     int map_height = (int)map_get_height(&map);
 
-    if (IsKeyPressed(KEY_A))
+    bool is_pressed_a = IsKeyPressed(KEY_A);
+    bool is_pressed_d = IsKeyPressed(KEY_D);
+    bool is_pressed_w = IsKeyPressed(KEY_W);
+    bool is_pressed_s = IsKeyPressed(KEY_S);
+    bool is_pressed_q = IsKeyPressed(KEY_Q);
+    bool is_pressed_e = IsKeyPressed(KEY_E);
+
+    if (is_pressed_a && !is_pressed_d && !is_pressed_w && !is_pressed_s)
     {
         int dx = player_f == 0 ? -1 : player_f == 2 ? 1
                                                     : 0;
@@ -727,7 +725,7 @@ static void game_tick(float delta)
             }
         }
     }
-    if (IsKeyPressed(KEY_D))
+    else if (!is_pressed_a && is_pressed_d && !is_pressed_w && !is_pressed_s)
     {
         int dx = player_f == 0 ? 1 : player_f == 2 ? -1
                                                    : 0;
@@ -747,7 +745,7 @@ static void game_tick(float delta)
             }
         }
     }
-    if (IsKeyPressed(KEY_W))
+    else if (!is_pressed_a && !is_pressed_d && is_pressed_w && !is_pressed_s)
     {
         int dx = player_f == 3 ? -1 : player_f == 1 ? 1
                                                     : 0;
@@ -767,7 +765,7 @@ static void game_tick(float delta)
             }
         }
     }
-    if (IsKeyPressed(KEY_S))
+    else if (!is_pressed_a && !is_pressed_d && !is_pressed_w && is_pressed_s)
     {
         int dx = player_f == 3 ? 1 : player_f == 1 ? -1
                                                    : 0;
@@ -787,11 +785,11 @@ static void game_tick(float delta)
             }
         }
     }
-    if (IsKeyPressed(KEY_Q))
+    else if (is_pressed_q && !is_pressed_e)
     {
         player_f = player_f == 0 ? 3 : player_f - 1;
     }
-    if (IsKeyPressed(KEY_E))
+    else if (!is_pressed_q && is_pressed_e)
     {
         player_f = player_f == 3 ? 0 : player_f + 1;
     }
