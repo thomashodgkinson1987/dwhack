@@ -1,0 +1,26 @@
+minimap_ui
+58x42 54,139
+
+spell_ui
+99x44 37,137
+
+inventory_ui
+36x182 0,0
+
+equipment_ui
+100x132 36,0
+
+portrait_hands_ui
+66x44 139,136
+
+camp_button_ui
+37x19 0,181
+
+character_sheet_ui
+136x182 0,0
+
+compass_ui
+45x44 210,134
+
+direction_buttons_ui
+58x44 260,136
