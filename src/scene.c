@@ -86,11 +86,6 @@ struct scene scene_1_create(int x, int y)
     data->x = x;
     data->y = y;
 
-    // *data = (struct scene_data_1){
-    //     .x = x,
-    //     .y = y
-    // };
-
     struct scene scene =
         {
             .tag = SCENE_TAG_1,
