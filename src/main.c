@@ -1,5 +1,6 @@
 #include "map.h"
 #include "sprite.h"
+#include "scene.h"
 
 #include "raylib.h"
 
@@ -188,6 +189,8 @@ static int player_f;
 
 static struct map map;
 
+static struct scene scene_1;
+
 static void game_init(void);
 static void game_init_coors(void);
 static void game_init_textures(void);
@@ -254,8 +257,15 @@ static void game_init(void)
 
     update_compass();
     recalculate_visible_walls();
-}
 
+    scene_vtable_init();
+
+    scene_1 = scene_1_create(123, 456);
+    scene_on_enter(&scene_1);
+    scene_on_tick(&scene_1, 1.0f / 60);
+    scene_on_draw(&scene_1);
+    scene_on_exit(&scene_1);
+}
 static void game_init_coors(void)
 {
     coors = (struct coors){0};
@@ -304,7 +314,6 @@ static void game_init_coors(void)
     coors.x1y3l = (struct rectanglei){242, 41, 8, 35};
     coors.x2y3l = (struct rectanglei){274, 41, 24, 35};
 }
-
 static void game_init_textures(void)
 {
     render_texture_virtual_screen_is_dirty = true;
@@ -457,7 +466,6 @@ static void game_init_textures(void)
     array_textures[array_textures_count++] = &texture_x1y3l;
     array_textures[array_textures_count++] = &texture_x2y3l;
 }
-
 static void game_init_sprites(void)
 {
     sprite_main = sprite_create(texture_main, (float)coors.main.x, (float)coors.main.y, (float)coors.main.w, (float)coors.main.h);
@@ -590,7 +598,6 @@ static void game_init_sprites(void)
     array_wall_sprites[array_wall_sprites_count++] = &sprite_x1y3l;
     array_wall_sprites[array_wall_sprites_count++] = &sprite_x2y3l;
 }
-
 static void game_init_map(void)
 {
     map = map_create(16, 16);
@@ -625,13 +632,15 @@ static void game_free(void)
     player_x = 0;
     player_y = 0;
     player_f = 0;
-}
 
+    scene_on_free(&scene_1);
+
+    scene_vtable_free();
+}
 static void game_free_coors(void)
 {
     coors = (struct coors){0};
 }
-
 static void game_free_textures(void)
 {
     for (size_t i = 0; i < array_textures_count; ++i)
@@ -655,7 +664,6 @@ static void game_free_textures(void)
     render_texture_virtual_screen_rotation = 0.0f;
     render_texture_virtual_screen_tint = BLANK;
 }
-
 static void game_free_sprites(void)
 {
     for (size_t i = 0; i < array_sprites_count; ++i)
@@ -674,7 +682,6 @@ static void game_free_sprites(void)
     free(array_wall_sprites);
     array_wall_sprites = NULL;
 }
-
 static void game_free_map(void)
 {
     map_free(&map);
