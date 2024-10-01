@@ -261,10 +261,6 @@ static void game_init(void)
     scene_vtable_init();
 
     scene_1 = scene_1_create(123, 456);
-    scene_on_enter(&scene_1);
-    scene_on_tick(&scene_1, 1.0f / 60);
-    scene_on_draw(&scene_1);
-    scene_on_exit(&scene_1);
 }
 static void game_init_coors(void)
 {
@@ -633,7 +629,7 @@ static void game_free(void)
     player_y = 0;
     player_f = 0;
 
-    scene_on_free(&scene_1);
+    scene_free(&scene_1);
 
     scene_vtable_free();
 }
