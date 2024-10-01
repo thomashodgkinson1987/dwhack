@@ -83,8 +83,10 @@ struct scene scene_1_create(int x, int y)
     assert(data != NULL);
     memset(data, 0, sizeof *data);
 
-    data->x = x;
-    data->y = y;
+    *data = (struct scene_data_1){
+        .x = x,
+        .y = y
+    };
 
     struct scene scene =
         {
@@ -112,7 +114,4 @@ void scene_1_on_draw(struct scene *scene)
 void scene_1_on_free(struct scene *scene)
 {
     struct scene_data_1 *data = scene->data;
-
-    data->x = 0;
-    data->y = 0;
 }
