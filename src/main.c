@@ -1,6 +1,8 @@
 #include "map.h"
 #include "sprite.h"
+
 #include "scene.h"
+#include "game_scene.h"
 
 #include "raylib.h"
 
@@ -189,19 +191,21 @@ static int player_f;
 
 static struct map map;
 
-static struct scene scene_1;
+static struct scene game_scene;
 
 static void game_init(void);
 static void game_init_coors(void);
 static void game_init_textures(void);
 static void game_init_sprites(void);
 static void game_init_map(void);
+static void game_init_scenes(void);
 
 static void game_free(void);
 static void game_free_coors(void);
 static void game_free_textures(void);
 static void game_free_sprites(void);
 static void game_free_map(void);
+static void game_free_scenes(void);
 
 static void game_tick(float delta);
 static void game_draw(void);
@@ -245,6 +249,7 @@ static void game_init(void)
     game_init_textures();
     game_init_sprites();
     game_init_map();
+    game_init_scenes();
 
     sprite_set_is_visible(&sprite_ui_character_sheet, false);
     sprite_set_is_visible(&sprite_ui_spells, false);
@@ -257,10 +262,6 @@ static void game_init(void)
 
     update_compass();
     recalculate_visible_walls();
-
-    scene_vtable_init();
-
-    scene_1 = scene_1_create(123, 456);
 }
 static void game_init_coors(void)
 {
@@ -617,6 +618,19 @@ static void game_init_map(void)
         }
     }
 }
+static void game_init_scenes(void)
+{
+    scene_vtable_init();
+
+    GAME_SCENE_TAG = scene_vtable_register((struct scene_funcs){
+        .on_free = game_scene_free,
+        .on_enter = game_scene_on_enter,
+        .on_exit = game_scene_on_exit,
+        .on_tick = game_scene_on_tick,
+        .on_draw = game_scene_on_draw});
+
+    game_scene = game_scene_create();
+}
 
 static void game_free(void)
 {
@@ -624,14 +638,11 @@ static void game_free(void)
     game_free_sprites();
     game_free_textures();
     game_free_coors();
+    game_free_scenes();
 
     player_x = 0;
     player_y = 0;
     player_f = 0;
-
-    scene_free(&scene_1);
-
-    scene_vtable_free();
 }
 static void game_free_coors(void)
 {
@@ -682,9 +693,17 @@ static void game_free_map(void)
 {
     map_free(&map);
 }
+static void game_free_scenes(void)
+{
+    scene_free(&game_scene);
+
+    scene_vtable_free();
+}
 
 static void game_tick(float delta)
 {
+    scene_tick(&game_scene, delta);
+
     if (IsKeyPressed(KEY_C))
     {
         sprite_ui_inventory.is_visible = !sprite_ui_inventory.is_visible;
@@ -809,6 +828,8 @@ static void game_tick(float delta)
 
 static void game_draw(void)
 {
+    scene_draw(&game_scene);
+
     if (render_texture_virtual_screen_is_dirty)
     {
         BeginTextureMode(render_texture_virtual_screen);
