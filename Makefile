@@ -28,6 +28,12 @@ CC = gcc
 PROJECT_NAME   ?= dwhack
 BUILD_MODE     ?= DEBUG
 
+SRC_DIR = src
+OBJ_DIR = obj
+BIN_DIR = bin
+RES_DIR = res
+LIB_DIR = lib
+
 ifeq ($(BUILD_MODE),DEBUG)
     CFLAGS += -g -O0
 else
@@ -36,19 +42,16 @@ endif
 
 CFLAGS += -std=c11 -Wall -Wno-missing-braces -Wextra -Wmissing-prototypes -D_DEFAULT_SOURCE
 
-INCLUDE_PATHS = -I/usr/local/include/
+#INCLUDE_PATHS = -I/usr/local/include/
+INCLUDE_PATHS = -Iinclude/
 
-LDFLAGS = -L/usr/local/lib/
+#LDFLAGS = -L/usr/local/lib/
 #LDFLAGS += -Wl,-rpath,/usr/local/lib/
+LDFLAGS += -Wl,-rpath,lib/
 
 LDLIBS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lc
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
-
-SRC_DIR = src
-OBJ_DIR = obj
-BIN_DIR = bin
-RES_DIR = res
 
 SRC_FILES = $(call rwildcard, $(SRC_DIR), *.c)
 OBJS = $(SRC_FILES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
@@ -58,7 +61,8 @@ all:
 
 $(PROJECT_NAME): $(OBJS)
 	$(CC) -o $(BIN_DIR)/$(PROJECT_NAME) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS)
-	ln -sf ../$(RES_DIR) $(BIN_DIR)/$(RES_DIR)
+	ln -sf ../$(RES_DIR) $(BIN_DIR)/
+	ln -sf ../$(LIB_DIR) $(BIN_DIR)/
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS)
@@ -67,4 +71,5 @@ clean:
 	rm -f $(OBJ_DIR)/*.o
 	rm -f $(BIN_DIR)/$(PROJECT_NAME)
 	rm -f $(BIN_DIR)/$(RES_DIR)
+	rm -f $(BIN_DIR)/$(LIB_DIR)
 	@echo Cleaning done

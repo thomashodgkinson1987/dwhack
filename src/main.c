@@ -2,11 +2,6 @@
 
 #include "raylib.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 static const int virtual_screen_width = 320;
 static const int virtual_screen_height = 200;
 
