@@ -1,7 +1,6 @@
 #include "scene.h"
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -16,13 +15,6 @@ void scene_vtable_init(void)
     vtable = malloc(sizeof *vtable * vtable_capacity);
     assert(vtable != NULL);
     memset(vtable, 0, sizeof *vtable * vtable_capacity);
-
-    SCENE_1_TAG = scene_vtable_register((struct scene_funcs){
-        .on_enter = scene_1_on_enter,
-        .on_exit = scene_1_on_exit,
-        .on_tick = scene_1_on_tick,
-        .on_draw = scene_1_on_draw,
-        .on_free = scene_1_on_free});
 }
 void scene_vtable_free(void)
 {
@@ -30,8 +22,6 @@ void scene_vtable_free(void)
     vtable_capacity = 0;
     free(vtable);
     vtable = NULL;
-
-    SCENE_1_TAG = 0;
 }
 size_t scene_vtable_register(struct scene_funcs scene_funcs)
 {
@@ -100,42 +90,4 @@ void scene_draw(struct scene *scene)
     {
         vtable[scene->tag].on_draw(scene);
     }
-}
-
-// SCENE 1
-
-size_t SCENE_1_TAG = 0;
-
-struct scene scene_1_create(int x, int y)
-{
-    struct scene_data_1 *data = malloc(sizeof *data);
-    assert(data != NULL);
-    memset(data, 0, sizeof *data);
-
-    data->x = x;
-    data->y = y;
-
-    struct scene scene = scene_create(SCENE_1_TAG, data);
-
-    return scene;
-}
-void scene_1_on_free(struct scene *scene)
-{
-    struct scene_data_1 *data = scene->data;
-}
-void scene_1_on_enter(struct scene *scene)
-{
-    struct scene_data_1 *data = scene->data;
-}
-void scene_1_on_exit(struct scene *scene)
-{
-    struct scene_data_1 *data = scene->data;
-}
-void scene_1_on_tick(struct scene *scene, float delta)
-{
-    struct scene_data_1 *data = scene->data;
-}
-void scene_1_on_draw(struct scene *scene)
-{
-    struct scene_data_1 *data = scene->data;
 }
