@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void game_scene_init_coors(struct scene *scene);
+static void game_scene_init_coords(struct scene *scene);
 static void game_scene_init_textures(struct scene *scene);
 static void game_scene_init_sprites(struct scene *scene);
 static void game_scene_init_map(struct scene *scene);
 static void game_scene_init_player(struct scene *scene);
 
-static void game_scene_free_coors(struct scene *scene);
+static void game_scene_free_coords(struct scene *scene);
 static void game_scene_free_textures(struct scene *scene);
 static void game_scene_free_sprites(struct scene *scene);
 static void game_scene_free_map(struct scene *scene);
@@ -30,7 +30,7 @@ struct scene game_scene_create(void)
 
     struct scene scene = scene_create(GAME_SCENE_TAG, data);
 
-    game_scene_init_coors(&scene);
+    game_scene_init_coords(&scene);
     game_scene_init_textures(&scene);
     game_scene_init_sprites(&scene);
     game_scene_init_map(&scene);
@@ -44,7 +44,7 @@ void game_scene_free(struct scene *scene)
     game_scene_free_map(scene);
     game_scene_free_sprites(scene);
     game_scene_free_textures(scene);
-    game_scene_free_coors(scene);
+    game_scene_free_coords(scene);
 }
 
 void game_scene_on_enter(struct scene *scene)
@@ -239,7 +239,7 @@ void game_scene_on_draw(struct scene *scene)
     sprite_draw(&data->sprite_ui_buttons_direction);
 }
 
-static void game_scene_init_coors(struct scene *scene)
+static void game_scene_init_coords(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
@@ -605,7 +605,7 @@ static void game_scene_init_player(struct scene *scene)
     data->player_f = 0;
 }
 
-static void game_scene_free_coors(struct scene *scene)
+static void game_scene_free_coords(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
