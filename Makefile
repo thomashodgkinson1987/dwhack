@@ -54,9 +54,6 @@ SRC_FILES = $(call rwildcard, $(SRC_DIR), *.c)
 OBJS = $(SRC_FILES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 all:
-	rm -f $(OBJ_DIR)/*.o
-	rm -f $(BIN_DIR)/$(PROJECT_NAME)
-	rm -f $(BIN_DIR)/$(RES_DIR)
 	make $(PROJECT_NAME)
 
 $(PROJECT_NAME): $(OBJS)
@@ -70,5 +67,4 @@ clean:
 	rm -f $(OBJ_DIR)/*.o
 	rm -f $(BIN_DIR)/$(PROJECT_NAME)
 	rm -f $(BIN_DIR)/$(RES_DIR)
-
 	@echo Cleaning done
