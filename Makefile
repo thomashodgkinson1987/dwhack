@@ -43,11 +43,11 @@ endif
 CFLAGS += -std=c11 -Wall -Wno-missing-braces -Wextra -Wmissing-prototypes -D_DEFAULT_SOURCE
 
 #INCLUDE_PATHS = -I/usr/local/include/
-INCLUDE_PATHS = -Iinclude/
+INCLUDE_PATHS = -I./include/
 
 #LDFLAGS = -L/usr/local/lib/
 #LDFLAGS += -Wl,-rpath,/usr/local/lib/
-LDFLAGS += -Wl,-rpath,lib/
+LDFLAGS += -Wl,-rpath,./lib/
 
 LDLIBS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lc
 
@@ -60,16 +60,16 @@ all:
 	make $(PROJECT_NAME)
 
 $(PROJECT_NAME): $(OBJS)
-	$(CC) -o $(BIN_DIR)/$(PROJECT_NAME) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS)
-	ln -sf ../$(RES_DIR) $(BIN_DIR)/
-	ln -sf ../$(LIB_DIR) $(BIN_DIR)/
+	$(CC) -v -o ./$(BIN_DIR)/$(PROJECT_NAME) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS)
+	ln -sf ./../$(RES_DIR) ./$(BIN_DIR)/
+	ln -sf ./../$(LIB_DIR) ./$(BIN_DIR)/
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS)
+	$(CC) -v -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS)
 
 clean:
-	rm -f $(OBJ_DIR)/*.o
-	rm -f $(BIN_DIR)/$(PROJECT_NAME)
-	rm -f $(BIN_DIR)/$(RES_DIR)
-	rm -f $(BIN_DIR)/$(LIB_DIR)
+	rm -f ./$(OBJ_DIR)/*.o
+	rm -f ./$(BIN_DIR)/$(PROJECT_NAME)
+	rm -f ./$(BIN_DIR)/$(RES_DIR)
+	rm -f ./$(BIN_DIR)/$(LIB_DIR)
 	@echo Cleaning done
