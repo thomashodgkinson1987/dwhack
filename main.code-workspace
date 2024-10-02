@@ -10,7 +10,8 @@
 			"math.h": "c",
 			"blocks.h": "c",
 			"stdio.h": "c",
-			"*.m": "c"
+			"*.m": "c",
+			"game_scene.h": "c"
 		},
 		"makefile.configureOnOpen": true
 	}
