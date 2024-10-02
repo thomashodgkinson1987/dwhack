@@ -42,8 +42,8 @@ endif
 
 CFLAGS += -std=c11 -Wall -Wno-missing-braces -Wextra -Wmissing-prototypes -D_DEFAULT_SOURCE
 
-INCLUDE_PATHS = -I/usr/local/include/
-#INCLUDE_PATHS = -Iinclude/
+#INCLUDE_PATHS = -I/usr/local/include/
+INCLUDE_PATHS = -Iinclude/
 
 #LDFLAGS = -L/usr/local/lib/
 #LDFLAGS += -Wl,-rpath,/usr/local/lib/
