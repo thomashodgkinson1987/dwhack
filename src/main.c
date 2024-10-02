@@ -90,6 +90,8 @@ static void game_init_scenes(void)
         .on_draw = game_scene_on_draw});
 
     game_scene = game_scene_create();
+
+    scene_enter(&game_scene);
 }
 
 static void game_free(void)
@@ -108,6 +110,8 @@ static void game_free_virtual_screen(void)
 }
 static void game_free_scenes(void)
 {
+    scene_exit(&game_scene);
+
     scene_free(&game_scene);
 
     GAME_SCENE_TAG = 0;

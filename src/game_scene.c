@@ -40,8 +40,6 @@ struct scene game_scene_create(void)
 }
 void game_scene_free(struct scene *scene)
 {
-    struct game_scene_data *data = scene->data;
-
     game_scene_free_player(scene);
     game_scene_free_map(scene);
     game_scene_free_sprites(scene);
@@ -56,7 +54,7 @@ void game_scene_on_enter(struct scene *scene)
     sprite_set_is_visible(&data->sprite_ui_character_sheet, false);
     sprite_set_is_visible(&data->sprite_ui_spells, false);
 
-    sprite_set_texture(&data->sprite_backdrop, data->array_texture_backdrops[GetRandomValue(0, sizeof(data->array_texture_backdrops) - 1)]);
+    sprite_set_texture(&data->sprite_backdrop, data->array_texture_backdrops[GetRandomValue(0, (sizeof(data->array_texture_backdrops) / sizeof(Texture2D)) - 1)]);
 
     game_scene_update_compass(scene);
     game_scene_recalculate_visible_walls(scene);
@@ -64,10 +62,14 @@ void game_scene_on_enter(struct scene *scene)
 void game_scene_on_exit(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
+
+    (void)data;
 }
 void game_scene_on_tick(struct scene *scene, float delta)
 {
     struct game_scene_data *data = scene->data;
+
+    (void)delta;
 
     if (IsKeyPressed(KEY_C))
     {
@@ -398,7 +400,7 @@ static void game_scene_init_textures(struct scene *scene)
 
     data->array_textures[data->array_textures_count++] = &data->texture_ui_buttons_direction;
 
-    for (size_t i = 0; i < sizeof(data->array_texture_backdrops); ++i)
+    for (size_t i = 0; i < sizeof(data->array_texture_backdrops) / sizeof(Texture2D); ++i)
     {
         data->array_textures[data->array_textures_count++] = &data->array_texture_backdrops[i];
     }
@@ -590,7 +592,7 @@ static void game_scene_init_map(struct scene *scene)
     {
         for (size_t x = 1; x < map_get_width(&data->map) - 1; ++x)
         {
-            map_data_set_at(&data->map, x, y, GetRandomValue(0, 100) > 60 ? 1 : 0);
+            map_data_set_at(&data->map, x, y, GetRandomValue(0, 100) > 65 ? 1 : 0);
         }
     }
 }
@@ -624,7 +626,7 @@ static void game_scene_free_textures(struct scene *scene)
     free(data->array_textures);
     data->array_textures = NULL;
 
-    memset(data->array_texture_backdrops, 0, sizeof(Texture2D) * sizeof(data->array_texture_backdrops));
+    memset(data->array_texture_backdrops, 0, sizeof(data->array_texture_backdrops));
 }
 static void game_scene_free_sprites(struct scene *scene)
 {
