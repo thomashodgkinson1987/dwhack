@@ -41,14 +41,8 @@ else
 endif
 
 CFLAGS += -std=c11 -Wall -Wno-missing-braces -Wextra -Wmissing-prototypes -D_DEFAULT_SOURCE
-
-#INCLUDE_PATHS = -I/usr/local/include/
 INCLUDE_PATHS = -I./include/
-
-#LDFLAGS = -L/usr/local/lib/
-#LDFLAGS += -Wl,-rpath,/usr/local/lib/
 LDFLAGS += -Wl,-rpath,./lib/
-
 LDLIBS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lc
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
