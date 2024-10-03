@@ -47,19 +47,19 @@ LDLIBS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lc
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
-SRC_FILES = $(call rwildcard, $(SRC_DIR), *.c)
-OBJS = $(SRC_FILES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+SRC_FILES = $(call rwildcard, ./$(SRC_DIR), *.c)
+OBJS = $(SRC_FILES:./$(SRC_DIR)/%.c=./$(OBJ_DIR)/%.o)
 
 all:
 	make $(PROJECT_NAME)
 
 $(PROJECT_NAME): $(OBJS)
-	$(CC) -v -o ./$(BIN_DIR)/$(PROJECT_NAME) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS)
-	ln -sf ./../$(RES_DIR) ./$(BIN_DIR)/
-	ln -sf ./../$(LIB_DIR) ./$(BIN_DIR)/
+	$(CC) -o ./$(BIN_DIR)/$(PROJECT_NAME) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS)
+	ln -sf ./../$(RES_DIR)/ ./$(BIN_DIR)/
+	ln -sf ./../$(LIB_DIR)/ ./$(BIN_DIR)/
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) -v -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS)
+	$(CC) -c ./$< -o ./$@ $(CFLAGS) $(INCLUDE_PATHS)
 
 clean:
 	rm -f ./$(OBJ_DIR)/*.o
