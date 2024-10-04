@@ -88,7 +88,6 @@ static void game_init_scenes(void)
 
     scene_enter(&game_scene);
 }
-
 static void game_free(void)
 {
     game_free_scenes();
@@ -127,11 +126,12 @@ static void game_draw(void)
 
     BeginDrawing();
     ClearBackground(WHITE);
-    DrawTexturePro(render_texture_virtual_screen.texture,
-                   render_texture_virtual_screen_source,
-                   render_texture_virtual_screen_dest,
-                   render_texture_virtual_screen_origin,
-                   render_texture_virtual_screen_rotation,
-                   render_texture_virtual_screen_tint);
+    DrawTexturePro(
+        render_texture_virtual_screen.texture,
+        render_texture_virtual_screen_source,
+        render_texture_virtual_screen_dest,
+        render_texture_virtual_screen_origin,
+        render_texture_virtual_screen_rotation,
+        render_texture_virtual_screen_tint);
     EndDrawing();
 }
