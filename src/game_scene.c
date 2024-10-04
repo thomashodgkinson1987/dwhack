@@ -1,6 +1,7 @@
 #include "game_scene.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -673,705 +674,234 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
         data->array_wall_sprites[i]->is_visible = false;
     }
 
-    //
-
     int map_width = (int)map_get_width(&data->map);
     int map_height = (int)map_get_height(&data->map);
 
-    if (data->player_f == 0)
+    int dir_vecs[4][2] = {
+        {0, -1},
+        {1, 0},
+        {0, 1},
+        {-1, 0}};
+
+    int left_f = (data->player_f + 3) % 4;
+    int right_f = (data->player_f + 1) % 4;
+
     {
+        int front_x = data->player_x + dir_vecs[data->player_f][0] * 3;
+        int front_y = data->player_y + dir_vecs[data->player_f][1] * 3;
+
+        if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
         {
-            int y = data->player_y - 3;
-            if (y >= 0)
             {
+                int target_x = front_x + dir_vecs[left_f][0] * 2;
+                int target_y = front_y + dir_vecs[left_f][1] * 2;
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int x = data->player_x - 2;
-                    if (x >= 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm2y3r.is_visible = true;
-                            data->sprite_xm2y3f.is_visible = true;
-                        }
+                        data->sprite_xm2y3r.is_visible = true;
+                        data->sprite_xm2y3f.is_visible = true;
                     }
                 }
+            }
+            {
+                int target_x = front_x + dir_vecs[left_f][0];
+                int target_y = front_y + dir_vecs[left_f][1];
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int x = data->player_x - 1;
-                    if (x >= 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y3r.is_visible = true;
-                            data->sprite_xm1y3f.is_visible = true;
-                        }
+                        data->sprite_xm1y3r.is_visible = true;
+                        data->sprite_xm1y3f.is_visible = true;
                     }
                 }
+            }
+            {
+                int target_x = front_x;
+                int target_y = front_y;
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int x = data->player_x;
-                    if (map_data_get_at(&data->map, x, y) != 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
                         data->sprite_x0y3f.is_visible = true;
                     }
                 }
-                {
-                    int x = data->player_x + 1;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y3l.is_visible = true;
-                            data->sprite_x1y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x + 2;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x2y3l.is_visible = true;
-                            data->sprite_x2y3f.is_visible = true;
-                        }
-                    }
-                }
             }
-        }
-        {
-            int y = data->player_y - 2;
-            if (y >= 0)
             {
+                int target_x = front_x + dir_vecs[right_f][0];
+                int target_y = front_y + dir_vecs[right_f][1];
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int x = data->player_x - 2;
-                    if (x >= 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm2y2r.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x - 1;
-                    if (x >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y2r.is_visible = true;
-                            data->sprite_xm1y2f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y2f.is_visible = true;
-                    }
-                }
-                {
-                    int x = data->player_x + 1;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y2l.is_visible = true;
-                            data->sprite_x1y2f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x + 2;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x2y2l.is_visible = true;
-                        }
-                    }
-                }
-            }
-        }
-        {
-            int y = data->player_y - 1;
-            if (y >= 0)
-            {
-                {
-                    int x = data->player_x - 1;
-                    if (x >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y1r.is_visible = true;
-                            data->sprite_xm1y1f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y1f.is_visible = true;
-                    }
-                }
-                {
-                    int x = data->player_x + 1;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y1l.is_visible = true;
-                            data->sprite_x1y1f.is_visible = true;
-                        }
-                    }
-                }
-            }
-        }
-        {
-            int y = data->player_y;
-            {
-                int x = data->player_x - 1;
-                if (x >= 0)
-                {
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_xm1y0r.is_visible = true;
+                        data->sprite_x1y3l.is_visible = true;
+                        data->sprite_x1y3f.is_visible = true;
                     }
                 }
             }
             {
-                int x = data->player_x + 1;
-                if (x < map_width)
+                int target_x = front_x + dir_vecs[right_f][0] * 2;
+                int target_y = front_y + dir_vecs[right_f][1] * 2;
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    if (map_data_get_at(&data->map, x, y) != 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        data->sprite_x1y0l.is_visible = true;
+                        data->sprite_x2y3l.is_visible = true;
+                        data->sprite_x2y3f.is_visible = true;
                     }
                 }
             }
         }
     }
 
-    //
-
-    if (data->player_f == 1)
     {
+        int front_x = data->player_x + dir_vecs[data->player_f][0] * 2;
+        int front_y = data->player_y + dir_vecs[data->player_f][1] * 2;
+
+        if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
         {
-            int x = data->player_x + 3;
-            if (x < map_width)
             {
+                int target_x = front_x + dir_vecs[left_f][0] * 2;
+                int target_y = front_y + dir_vecs[left_f][1] * 2;
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int y = data->player_y - 2;
-                    if (y >= 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm2y3r.is_visible = true;
-                            data->sprite_xm2y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y - 1;
-                    if (y >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y3r.is_visible = true;
-                            data->sprite_xm1y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y3f.is_visible = true;
-                    }
-                }
-                {
-                    int y = data->player_y + 1;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y3l.is_visible = true;
-                            data->sprite_x1y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y + 2;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x2y3l.is_visible = true;
-                            data->sprite_x2y3f.is_visible = true;
-                        }
+                        data->sprite_xm2y2r.is_visible = true;
                     }
                 }
             }
-        }
-        {
-            int x = data->player_x + 2;
-            if (x < map_width)
             {
+                int target_x = front_x + dir_vecs[left_f][0];
+                int target_y = front_y + dir_vecs[left_f][1];
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int y = data->player_y - 2;
-                    if (y >= 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm2y2r.is_visible = true;
-                        }
+                        data->sprite_xm1y2r.is_visible = true;
+                        data->sprite_xm1y2f.is_visible = true;
                     }
                 }
+            }
+            {
+                int target_x = front_x;
+                int target_y = front_y;
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int y = data->player_y - 1;
-                    if (y >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y2r.is_visible = true;
-                            data->sprite_xm1y2f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y;
-                    if (map_data_get_at(&data->map, x, y) != 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
                         data->sprite_x0y2f.is_visible = true;
                     }
                 }
-                {
-                    int y = data->player_y + 1;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y2l.is_visible = true;
-                            data->sprite_x1y2f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y + 2;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x2y2l.is_visible = true;
-                        }
-                    }
-                }
             }
-        }
-        {
-            int x = data->player_x + 1;
-            if (x < map_width)
             {
+                int target_x = front_x + dir_vecs[right_f][0];
+                int target_y = front_y + dir_vecs[right_f][1];
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int y = data->player_y - 1;
-                    if (y >= 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y1r.is_visible = true;
-                            data->sprite_xm1y1f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y1f.is_visible = true;
-                    }
-                }
-                {
-                    int y = data->player_y + 1;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y1l.is_visible = true;
-                            data->sprite_x1y1f.is_visible = true;
-                        }
-                    }
-                }
-            }
-        }
-        {
-            int x = data->player_x;
-            {
-                int y = data->player_y - 1;
-                if (y >= 0)
-                {
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_xm1y0r.is_visible = true;
+                        data->sprite_x1y2l.is_visible = true;
+                        data->sprite_x1y2f.is_visible = true;
                     }
                 }
             }
             {
-                int y = data->player_y + 1;
-                if (y < map_height)
+                int target_x = front_x + dir_vecs[right_f][0] * 2;
+                int target_y = front_y + dir_vecs[right_f][1] * 2;
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    if (map_data_get_at(&data->map, x, y) != 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        data->sprite_x1y0l.is_visible = true;
+                        data->sprite_x2y2l.is_visible = true;
                     }
                 }
             }
         }
     }
 
-    //
-
-    if (data->player_f == 2)
     {
+        int front_x = data->player_x + dir_vecs[data->player_f][0];
+        int front_y = data->player_y + dir_vecs[data->player_f][1];
+
+        if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
         {
-            int y = data->player_y + 3;
-            if (y < map_height)
             {
+                int target_x = front_x + dir_vecs[left_f][0];
+                int target_y = front_y + dir_vecs[left_f][1];
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int x = data->player_x + 2;
-                    if (x < map_width)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm2y3r.is_visible = true;
-                            data->sprite_xm2y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x + 1;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y3r.is_visible = true;
-                            data->sprite_xm1y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y3f.is_visible = true;
-                    }
-                }
-                {
-                    int x = data->player_x - 1;
-                    if (x >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y3l.is_visible = true;
-                            data->sprite_x1y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x - 2;
-                    if (x >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x2y3l.is_visible = true;
-                            data->sprite_x2y3f.is_visible = true;
-                        }
+                        data->sprite_xm1y1r.is_visible = true;
+                        data->sprite_xm1y1f.is_visible = true;
                     }
                 }
             }
-        }
-        {
-            int y = data->player_y + 2;
-            if (y < map_height)
             {
+                int target_x = front_x;
+                int target_y = front_y;
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int x = data->player_x + 2;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm2y2r.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x + 1;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y2r.is_visible = true;
-                            data->sprite_xm1y2f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y2f.is_visible = true;
-                    }
-                }
-                {
-                    int x = data->player_x - 1;
-                    if (x >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y2l.is_visible = true;
-                            data->sprite_x1y2f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x - 2;
-                    if (x >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x2y2l.is_visible = true;
-                        }
-                    }
-                }
-            }
-        }
-        {
-            int y = data->player_y + 1;
-            if (y < map_height)
-            {
-                {
-                    int x = data->player_x + 1;
-                    if (x < map_width)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y1r.is_visible = true;
-                            data->sprite_xm1y1f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int x = data->player_x;
-                    if (map_data_get_at(&data->map, x, y) != 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
                         data->sprite_x0y1f.is_visible = true;
                     }
                 }
-                {
-                    int x = data->player_x - 1;
-                    if (x >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y1l.is_visible = true;
-                            data->sprite_x1y1f.is_visible = true;
-                        }
-                    }
-                }
-            }
-        }
-        {
-            int y = data->player_y;
-            {
-                int x = data->player_x + 1;
-                if (x < map_width)
-                {
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_xm1y0r.is_visible = true;
-                    }
-                }
             }
             {
-                int x = data->player_x - 1;
-                if (x >= 0)
+                int target_x = front_x + dir_vecs[right_f][0];
+                int target_y = front_y + dir_vecs[right_f][1];
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    if (map_data_get_at(&data->map, x, y) != 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
-                        data->sprite_x1y0l.is_visible = true;
+                        data->sprite_x1y1l.is_visible = true;
+                        data->sprite_x1y1f.is_visible = true;
                     }
                 }
             }
         }
     }
 
-    //
-
-    if (data->player_f == 3)
     {
+        int front_x = data->player_x;
+        int front_y = data->player_y;
+
+        if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
         {
-            int x = data->player_x - 3;
-            if (x >= 0)
             {
+                int target_x = front_x + dir_vecs[left_f][0];
+                int target_y = front_y + dir_vecs[left_f][1];
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    int y = data->player_y + 2;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm2y3r.is_visible = true;
-                            data->sprite_xm2y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y + 1;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y3r.is_visible = true;
-                            data->sprite_xm1y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y3f.is_visible = true;
-                    }
-                }
-                {
-                    int y = data->player_y - 1;
-                    if (y >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y3l.is_visible = true;
-                            data->sprite_x1y3f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y - 2;
-                    if (y >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x2y3l.is_visible = true;
-                            data->sprite_x2y3f.is_visible = true;
-                        }
-                    }
-                }
-            }
-        }
-        {
-            int x = data->player_x - 2;
-            if (x >= 0)
-            {
-                {
-                    int y = data->player_y + 2;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm2y2r.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y + 1;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y2r.is_visible = true;
-                            data->sprite_xm1y2f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y2f.is_visible = true;
-                    }
-                }
-                {
-                    int y = data->player_y - 1;
-                    if (y >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y2l.is_visible = true;
-                            data->sprite_x1y2f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y - 2;
-                    if (y >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x2y2l.is_visible = true;
-                        }
-                    }
-                }
-            }
-        }
-        {
-            int x = data->player_x - 1;
-            if (x >= 0)
-            {
-                {
-                    int y = data->player_y + 1;
-                    if (y < map_height)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_xm1y1r.is_visible = true;
-                            data->sprite_xm1y1f.is_visible = true;
-                        }
-                    }
-                }
-                {
-                    int y = data->player_y;
-                    if (map_data_get_at(&data->map, x, y) != 0)
-                    {
-                        data->sprite_x0y1f.is_visible = true;
-                    }
-                }
-                {
-                    int y = data->player_y - 1;
-                    if (y >= 0)
-                    {
-                        if (map_data_get_at(&data->map, x, y) != 0)
-                        {
-                            data->sprite_x1y1l.is_visible = true;
-                            data->sprite_x1y1f.is_visible = true;
-                        }
-                    }
-                }
-            }
-        }
-        {
-            int x = data->player_x;
-            {
-                int y = data->player_y + 1;
-                if (y < map_height)
-                {
-                    if (map_data_get_at(&data->map, x, y) != 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
                         data->sprite_xm1y0r.is_visible = true;
                     }
                 }
             }
             {
-                int y = data->player_y - 1;
-                if (y >= 0)
+                int target_x = front_x + dir_vecs[right_f][0];
+                int target_y = front_y + dir_vecs[right_f][1];
+
+                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
-                    if (map_data_get_at(&data->map, x, y) != 0)
+                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
                     {
                         data->sprite_x1y0l.is_visible = true;
                     }

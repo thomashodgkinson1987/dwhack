@@ -41,10 +41,10 @@ size_t scene_vtable_register(struct scene_funcs scene_funcs)
 
 struct scene scene_create(size_t tag, void *data)
 {
-    struct scene scene =
-        {
-            .tag = tag,
-            .data = data};
+    struct scene scene = {
+        .tag = tag,
+        .data = data,
+    };
 
     return scene;
 }
