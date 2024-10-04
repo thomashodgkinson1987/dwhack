@@ -689,11 +689,13 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
     {
         int front_x = data->player_x + dir_vecs[data->player_f][0] * 3;
         int front_y = data->player_y + dir_vecs[data->player_f][1] * 3;
+
         if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
         {
             {
                 int target_x = front_x + dir_vecs[left_f][0] * 2;
                 int target_y = front_y + dir_vecs[left_f][1] * 2;
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -704,8 +706,9 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
                 }
             }
             {
-                int target_x = front_x + dir_vecs[left_f][0] * 1;
-                int target_y = front_y + dir_vecs[left_f][1] * 1;
+                int target_x = front_x + dir_vecs[left_f][0];
+                int target_y = front_y + dir_vecs[left_f][1];
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -718,6 +721,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             {
                 int target_x = front_x;
                 int target_y = front_y;
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -727,8 +731,9 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
                 }
             }
             {
-                int target_x = front_x + dir_vecs[right_f][0] * 1;
-                int target_y = front_y + dir_vecs[right_f][1] * 1;
+                int target_x = front_x + dir_vecs[right_f][0];
+                int target_y = front_y + dir_vecs[right_f][1];
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -741,6 +746,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             {
                 int target_x = front_x + dir_vecs[right_f][0] * 2;
                 int target_y = front_y + dir_vecs[right_f][1] * 2;
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -752,14 +758,17 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             }
         }
     }
+
     {
         int front_x = data->player_x + dir_vecs[data->player_f][0] * 2;
         int front_y = data->player_y + dir_vecs[data->player_f][1] * 2;
+
         if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
         {
             {
                 int target_x = front_x + dir_vecs[left_f][0] * 2;
                 int target_y = front_y + dir_vecs[left_f][1] * 2;
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -769,8 +778,9 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
                 }
             }
             {
-                int target_x = front_x + dir_vecs[left_f][0] * 1;
-                int target_y = front_y + dir_vecs[left_f][1] * 1;
+                int target_x = front_x + dir_vecs[left_f][0];
+                int target_y = front_y + dir_vecs[left_f][1];
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -783,6 +793,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             {
                 int target_x = front_x;
                 int target_y = front_y;
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -792,8 +803,9 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
                 }
             }
             {
-                int target_x = front_x + dir_vecs[right_f][0] * 1;
-                int target_y = front_y + dir_vecs[right_f][1] * 1;
+                int target_x = front_x + dir_vecs[right_f][0];
+                int target_y = front_y + dir_vecs[right_f][1];
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -806,6 +818,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             {
                 int target_x = front_x + dir_vecs[right_f][0] * 2;
                 int target_y = front_y + dir_vecs[right_f][1] * 2;
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -816,14 +829,17 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             }
         }
     }
+
     {
-        int front_x = data->player_x + dir_vecs[data->player_f][0] * 1;
-        int front_y = data->player_y + dir_vecs[data->player_f][1] * 1;
+        int front_x = data->player_x + dir_vecs[data->player_f][0];
+        int front_y = data->player_y + dir_vecs[data->player_f][1];
+
         if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
         {
             {
-                int target_x = front_x + dir_vecs[left_f][0] * 1;
-                int target_y = front_y + dir_vecs[left_f][1] * 1;
+                int target_x = front_x + dir_vecs[left_f][0];
+                int target_y = front_y + dir_vecs[left_f][1];
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -836,6 +852,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             {
                 int target_x = front_x;
                 int target_y = front_y;
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -845,8 +862,9 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
                 }
             }
             {
-                int target_x = front_x + dir_vecs[right_f][0] * 1;
-                int target_y = front_y + dir_vecs[right_f][1] * 1;
+                int target_x = front_x + dir_vecs[right_f][0];
+                int target_y = front_y + dir_vecs[right_f][1];
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -860,13 +878,15 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
     }
 
     {
-        int front_x = data->player_x + dir_vecs[data->player_f][0] * 0;
-        int front_y = data->player_y + dir_vecs[data->player_f][1] * 0;
+        int front_x = data->player_x;
+        int front_y = data->player_y;
+
         if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
         {
             {
-                int target_x = front_x + dir_vecs[left_f][0] * 1;
-                int target_y = front_y + dir_vecs[left_f][1] * 1;
+                int target_x = front_x + dir_vecs[left_f][0];
+                int target_y = front_y + dir_vecs[left_f][1];
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
@@ -876,8 +896,9 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
                 }
             }
             {
-                int target_x = front_x + dir_vecs[right_f][0] * 1;
-                int target_y = front_y + dir_vecs[right_f][1] * 1;
+                int target_x = front_x + dir_vecs[right_f][0];
+                int target_y = front_y + dir_vecs[right_f][1];
+
                 if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
                 {
                     if (map_data_get_at(&data->map, target_x, target_y) != 0)
