@@ -7,8 +7,8 @@ static const int virtual_screen_height = 200;
 
 static const int screen_size_multiplier = 4;
 
-static const int screen_width = virtual_screen_width * screen_size_multiplier;
-static const int screen_height = virtual_screen_height * screen_size_multiplier;
+static const int window_width = virtual_screen_width * screen_size_multiplier;
+static const int window_height = virtual_screen_height * screen_size_multiplier;
 
 static RenderTexture2D render_texture_virtual_screen;
 static Rectangle render_texture_virtual_screen_source;
@@ -32,7 +32,7 @@ static void game_draw(void);
 
 int main(void)
 {
-    InitWindow(screen_width, screen_height, "Dungeon Whack");
+    InitWindow(window_width, window_height, "Dungeon Whack");
     SetTargetFPS(60);
 
     game_init();
@@ -68,7 +68,7 @@ static void game_init_virtual_screen(void)
 {
     render_texture_virtual_screen = LoadRenderTexture(virtual_screen_width, virtual_screen_height);
     render_texture_virtual_screen_source = (Rectangle){0.0f, 0.0f, (float)render_texture_virtual_screen.texture.width, -(float)render_texture_virtual_screen.texture.height};
-    render_texture_virtual_screen_dest = (Rectangle){0.0f, 0.0f, (float)screen_width, (float)screen_height};
+    render_texture_virtual_screen_dest = (Rectangle){0.0f, 0.0f, (float)window_width, (float)window_height};
     render_texture_virtual_screen_origin = (Vector2){0.0f, 0.0f};
     render_texture_virtual_screen_rotation = 0.0f;
     render_texture_virtual_screen_tint = WHITE;
