@@ -910,11 +910,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
         }
     }
 }
-/**
- * Flip the game scene's backdrop sprite horizontally.
- *
- * @param scene The scene.
- */
+
 static void game_scene_flip_backdrop(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
