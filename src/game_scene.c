@@ -220,11 +220,11 @@ void game_scene_on_draw(struct scene *scene)
 
     {
         struct enemy_position_check checks[] = {
-            {3, -2, data->coords.xm2y3f.x + 34, data->coords.xm2y3f.y + 12, 2.0f},
-            {3, -1, data->coords.xm1y3f.x + 30, data->coords.xm1y3f.y + 12, 2.0f},
-            {3, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 12, 2.0f},
-            {3, 1, data->coords.x1y3f.x + 30, data->coords.x1y3f.y + 12, 2.0f},
-            {3, 2, data->coords.x2y3f.x + 34, data->coords.x2y3f.y + 12, 2.0f},
+            {3, -2, data->coords.xm2y3f.x + 40, data->coords.xm2y3f.y + 12, 4.0f},
+            {3, -1, data->coords.xm1y3f.x + 30, data->coords.xm1y3f.y + 12, 4.0f},
+            {3, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 12, 4.0f},
+            {3, 1, data->coords.x1y3f.x + data->coords.x1y3f.w - 30, data->coords.x1y3f.y + 12, 4.0f},
+            {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.w - 40, data->coords.x2y3f.y + 12, 4.0f},
         };
 
         for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
@@ -261,9 +261,9 @@ void game_scene_on_draw(struct scene *scene)
 
     {
         struct enemy_position_check checks[] = {
-            {2, -1, data->coords.xm1y3f.x + 24, data->coords.xm1y3f.y + 16, 4.0f},
-            {2, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 4.0f},
-            {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 4.0f},
+            {2, -1, data->coords.xm1y3f.x + 24, data->coords.xm1y3f.y + 16, 8.0f},
+            {2, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 8.0f},
+            {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f},
         };
 
         for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
@@ -296,9 +296,9 @@ void game_scene_on_draw(struct scene *scene)
 
     {
         struct enemy_position_check checks[] = {
-            {1, -1, data->coords.xm1y2f.x + 40, data->coords.xm1y2f.y + 30, 8.0f},
-            {1, 0, data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 8.0f},
-            {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 8.0f},
+            {1, -1, data->coords.xm1y2f.x + 40, data->coords.xm1y2f.y + 30, 16.0f},
+            {1, 0, data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 16.0f},
+            {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f},
         };
 
         for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
@@ -695,7 +695,7 @@ static void game_scene_init_map(struct scene *scene)
     {
         for (size_t x = 1; x < map_get_width(&data->map) - 1; ++x)
         {
-            map_data_set_at(&data->map, x, y, GetRandomValue(0, 100) > 70 ? 1 : 0);
+            map_data_set_at(&data->map, x, y, GetRandomValue(0, 100) > 75 ? 1 : 0);
         }
     }
 }
