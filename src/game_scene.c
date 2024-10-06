@@ -743,7 +743,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
 
         if (game_scene_is_visible(&data->map, target_x, target_y))
         {
-            for (int j = 0; j < check->sprites_count; ++j)
+            for (size_t j = 0; j < check->sprites_count; ++j)
             {
                 sprite_set_is_visible(check->sprites[j], true);
             }
@@ -758,7 +758,7 @@ static void game_scene_flip_backdrop(struct scene *scene)
     data->sprite_backdrop.source.width *= -1;
 }
 
-static void game_scene_get_target(int *target_x, int *target_y, int x, int y, int dir_vec[2], int forward_distance, int side_vec[2], int sideways_distance)
+static void game_scene_get_target(int *target_x, int *target_y, int x, int y, int *dir_vec, int forward_distance, int *side_vec, int sideways_distance)
 {
     *target_x = x + dir_vec[0] * forward_distance + side_vec[0] * sideways_distance;
     *target_y = y + dir_vec[1] * forward_distance + side_vec[1] * sideways_distance;
@@ -766,7 +766,7 @@ static void game_scene_get_target(int *target_x, int *target_y, int x, int y, in
 
 static bool game_scene_is_visible(struct map *map, int x, int y)
 {
-    if (x >= 0 && x < map_get_width(map) && y >= 0 && y < map_get_height(map))
+    if (x >= 0 && x < (int)map_get_width(map) && y >= 0 && y < (int)map_get_height(map))
     {
         return map_data_get_at(map, x, y) != 0;
     }
