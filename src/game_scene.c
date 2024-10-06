@@ -21,6 +21,9 @@ static void game_scene_update_compass(struct scene *scene);
 static void game_scene_recalculate_visible_walls(struct scene *scene);
 static void game_scene_flip_backdrop(struct scene *scene);
 
+static void game_scene_get_target(int *target_x, int *target_y, int x, int y, int *front_vec, int front_distance, int *side_vec, int side_distance);
+static bool game_scene_is_visible(struct map *map, int x, int y);
+
 size_t GAME_SCENE_TAG = 0;
 
 struct scene game_scene_create(void)
@@ -665,17 +668,15 @@ static void game_scene_update_compass(struct scene *scene)
         break;
     }
 }
+
 static void game_scene_recalculate_visible_walls(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
     for (size_t i = 0; i < data->array_wall_sprites_count; ++i)
     {
-        data->array_wall_sprites[i]->is_visible = false;
+        sprite_set_is_visible(data->array_wall_sprites[i], false);
     }
-
-    int map_width = (int)map_get_width(&data->map);
-    int map_height = (int)map_get_height(&data->map);
 
     int dir_vecs[4][2] = {
         {0, -1},
@@ -683,229 +684,68 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
         {0, 1},
         {-1, 0}};
 
-    int left_f = (data->player_f + 3) % 4;
-    int right_f = (data->player_f + 1) % 4;
+    int front_f = data->player_f;
+    int left_f = (front_f + 3) % 4;
+    int right_f = (front_f + 1) % 4;
 
+    int *front_vec = dir_vecs[front_f];
+    int *left_vec = dir_vecs[left_f];
+    int *right_vec = dir_vecs[right_f];
+
+    struct position_check
     {
-        int front_x = data->player_x + dir_vecs[data->player_f][0] * 3;
-        int front_y = data->player_y + dir_vecs[data->player_f][1] * 3;
+        int forward_distance;
+        int sizeways_distance;
+        struct sprite **sprites;
+        size_t sprites_count;
+    };
 
-        if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
+    struct position_check checks[] = {
+        {3, -2, (struct sprite*[]){&data->sprite_xm2y3r, &data->sprite_xm2y3f}, 2},
+        {3, -1, (struct sprite*[]){&data->sprite_xm1y3r, &data->sprite_xm1y3f}, 2},
+        {3, 0, (struct sprite*[]){&data->sprite_x0y3f}, 1},
+        {3, 1, (struct sprite*[]){&data->sprite_x1y3l, &data->sprite_x1y3f}, 2},
+        {3, 2, (struct sprite*[]){&data->sprite_x2y3l, &data->sprite_x2y3f}, 2},
+
+        {2, -2, (struct sprite*[]){&data->sprite_xm2y2r}, 1},
+        {2, -1, (struct sprite*[]){&data->sprite_xm1y2r, &data->sprite_xm1y2f}, 2},
+        {2, 0, (struct sprite*[]){&data->sprite_x0y2f}, 1},
+        {2, 1, (struct sprite*[]){&data->sprite_x1y2l, &data->sprite_x1y2f}, 2},
+        {2, 2, (struct sprite*[]){&data->sprite_x2y2l}, 1},
+
+        {1, -1, (struct sprite*[]){&data->sprite_xm1y1r, &data->sprite_xm1y1f}, 2},
+        {1, 0, (struct sprite*[]){&data->sprite_x0y1f}, 1},
+        {1, 1, (struct sprite*[]){&data->sprite_x1y1l, &data->sprite_x1y1f}, 2},
+
+        {0, -1, (struct sprite*[]){&data->sprite_xm1y0r}, 1},
+        {0, 1, (struct sprite*[]){&data->sprite_x1y0l}, 1},
+    };
+
+    int num_checks = sizeof(checks) / sizeof checks[0];
+
+    for (int i = 0; i < num_checks; ++i)
+    {
+        struct position_check *check = &checks[i];
+
+        int target_x;
+        int target_y;
+
+        int *side_vec = check->sizeways_distance < 0 ? left_vec : right_vec;
+        int sideways_distance = abs(check->sizeways_distance);
+
+        game_scene_get_target(&target_x, &target_y, data->player_x, data->player_y, front_vec, check->forward_distance, side_vec, sideways_distance);
+
+        if (sideways_distance == 0)
         {
-            {
-                int target_x = front_x + dir_vecs[left_f][0] * 2;
-                int target_y = front_y + dir_vecs[left_f][1] * 2;
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_xm2y3r.is_visible = true;
-                        data->sprite_xm2y3f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x + dir_vecs[left_f][0];
-                int target_y = front_y + dir_vecs[left_f][1];
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_xm1y3r.is_visible = true;
-                        data->sprite_xm1y3f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x;
-                int target_y = front_y;
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x0y3f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x + dir_vecs[right_f][0];
-                int target_y = front_y + dir_vecs[right_f][1];
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x1y3l.is_visible = true;
-                        data->sprite_x1y3f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x + dir_vecs[right_f][0] * 2;
-                int target_y = front_y + dir_vecs[right_f][1] * 2;
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x2y3l.is_visible = true;
-                        data->sprite_x2y3f.is_visible = true;
-                    }
-                }
-            }
+            target_x = data->player_x + front_vec[0] * check->forward_distance;
+            target_y = data->player_y + front_vec[1] * check->forward_distance;
         }
-    }
 
-    {
-        int front_x = data->player_x + dir_vecs[data->player_f][0] * 2;
-        int front_y = data->player_y + dir_vecs[data->player_f][1] * 2;
-
-        if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
+        if (game_scene_is_visible(&data->map, target_x, target_y))
         {
+            for (int j = 0; j < check->sprites_count; ++j)
             {
-                int target_x = front_x + dir_vecs[left_f][0] * 2;
-                int target_y = front_y + dir_vecs[left_f][1] * 2;
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_xm2y2r.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x + dir_vecs[left_f][0];
-                int target_y = front_y + dir_vecs[left_f][1];
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_xm1y2r.is_visible = true;
-                        data->sprite_xm1y2f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x;
-                int target_y = front_y;
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x0y2f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x + dir_vecs[right_f][0];
-                int target_y = front_y + dir_vecs[right_f][1];
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x1y2l.is_visible = true;
-                        data->sprite_x1y2f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x + dir_vecs[right_f][0] * 2;
-                int target_y = front_y + dir_vecs[right_f][1] * 2;
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x2y2l.is_visible = true;
-                    }
-                }
-            }
-        }
-    }
-
-    {
-        int front_x = data->player_x + dir_vecs[data->player_f][0];
-        int front_y = data->player_y + dir_vecs[data->player_f][1];
-
-        if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
-        {
-            {
-                int target_x = front_x + dir_vecs[left_f][0];
-                int target_y = front_y + dir_vecs[left_f][1];
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_xm1y1r.is_visible = true;
-                        data->sprite_xm1y1f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x;
-                int target_y = front_y;
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x0y1f.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x + dir_vecs[right_f][0];
-                int target_y = front_y + dir_vecs[right_f][1];
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x1y1l.is_visible = true;
-                        data->sprite_x1y1f.is_visible = true;
-                    }
-                }
-            }
-        }
-    }
-
-    {
-        int front_x = data->player_x;
-        int front_y = data->player_y;
-
-        if (front_x >= 0 && front_x < map_width && front_y >= 0 && front_y < map_height)
-        {
-            {
-                int target_x = front_x + dir_vecs[left_f][0];
-                int target_y = front_y + dir_vecs[left_f][1];
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_xm1y0r.is_visible = true;
-                    }
-                }
-            }
-            {
-                int target_x = front_x + dir_vecs[right_f][0];
-                int target_y = front_y + dir_vecs[right_f][1];
-
-                if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-                {
-                    if (map_data_get_at(&data->map, target_x, target_y) != 0)
-                    {
-                        data->sprite_x1y0l.is_visible = true;
-                    }
-                }
+                sprite_set_is_visible(check->sprites[j], true);
             }
         }
     }
@@ -916,4 +756,20 @@ static void game_scene_flip_backdrop(struct scene *scene)
     struct game_scene_data *data = scene->data;
 
     data->sprite_backdrop.source.width *= -1;
+}
+
+static void game_scene_get_target(int *target_x, int *target_y, int x, int y, int dir_vec[2], int forward_distance, int side_vec[2], int sideways_distance)
+{
+    *target_x = x + dir_vec[0] * forward_distance + side_vec[0] * sideways_distance;
+    *target_y = y + dir_vec[1] * forward_distance + side_vec[1] * sideways_distance;
+}
+
+static bool game_scene_is_visible(struct map *map, int x, int y)
+{
+    if (x >= 0 && x < map_get_width(map) && y >= 0 && y < map_get_height(map))
+    {
+        return map_data_get_at(map, x, y) != 0;
+    }
+
+    return false;
 }
