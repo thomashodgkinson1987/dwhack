@@ -227,7 +227,7 @@ void game_scene_on_draw(struct scene *scene)
             {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.w - 40, data->coords.x2y3f.y + 12, 4.0f},
         };
 
-        for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
+        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
             struct enemy_position_check *check = &checks[i];
 
@@ -236,9 +236,9 @@ void game_scene_on_draw(struct scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (int i = 0; i < data->enemies_count; ++i)
+                for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[i];
+                    struct enemy *enemy = &data->enemies[j];
                     if (enemy->x == target_x && enemy->y == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
@@ -266,7 +266,7 @@ void game_scene_on_draw(struct scene *scene)
             {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f},
         };
 
-        for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
+        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
             struct enemy_position_check *check = &checks[i];
 
@@ -275,9 +275,9 @@ void game_scene_on_draw(struct scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (int i = 0; i < data->enemies_count; ++i)
+                for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[i];
+                    struct enemy *enemy = &data->enemies[j];
                     if (enemy->x == target_x && enemy->y == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
@@ -301,7 +301,7 @@ void game_scene_on_draw(struct scene *scene)
             {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f},
         };
 
-        for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
+        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
             struct enemy_position_check *check = &checks[i];
 
@@ -310,9 +310,9 @@ void game_scene_on_draw(struct scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (int i = 0; i < data->enemies_count; ++i)
+                for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[i];
+                    struct enemy *enemy = &data->enemies[j];
                     if (enemy->x == target_x && enemy->y == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
