@@ -40,10 +40,20 @@ struct scene game_scene_create(void)
     game_scene_init_map(&scene);
     game_scene_init_player(&scene);
 
+    data->enemy_x = data->player_x;
+    data->enemy_y = data->player_y - 1;
+    data->enemy_f = 0;
+
     return scene;
 }
 void game_scene_free(struct scene *scene)
 {
+    struct game_scene_data *data = (struct game_scene_data *)scene->data;
+
+    data->enemy_x = 0;
+    data->enemy_y = 0;
+    data->enemy_f = 0;
+
     game_scene_free_player(scene);
     game_scene_free_map(scene);
     game_scene_free_sprites(scene);
@@ -74,6 +84,27 @@ void game_scene_on_tick(struct scene *scene, float delta)
     struct game_scene_data *data = scene->data;
 
     (void)delta;
+
+    if (IsKeyPressed(KEY_LEFT))
+    {
+        --data->enemy_x;
+    }
+    if (IsKeyPressed(KEY_RIGHT))
+    {
+        ++data->enemy_x;
+    }
+    if (IsKeyPressed(KEY_UP))
+    {
+        --data->enemy_y;
+    }
+    if (IsKeyPressed(KEY_DOWN))
+    {
+        ++data->enemy_y;
+    }
+    data->enemy_x = data->enemy_x < 0 ? 0 : data->enemy_x >= (int)map_get_width(&data->map) ? (int)map_get_width(&data->map) - 1
+                                                                                            : data->enemy_x;
+    data->enemy_y = data->enemy_y < 0 ? 0 : data->enemy_y >= (int)map_get_height(&data->map) ? (int)map_get_height(&data->map) - 1
+                                                                                             : data->enemy_y;
 
     if (IsKeyPressed(KEY_C))
     {
@@ -152,12 +183,85 @@ void game_scene_on_draw(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
+    int map_width = (int)map_get_width(&data->map);
+    int map_height = (int)map_get_height(&data->map);
+
+    int dir_vecs[4][2] = {
+        {0, -1},
+        {1, 0},
+        {0, 1},
+        {-1, 0}};
+
+    int front_f = data->player_f;
+    int left_f = (front_f + 3) % 4;
+    int right_f = (front_f + 1) % 4;
+
+    int *front_vec = dir_vecs[front_f];
+    int *left_vec = dir_vecs[left_f];
+    int *right_vec = dir_vecs[right_f];
+
     sprite_draw(&data->sprite_backdrop);
 
     sprite_draw(&data->sprite_xm2y3r);
     sprite_draw(&data->sprite_xm1y3r);
     sprite_draw(&data->sprite_x1y3l);
     sprite_draw(&data->sprite_x2y3l);
+
+    {
+        int target_x = data->player_x + front_vec[0] * 3 + left_vec[0] * 2;
+        int target_y = data->player_y + front_vec[1] * 3 + left_vec[1] * 2;
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.xm2y3f.x + 34, data->coords.xm2y3f.y + 12, 2.0f, BLUE);
+            }
+        }
+    }
+    {
+        int target_x = data->player_x + front_vec[0] * 3 + left_vec[0];
+        int target_y = data->player_y + front_vec[1] * 3 + left_vec[1];
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.xm1y3f.x + 30, data->coords.xm1y3f.y + 12, 2.0f, BLUE);
+            }
+        }
+    }
+    {
+        int target_x = data->player_x + front_vec[0] * 3;
+        int target_y = data->player_y + front_vec[1] * 3;
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 12, 2.0f, BLUE);
+            }
+        }
+    }
+    {
+        int target_x = data->player_x + front_vec[0] * 3 + right_vec[0];
+        int target_y = data->player_y + front_vec[1] * 3 + right_vec[1];
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.x1y3f.x + 18, data->coords.x1y3f.y + 12, 2.0f, BLUE);
+            }
+        }
+    }
+    {
+        int target_x = data->player_x + front_vec[0] * 3 + right_vec[0] * 2;
+        int target_y = data->player_y + front_vec[1] * 3 + right_vec[1] * 2;
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.x2y3f.x + 14, data->coords.x2y3f.y + 12, 2.0f, BLUE);
+            }
+        }
+    }
 
     sprite_draw(&data->sprite_xm2y3f);
     sprite_draw(&data->sprite_xm1y3f);
@@ -170,12 +274,80 @@ void game_scene_on_draw(struct scene *scene)
     sprite_draw(&data->sprite_x1y2l);
     sprite_draw(&data->sprite_x2y2l);
 
+    {
+        int target_x = data->player_x + front_vec[0] * 2 + left_vec[0];
+        int target_y = data->player_y + front_vec[1] * 2 + left_vec[1];
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.xm1y3f.x + 24, data->coords.xm1y3f.y + 16, 4.0f, BLUE);
+            }
+        }
+    }
+    {
+        int target_x = data->player_x + front_vec[0] * 2;
+        int target_y = data->player_y + front_vec[1] * 2;
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 4.0f, BLUE);
+            }
+        }
+    }
+    {
+        int target_x = data->player_x + front_vec[0] * 2 + right_vec[0];
+        int target_y = data->player_y + front_vec[1] * 2 + right_vec[1];
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 4.0f, BLUE);
+            }
+        }
+    }
+
     sprite_draw(&data->sprite_xm1y2f);
     sprite_draw(&data->sprite_x0y2f);
     sprite_draw(&data->sprite_x1y2f);
 
     sprite_draw(&data->sprite_xm1y1r);
     sprite_draw(&data->sprite_x1y1l);
+
+    {
+        int target_x = data->player_x + front_vec[0] + left_vec[0];
+        int target_y = data->player_y + front_vec[1] + left_vec[1];
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.xm1y2f.x + 40, data->coords.xm1y2f.y + 30, 8.0f, BLUE);
+            }
+        }
+    }
+    {
+        int target_x = data->player_x + front_vec[0];
+        int target_y = data->player_y + front_vec[1];
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 8.0f, BLUE);
+            }
+        }
+    }
+    {
+        int target_x = data->player_x + front_vec[0] + right_vec[0];
+        int target_y = data->player_y + front_vec[1] + right_vec[1];
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            if (data->enemy_x == target_x && data->enemy_y == target_y)
+            {
+                DrawCircle(data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 8.0f, BLUE);
+            }
+        }
+    }
 
     sprite_draw(&data->sprite_xm1y1f);
     sprite_draw(&data->sprite_x0y1f);

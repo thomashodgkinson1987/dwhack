@@ -131,6 +131,12 @@ struct game_scene_data
     int player_x;
     int player_y;
     int player_f;
+
+    //
+
+    int enemy_x;
+    int enemy_y;
+    int enemy_f;
 };
 
 struct scene game_scene_create(void);
