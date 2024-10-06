@@ -78,11 +78,11 @@ static void game_init_scenes(void)
     scene_vtable_init();
 
     GAME_SCENE_TAG = scene_vtable_register((struct scene_funcs){
-        .on_free = game_scene_free,
-        .on_enter = game_scene_on_enter,
-        .on_exit = game_scene_on_exit,
-        .on_tick = game_scene_on_tick,
-        .on_draw = game_scene_on_draw});
+        .free = game_scene_free,
+        .enter = game_scene_enter,
+        .exit = game_scene_exit,
+        .tick = game_scene_tick,
+        .draw = game_scene_draw});
 
     game_scene = game_scene_create();
 

@@ -11,11 +11,11 @@ struct scene
 
 struct scene_funcs
 {
-    void(*on_free)(struct scene *scene);
-    void(*on_enter)(struct scene *scene);
-    void(*on_exit)(struct scene *scene);
-    void(*on_tick)(struct scene *scene, float delta);
-    void(*on_draw)(struct scene *scene);
+    void(*free)(struct scene *scene);
+    void(*enter)(struct scene *scene);
+    void(*exit)(struct scene *scene);
+    void(*tick)(struct scene *scene, float delta);
+    void(*draw)(struct scene *scene);
 };
 
 void scene_vtable_init(void);

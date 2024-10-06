@@ -19,6 +19,10 @@ static void game_scene_free_map(struct scene *scene);
 static void game_scene_free_player(struct scene *scene);
 static void game_scene_free_enemies(struct scene *scene);
 
+static void game_scene_draw_world(struct scene *scene);
+static void game_scene_draw_main(struct scene *scene);
+static void game_scene_draw_ui(struct scene *scene);
+
 static void game_scene_update_compass(struct scene *scene);
 static void game_scene_recalculate_visible_walls(struct scene *scene);
 static void game_scene_flip_backdrop(struct scene *scene);
@@ -55,7 +59,7 @@ void game_scene_free(struct scene *scene)
     game_scene_free_coords(scene);
 }
 
-void game_scene_on_enter(struct scene *scene)
+void game_scene_enter(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
@@ -67,13 +71,13 @@ void game_scene_on_enter(struct scene *scene)
     game_scene_update_compass(scene);
     game_scene_recalculate_visible_walls(scene);
 }
-void game_scene_on_exit(struct scene *scene)
+void game_scene_exit(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
     (void)data;
 }
-void game_scene_on_tick(struct scene *scene, float delta)
+void game_scene_tick(struct scene *scene, float delta)
 {
     struct game_scene_data *data = scene->data;
 
@@ -97,7 +101,7 @@ void game_scene_on_tick(struct scene *scene, float delta)
             }
             int new_x = enemy->x + dx;
             int new_y = enemy->y + dy;
-            if (new_x >= 0 && new_x < map_get_width(&data->map) && new_y >= 0 && new_y < map_get_height(&data->map))
+            if (new_x >= 0 && new_x < (int)map_get_width(&data->map) && new_y >= 0 && new_y < (int)map_get_height(&data->map))
             {
                 if (map_data_get_at(&data->map, new_x, new_y) == 0)
                 {
@@ -181,7 +185,17 @@ void game_scene_on_tick(struct scene *scene, float delta)
         }
     }
 }
-void game_scene_on_draw(struct scene *scene)
+void game_scene_draw(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
+
+    (void)data;
+
+    game_scene_draw_world(scene);
+    game_scene_draw_main(scene);
+    game_scene_draw_ui(scene);
+}
+static void game_scene_draw_world(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
@@ -199,7 +213,7 @@ void game_scene_on_draw(struct scene *scene)
     int right_f = (front_f + 1) % 4;
 
     int *front_vec = dir_vecs[front_f];
-    int *left_vec = dir_vecs[left_f];
+    //int *left_vec = dir_vecs[left_f];
     int *right_vec = dir_vecs[right_f];
 
     struct enemy_position_check
@@ -328,8 +342,16 @@ void game_scene_on_draw(struct scene *scene)
 
     sprite_draw(&data->sprite_xm1y0r);
     sprite_draw(&data->sprite_x1y0l);
+}
+static void game_scene_draw_main(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
 
     sprite_draw(&data->sprite_main);
+}
+static void game_scene_draw_ui(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
 
     sprite_draw(&data->sprite_ui_inventory);
     sprite_draw(&data->sprite_ui_button_camp);

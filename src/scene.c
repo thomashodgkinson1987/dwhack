@@ -50,9 +50,9 @@ struct scene scene_create(size_t tag, void *data)
 }
 void scene_free(struct scene *scene)
 {
-    if (vtable[scene->tag].on_free != NULL)
+    if (vtable[scene->tag].free != NULL)
     {
-        vtable[scene->tag].on_free(scene);
+        vtable[scene->tag].free(scene);
     }
 
     scene->tag = 0;
@@ -65,29 +65,29 @@ void scene_free(struct scene *scene)
 }
 void scene_enter(struct scene *scene)
 {
-    if (vtable[scene->tag].on_enter != NULL)
+    if (vtable[scene->tag].enter != NULL)
     {
-        vtable[scene->tag].on_enter(scene);
+        vtable[scene->tag].enter(scene);
     }
 }
 void scene_exit(struct scene *scene)
 {
-    if (vtable[scene->tag].on_exit != NULL)
+    if (vtable[scene->tag].exit != NULL)
     {
-        vtable[scene->tag].on_exit(scene);
+        vtable[scene->tag].exit(scene);
     }
 }
 void scene_tick(struct scene *scene, float delta)
 {
-    if (vtable[scene->tag].on_tick != NULL)
+    if (vtable[scene->tag].tick != NULL)
     {
-        vtable[scene->tag].on_tick(scene, delta);
+        vtable[scene->tag].tick(scene, delta);
     }
 }
 void scene_draw(struct scene *scene)
 {
-    if (vtable[scene->tag].on_draw != NULL)
+    if (vtable[scene->tag].draw != NULL)
     {
-        vtable[scene->tag].on_draw(scene);
+        vtable[scene->tag].draw(scene);
     }
 }
