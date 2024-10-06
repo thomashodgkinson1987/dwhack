@@ -4,6 +4,7 @@
 #include "scene.h"
 
 #include "coords.h"
+#include "enemy.h"
 #include "map.h"
 #include "sprite.h"
 
@@ -134,9 +135,9 @@ struct game_scene_data
 
     //
 
-    int enemy_x;
-    int enemy_y;
-    int enemy_f;
+    size_t enemies_count;
+    size_t enemies_capacity;
+    struct enemy *enemies;
 };
 
 struct scene game_scene_create(void);
