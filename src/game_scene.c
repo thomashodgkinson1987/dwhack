@@ -21,8 +21,8 @@ static void game_scene_update_compass(struct scene *scene);
 static void game_scene_recalculate_visible_walls(struct scene *scene);
 static void game_scene_flip_backdrop(struct scene *scene);
 
-static void game_scene_get_target(int *target_x, int *target_y, int x, int y, int *front_vec, int front_distance, int *side_vec, int side_distance);
-static bool game_scene_is_visible(struct map *map, int x, int y);
+static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *front_vec, int front_distance, int *side_vec, int side_distance);
+static bool game_scene_is_wall_at(struct map *map, int x, int y);
 
 size_t GAME_SCENE_TAG = 0;
 
@@ -83,92 +83,68 @@ void game_scene_on_tick(struct scene *scene, float delta)
         data->sprite_ui_minimap.is_visible = !data->sprite_ui_minimap.is_visible;
     }
 
-    int map_width = (int)map_get_width(&data->map);
-    int map_height = (int)map_get_height(&data->map);
+    if (IsKeyPressed(KEY_Q) && !IsKeyPressed(KEY_E))
+    {
+        data->player_f = (data->player_f + 3) % 4;
+        game_scene_update_compass(scene);
+        game_scene_flip_backdrop(scene);
+        game_scene_recalculate_visible_walls(scene);
+    }
+    else if (!IsKeyPressed(KEY_Q) && IsKeyPressed(KEY_E))
+    {
+        data->player_f = (data->player_f + 1) % 4;
+        game_scene_update_compass(scene);
+        game_scene_flip_backdrop(scene);
+        game_scene_recalculate_visible_walls(scene);
+    }
+    else
+    {
+        int dir_vecs[4][2] = {
+            {0, -1},
+            {1, 0},
+            {0, 1},
+            {-1, 0}};
 
-    bool is_pressed_a = IsKeyPressed(KEY_A);
-    bool is_pressed_d = IsKeyPressed(KEY_D);
-    bool is_pressed_w = IsKeyPressed(KEY_W);
-    bool is_pressed_s = IsKeyPressed(KEY_S);
-    bool is_pressed_q = IsKeyPressed(KEY_Q);
-    bool is_pressed_e = IsKeyPressed(KEY_E);
+        int movement_vec[2] = {0, 0};
 
-    int dx = 0;
-    int dy = 0;
-    int df = 0;
-
-    if (is_pressed_a && !is_pressed_d && !is_pressed_w && !is_pressed_s)
-    {
-        dx = data->player_f == 0 ? -1 : data->player_f == 2 ? 1
-                                                            : 0;
-        dy = data->player_f == 1 ? -1 : data->player_f == 3 ? 1
-                                                            : 0;
-    }
-    else if (!is_pressed_a && is_pressed_d && !is_pressed_w && !is_pressed_s)
-    {
-        dx = data->player_f == 0 ? 1 : data->player_f == 2 ? -1
-                                                           : 0;
-        dy = data->player_f == 1 ? 1 : data->player_f == 3 ? -1
-                                                           : 0;
-    }
-    else if (!is_pressed_a && !is_pressed_d && is_pressed_w && !is_pressed_s)
-    {
-        dx = data->player_f == 3 ? -1 : data->player_f == 1 ? 1
-                                                            : 0;
-        dy = data->player_f == 0 ? -1 : data->player_f == 2 ? 1
-                                                            : 0;
-    }
-    else if (!is_pressed_a && !is_pressed_d && !is_pressed_w && is_pressed_s)
-    {
-        dx = data->player_f == 3 ? 1 : data->player_f == 1 ? -1
-                                                           : 0;
-        dy = data->player_f == 0 ? 1 : data->player_f == 2 ? -1
-                                                           : 0;
-    }
-    else if (is_pressed_q && !is_pressed_e)
-    {
-        df = -1;
-    }
-    else if (!is_pressed_q && is_pressed_e)
-    {
-        df = 1;
-    }
-
-    if (dx != 0 || dy != 0 || df != 0)
-    {
-        int old_player_x = data->player_x;
-        int old_player_y = data->player_y;
-        int old_player_f = data->player_f;
-
-        if (dx != 0 || dy != 0)
+        if (IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
         {
-            int new_x = data->player_x + dx;
-            int new_y = data->player_y + dy;
-            if (new_x >= 0 && new_x < map_width && new_y >= 0 && new_y < map_height)
+            movement_vec[0] += dir_vecs[data->player_f][0];
+            movement_vec[1] += dir_vecs[data->player_f][1];
+        }
+        else if (!IsKeyPressed(KEY_W) && IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
+        {
+            movement_vec[0] -= dir_vecs[data->player_f][0];
+            movement_vec[1] -= dir_vecs[data->player_f][1];
+        }
+        else if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
+        {
+            int left_f = (data->player_f + 3) % 4;
+            movement_vec[0] += dir_vecs[left_f][0];
+            movement_vec[1] += dir_vecs[left_f][1];
+        }
+        if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && IsKeyPressed(KEY_D))
+        {
+            int right_f = (data->player_f + 1) % 4;
+            movement_vec[0] += dir_vecs[right_f][0];
+            movement_vec[1] += dir_vecs[right_f][1];
+        }
+
+        if (movement_vec[0] != 0 || movement_vec[1] != 0)
+        {
+            int new_x = data->player_x + movement_vec[0];
+            int new_y = data->player_y + movement_vec[1];
+
+            if (new_x >= 0 && new_x < (int)map_get_width(&data->map) && new_y >= 0 && new_y < (int)map_get_height(&data->map))
             {
                 if (map_data_get_at(&data->map, new_x, new_y) == 0)
                 {
                     data->player_x = new_x;
                     data->player_y = new_y;
+                    game_scene_flip_backdrop(scene);
+                    game_scene_recalculate_visible_walls(scene);
                 }
             }
-        }
-
-        if (df != 0)
-        {
-            int new_f = data->player_f + df;
-            if (new_f < 0)
-                new_f = 3;
-            else if (new_f > 3)
-                new_f = 0;
-            data->player_f = new_f;
-            game_scene_update_compass(scene);
-        }
-
-        if (data->player_x != old_player_x || data->player_y != old_player_y || data->player_f != old_player_f)
-        {
-            game_scene_flip_backdrop(scene);
-            game_scene_recalculate_visible_walls(scene);
         }
     }
 }
@@ -701,24 +677,24 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
     };
 
     struct position_check checks[] = {
-        {3, -2, (struct sprite*[]){&data->sprite_xm2y3r, &data->sprite_xm2y3f}, 2},
-        {3, -1, (struct sprite*[]){&data->sprite_xm1y3r, &data->sprite_xm1y3f}, 2},
-        {3, 0, (struct sprite*[]){&data->sprite_x0y3f}, 1},
-        {3, 1, (struct sprite*[]){&data->sprite_x1y3l, &data->sprite_x1y3f}, 2},
-        {3, 2, (struct sprite*[]){&data->sprite_x2y3l, &data->sprite_x2y3f}, 2},
+        {3, -2, (struct sprite *[]){&data->sprite_xm2y3r, &data->sprite_xm2y3f}, 2},
+        {3, -1, (struct sprite *[]){&data->sprite_xm1y3r, &data->sprite_xm1y3f}, 2},
+        {3, 0, (struct sprite *[]){&data->sprite_x0y3f}, 1},
+        {3, 1, (struct sprite *[]){&data->sprite_x1y3l, &data->sprite_x1y3f}, 2},
+        {3, 2, (struct sprite *[]){&data->sprite_x2y3l, &data->sprite_x2y3f}, 2},
 
-        {2, -2, (struct sprite*[]){&data->sprite_xm2y2r}, 1},
-        {2, -1, (struct sprite*[]){&data->sprite_xm1y2r, &data->sprite_xm1y2f}, 2},
-        {2, 0, (struct sprite*[]){&data->sprite_x0y2f}, 1},
-        {2, 1, (struct sprite*[]){&data->sprite_x1y2l, &data->sprite_x1y2f}, 2},
-        {2, 2, (struct sprite*[]){&data->sprite_x2y2l}, 1},
+        {2, -2, (struct sprite *[]){&data->sprite_xm2y2r}, 1},
+        {2, -1, (struct sprite *[]){&data->sprite_xm1y2r, &data->sprite_xm1y2f}, 2},
+        {2, 0, (struct sprite *[]){&data->sprite_x0y2f}, 1},
+        {2, 1, (struct sprite *[]){&data->sprite_x1y2l, &data->sprite_x1y2f}, 2},
+        {2, 2, (struct sprite *[]){&data->sprite_x2y2l}, 1},
 
-        {1, -1, (struct sprite*[]){&data->sprite_xm1y1r, &data->sprite_xm1y1f}, 2},
-        {1, 0, (struct sprite*[]){&data->sprite_x0y1f}, 1},
-        {1, 1, (struct sprite*[]){&data->sprite_x1y1l, &data->sprite_x1y1f}, 2},
+        {1, -1, (struct sprite *[]){&data->sprite_xm1y1r, &data->sprite_xm1y1f}, 2},
+        {1, 0, (struct sprite *[]){&data->sprite_x0y1f}, 1},
+        {1, 1, (struct sprite *[]){&data->sprite_x1y1l, &data->sprite_x1y1f}, 2},
 
-        {0, -1, (struct sprite*[]){&data->sprite_xm1y0r}, 1},
-        {0, 1, (struct sprite*[]){&data->sprite_x1y0l}, 1},
+        {0, -1, (struct sprite *[]){&data->sprite_xm1y0r}, 1},
+        {0, 1, (struct sprite *[]){&data->sprite_x1y0l}, 1},
     };
 
     int num_checks = sizeof(checks) / sizeof checks[0];
@@ -733,7 +709,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
         int *side_vec = check->sizeways_distance < 0 ? left_vec : right_vec;
         int sideways_distance = abs(check->sizeways_distance);
 
-        game_scene_get_target(&target_x, &target_y, data->player_x, data->player_y, front_vec, check->forward_distance, side_vec, sideways_distance);
+        game_scene_calculate_target_position(&target_x, &target_y, data->player_x, data->player_y, front_vec, check->forward_distance, side_vec, sideways_distance);
 
         if (sideways_distance == 0)
         {
@@ -741,7 +717,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             target_y = data->player_y + front_vec[1] * check->forward_distance;
         }
 
-        if (game_scene_is_visible(&data->map, target_x, target_y))
+        if (game_scene_is_wall_at(&data->map, target_x, target_y))
         {
             for (size_t j = 0; j < check->sprites_count; ++j)
             {
@@ -758,13 +734,13 @@ static void game_scene_flip_backdrop(struct scene *scene)
     data->sprite_backdrop.source.width *= -1;
 }
 
-static void game_scene_get_target(int *target_x, int *target_y, int x, int y, int *dir_vec, int forward_distance, int *side_vec, int sideways_distance)
+static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *dir_vec, int forward_distance, int *side_vec, int sideways_distance)
 {
     *target_x = x + dir_vec[0] * forward_distance + side_vec[0] * sideways_distance;
     *target_y = y + dir_vec[1] * forward_distance + side_vec[1] * sideways_distance;
 }
 
-static bool game_scene_is_visible(struct map *map, int x, int y)
+static bool game_scene_is_wall_at(struct map *map, int x, int y)
 {
     if (x >= 0 && x < (int)map_get_width(map) && y >= 0 && y < (int)map_get_height(map))
     {
