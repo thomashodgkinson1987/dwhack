@@ -5,7 +5,7 @@
 
 /**
  * @brief Represents a scene in the game or application.
- * 
+ *
  * This structure holds a tag for identification and a pointer to arbitrary data.
  */
 struct scene
@@ -18,7 +18,7 @@ struct scene
 
 /**
  * @brief Function pointers for scene management.
- * 
+ *
  * This structure defines a set of function pointers for managing the lifecycle of a scene.
  */
 struct scene_funcs
@@ -41,7 +41,7 @@ void scene_vtable_init(void);
 void scene_vtable_free(void);
 /**
  * @brief Registers a set of scene functions into the virtual function table.
- * 
+ *
  * @param scene_funcs The function pointers to register.
  * @return A unique identifier for the registered scene functions.  Returns 0 on failure.
  */
@@ -49,7 +49,7 @@ size_t scene_vtable_register(struct scene_funcs scene_funcs);
 
 /**
  * @brief Creates a new scene.
- * 
+ *
  * @param tag Unique identifier for the scene.
  * @param data Pointer to scene-specific data.
  * @return A scene struct.  The data pointer is copied, not the data itself.
