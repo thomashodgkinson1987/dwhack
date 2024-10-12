@@ -64,10 +64,10 @@ void game_scene_enter(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    sprite_set_is_visible(&data->sprite_ui_character_sheet, false);
-    sprite_set_is_visible(&data->sprite_ui_spells, false);
+    sprite_set_is_visible(data->sprite_ui_character_sheet, false);
+    sprite_set_is_visible(data->sprite_ui_spells, false);
 
-    sprite_set_texture(&data->sprite_backdrop, data->array_texture_backdrops[GetRandomValue(0, (sizeof(data->array_texture_backdrops) / sizeof(Texture2D)) - 1)]);
+    sprite_set_texture(data->sprite_backdrop, data->array_texture_backdrops[GetRandomValue(0, (sizeof(data->array_texture_backdrops) / sizeof(Texture2D)) - 1)]);
 
     game_scene_update_compass(scene);
     game_scene_recalculate_visible_walls(scene);
@@ -119,10 +119,10 @@ void game_scene_tick(struct scene *scene, float delta)
 
     if (IsKeyPressed(KEY_C))
     {
-        data->sprite_ui_inventory.is_visible = !data->sprite_ui_inventory.is_visible;
-        data->sprite_ui_equipment.is_visible = !data->sprite_ui_equipment.is_visible;
-        data->sprite_ui_character_sheet.is_visible = !data->sprite_ui_character_sheet.is_visible;
-        data->sprite_ui_minimap.is_visible = !data->sprite_ui_minimap.is_visible;
+        sprite_set_is_visible(data->sprite_ui_inventory, !sprite_get_is_visible(data->sprite_ui_inventory));
+        sprite_set_is_visible(data->sprite_ui_equipment, !sprite_get_is_visible(data->sprite_ui_equipment));
+        sprite_set_is_visible(data->sprite_ui_character_sheet, !sprite_get_is_visible(data->sprite_ui_character_sheet));
+        sprite_set_is_visible(data->sprite_ui_minimap, !sprite_get_is_visible(data->sprite_ui_minimap));
     }
 
     if (IsKeyPressed(KEY_Q) && !IsKeyPressed(KEY_E))
@@ -232,12 +232,12 @@ static void game_scene_draw_world(struct scene *scene)
         float radius;
     };
 
-    sprite_draw(&data->sprite_backdrop);
+    sprite_draw(data->sprite_backdrop);
 
-    sprite_draw(&data->sprite_xm2y3r);
-    sprite_draw(&data->sprite_xm1y3r);
-    sprite_draw(&data->sprite_x1y3l);
-    sprite_draw(&data->sprite_x2y3l);
+    sprite_draw(data->sprite_xm2y3r);
+    sprite_draw(data->sprite_xm1y3r);
+    sprite_draw(data->sprite_x1y3l);
+    sprite_draw(data->sprite_x2y3l);
 
     {
         struct enemy_position_check checks[] = {
@@ -269,16 +269,16 @@ static void game_scene_draw_world(struct scene *scene)
         }
     }
 
-    sprite_draw(&data->sprite_xm2y3f);
-    sprite_draw(&data->sprite_xm1y3f);
-    sprite_draw(&data->sprite_x0y3f);
-    sprite_draw(&data->sprite_x1y3f);
-    sprite_draw(&data->sprite_x2y3f);
+    sprite_draw(data->sprite_xm2y3f);
+    sprite_draw(data->sprite_xm1y3f);
+    sprite_draw(data->sprite_x0y3f);
+    sprite_draw(data->sprite_x1y3f);
+    sprite_draw(data->sprite_x2y3f);
 
-    sprite_draw(&data->sprite_xm2y2r);
-    sprite_draw(&data->sprite_xm1y2r);
-    sprite_draw(&data->sprite_x1y2l);
-    sprite_draw(&data->sprite_x2y2l);
+    sprite_draw(data->sprite_xm2y2r);
+    sprite_draw(data->sprite_xm1y2r);
+    sprite_draw(data->sprite_x1y2l);
+    sprite_draw(data->sprite_x2y2l);
 
     {
         struct enemy_position_check checks[] = {
@@ -308,12 +308,12 @@ static void game_scene_draw_world(struct scene *scene)
         }
     }
 
-    sprite_draw(&data->sprite_xm1y2f);
-    sprite_draw(&data->sprite_x0y2f);
-    sprite_draw(&data->sprite_x1y2f);
+    sprite_draw(data->sprite_xm1y2f);
+    sprite_draw(data->sprite_x0y2f);
+    sprite_draw(data->sprite_x1y2f);
 
-    sprite_draw(&data->sprite_xm1y1r);
-    sprite_draw(&data->sprite_x1y1l);
+    sprite_draw(data->sprite_xm1y1r);
+    sprite_draw(data->sprite_x1y1l);
 
     {
         struct enemy_position_check checks[] = {
@@ -343,32 +343,32 @@ static void game_scene_draw_world(struct scene *scene)
         }
     }
 
-    sprite_draw(&data->sprite_xm1y1f);
-    sprite_draw(&data->sprite_x0y1f);
-    sprite_draw(&data->sprite_x1y1f);
+    sprite_draw(data->sprite_xm1y1f);
+    sprite_draw(data->sprite_x0y1f);
+    sprite_draw(data->sprite_x1y1f);
 
-    sprite_draw(&data->sprite_xm1y0r);
-    sprite_draw(&data->sprite_x1y0l);
+    sprite_draw(data->sprite_xm1y0r);
+    sprite_draw(data->sprite_x1y0l);
 }
 static void game_scene_draw_main(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    sprite_draw(&data->sprite_main);
+    sprite_draw(data->sprite_main);
 }
 static void game_scene_draw_ui(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    sprite_draw(&data->sprite_ui_inventory);
-    sprite_draw(&data->sprite_ui_button_camp);
-    sprite_draw(&data->sprite_ui_equipment);
-    sprite_draw(&data->sprite_ui_character_sheet);
-    sprite_draw(&data->sprite_ui_minimap);
-    sprite_draw(&data->sprite_ui_spells);
-    sprite_draw(&data->sprite_ui_portrait_hands);
-    sprite_draw(&data->sprite_ui_compass);
-    sprite_draw(&data->sprite_ui_buttons_direction);
+    sprite_draw(data->sprite_ui_inventory);
+    sprite_draw(data->sprite_ui_button_camp);
+    sprite_draw(data->sprite_ui_equipment);
+    sprite_draw(data->sprite_ui_character_sheet);
+    sprite_draw(data->sprite_ui_minimap);
+    sprite_draw(data->sprite_ui_spells);
+    sprite_draw(data->sprite_ui_portrait_hands);
+    sprite_draw(data->sprite_ui_compass);
+    sprite_draw(data->sprite_ui_buttons_direction);
 }
 
 static void game_scene_init_coords(struct scene *scene)
@@ -571,7 +571,11 @@ static void game_scene_init_sprites(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
+    //
+
     struct coords coords = data->coords;
+
+    //
 
     data->sprite_main = sprite_create(data->texture_main, (float)coords.main.x, (float)coords.main.y, (float)coords.main.w, (float)coords.main.h);
 
@@ -617,91 +621,123 @@ static void game_scene_init_sprites(struct scene *scene)
     data->sprite_x1y3l = sprite_create(data->texture_x1y3l, (float)coords.x1y3l.x, (float)coords.x1y3l.y, (float)coords.x1y3l.w, (float)coords.x1y3l.h);
     data->sprite_x2y3l = sprite_create(data->texture_x2y3l, (float)coords.x2y3l.x, (float)coords.x2y3l.y, (float)coords.x2y3l.w, (float)coords.x2y3l.h);
 
-    data->array_sprites_count = 0;
-    data->array_sprites_capacity = 37;
-    data->array_sprites = malloc(sizeof *data->array_sprites * data->array_sprites_capacity);
-    assert(data->array_sprites != NULL);
-    memset(data->array_sprites, 0, sizeof *data->array_sprites * data->array_sprites_capacity);
+    //
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_main;
+    data->sprites_count = 0;
+    data->sprites_capacity = 37;
+    data->sprites = (Sprite **)malloc(sizeof *data->sprites * data->sprites_capacity);
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_inventory;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_button_camp;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_equipment;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_character_sheet;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_minimap;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_spells;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_portrait_hands;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_compass;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_ui_buttons_direction;
+    if (data->sprites == NULL)
+    {
+        fprintf(stderr, "Cannot malloc sprites array!\n");
+        exit(1);
+    }
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_backdrop;
+    memset(data->sprites, 0, sizeof *data->sprites * data->sprites_capacity);
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm1y0r;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x1y0l;
+    //
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm1y1f;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x0y1f;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x1y1f;
+    data->sprites[data->sprites_count++] = data->sprite_main;
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm1y1r;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x1y1l;
+    data->sprites[data->sprites_count++] = data->sprite_ui_inventory;
+    data->sprites[data->sprites_count++] = data->sprite_ui_button_camp;
+    data->sprites[data->sprites_count++] = data->sprite_ui_equipment;
+    data->sprites[data->sprites_count++] = data->sprite_ui_character_sheet;
+    data->sprites[data->sprites_count++] = data->sprite_ui_minimap;
+    data->sprites[data->sprites_count++] = data->sprite_ui_spells;
+    data->sprites[data->sprites_count++] = data->sprite_ui_portrait_hands;
+    data->sprites[data->sprites_count++] = data->sprite_ui_compass;
+    data->sprites[data->sprites_count++] = data->sprite_ui_buttons_direction;
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm1y2f;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x0y2f;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x1y2f;
+    data->sprites[data->sprites_count++] = data->sprite_backdrop;
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm2y2r;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm1y2r;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x1y2l;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x2y2l;
+    data->sprites[data->sprites_count++] = data->sprite_xm1y0r;
+    data->sprites[data->sprites_count++] = data->sprite_x1y0l;
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm2y3f;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm1y3f;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x0y3f;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x1y3f;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x2y3f;
+    data->sprites[data->sprites_count++] = data->sprite_xm1y1f;
+    data->sprites[data->sprites_count++] = data->sprite_x0y1f;
+    data->sprites[data->sprites_count++] = data->sprite_x1y1f;
 
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm2y3r;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_xm1y3r;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x1y3l;
-    data->array_sprites[data->array_sprites_count++] = &data->sprite_x2y3l;
+    data->sprites[data->sprites_count++] = data->sprite_xm1y1r;
+    data->sprites[data->sprites_count++] = data->sprite_x1y1l;
 
-    data->array_wall_sprites_count = 0;
-    data->array_wall_sprites_capacity = 23;
-    data->array_wall_sprites = malloc(sizeof *data->array_wall_sprites * data->array_wall_sprites_capacity);
-    assert(data->array_wall_sprites != NULL);
-    memset(data->array_wall_sprites, 0, sizeof *data->array_wall_sprites * data->array_wall_sprites_capacity);
+    data->sprites[data->sprites_count++] = data->sprite_xm1y2f;
+    data->sprites[data->sprites_count++] = data->sprite_x0y2f;
+    data->sprites[data->sprites_count++] = data->sprite_x1y2f;
 
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm1y0r;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x1y0l;
+    data->sprites[data->sprites_count++] = data->sprite_xm2y2r;
+    data->sprites[data->sprites_count++] = data->sprite_xm1y2r;
+    data->sprites[data->sprites_count++] = data->sprite_x1y2l;
+    data->sprites[data->sprites_count++] = data->sprite_x2y2l;
 
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm1y1f;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x0y1f;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x1y1f;
+    data->sprites[data->sprites_count++] = data->sprite_xm2y3f;
+    data->sprites[data->sprites_count++] = data->sprite_xm1y3f;
+    data->sprites[data->sprites_count++] = data->sprite_x0y3f;
+    data->sprites[data->sprites_count++] = data->sprite_x1y3f;
+    data->sprites[data->sprites_count++] = data->sprite_x2y3f;
 
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm1y1r;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x1y1l;
+    data->sprites[data->sprites_count++] = data->sprite_xm2y3r;
+    data->sprites[data->sprites_count++] = data->sprite_xm1y3r;
+    data->sprites[data->sprites_count++] = data->sprite_x1y3l;
+    data->sprites[data->sprites_count++] = data->sprite_x2y3l;
 
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm1y2f;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x0y2f;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x1y2f;
+    //
 
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm2y2r;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm1y2r;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x1y2l;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x2y2l;
+    for (size_t i = 0; i < data->sprites_count; ++i)
+    {
+        Sprite *sprite = data->sprites[i];
+        if (sprite == NULL)
+        {
+            fprintf(stderr, "Error creaing sprite #%zu!\n", i);
+            exit(1);
+        }
+    }
 
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm2y3f;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm1y3f;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x0y3f;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x1y3f;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x2y3f;
+    //
 
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm2y3r;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_xm1y3r;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x1y3l;
-    data->array_wall_sprites[data->array_wall_sprites_count++] = &data->sprite_x2y3l;
+    data->wall_sprites_count = 0;
+    data->wall_sprites_capacity = 23;
+    data->wall_sprites = (Sprite **)malloc(sizeof *data->wall_sprites * data->wall_sprites_capacity);
+
+    if (data->wall_sprites == NULL)
+    {
+        fprintf(stderr, "Error malloc wall_sprites!\n");
+        exit(1);
+    }
+
+    memset(data->wall_sprites, 0, sizeof *data->wall_sprites * data->wall_sprites_capacity);
+
+    //
+
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y0r;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y0l;
+
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y1f;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x0y1f;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y1f;
+
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y1r;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y1l;
+
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y2f;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x0y2f;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y2f;
+
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm2y2r;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y2r;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y2l;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x2y2l;
+
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm2y3f;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y3f;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x0y3f;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y3f;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x2y3f;
+
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm2y3r;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y3r;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y3l;
+    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x2y3l;
 }
 static void game_scene_init_map(struct scene *scene)
 {
@@ -813,21 +849,27 @@ static void game_scene_free_sprites(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    for (size_t i = 0; i < data->array_sprites_count; ++i)
+    //
+
+    for (size_t i = 0; i < data->sprites_count; ++i)
     {
-        struct sprite *sprite = data->array_sprites[i];
+        Sprite *sprite = data->sprites[i];
         sprite_free(sprite);
     }
 
-    data->array_sprites_count = 0;
-    data->array_sprites_capacity = 0;
-    free(data->array_sprites);
-    data->array_sprites = NULL;
+    //
 
-    data->array_wall_sprites_capacity = 0;
-    data->array_wall_sprites_count = 0;
-    free(data->array_wall_sprites);
-    data->array_wall_sprites = NULL;
+    data->sprites_count = 0;
+    data->sprites_capacity = 0;
+    free(data->sprites);
+    data->sprites = NULL;
+
+    //
+
+    data->wall_sprites_capacity = 0;
+    data->wall_sprites_count = 0;
+    free(data->wall_sprites);
+    data->wall_sprites = NULL;
 }
 static void game_scene_free_map(struct scene *scene)
 {
@@ -864,19 +906,19 @@ static void game_scene_update_compass(struct scene *scene)
     switch (player_get_facing(data->player))
     {
     case 0:
-        data->sprite_ui_compass.texture = data->texture_ui_compass_north;
+        sprite_set_texture(data->sprite_ui_compass, data->texture_ui_compass_north);
         break;
     case 1:
-        data->sprite_ui_compass.texture = data->texture_ui_compass_east;
+        sprite_set_texture(data->sprite_ui_compass, data->texture_ui_compass_east);
         break;
     case 2:
-        data->sprite_ui_compass.texture = data->texture_ui_compass_south;
+        sprite_set_texture(data->sprite_ui_compass, data->texture_ui_compass_south);
         break;
     case 3:
-        data->sprite_ui_compass.texture = data->texture_ui_compass_west;
+        sprite_set_texture(data->sprite_ui_compass, data->texture_ui_compass_west);
         break;
     default:
-        data->sprite_ui_compass.texture = data->texture_ui_compass_north;
+        sprite_set_texture(data->sprite_ui_compass, data->texture_ui_compass_north);
         break;
     }
 }
@@ -885,9 +927,9 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    for (size_t i = 0; i < data->array_wall_sprites_count; ++i)
+    for (size_t i = 0; i < data->wall_sprites_count; ++i)
     {
-        sprite_set_is_visible(data->array_wall_sprites[i], false);
+        sprite_set_is_visible(data->wall_sprites[i], false);
     }
 
     int dir_vecs[4][2] = {
@@ -908,29 +950,29 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
     {
         int forward_distance;
         int sizeways_distance;
-        struct sprite **sprites;
+        Sprite **sprites;
         size_t sprites_count;
     };
 
     struct position_check checks[] = {
-        {3, -2, (struct sprite *[]){&data->sprite_xm2y3r, &data->sprite_xm2y3f}, 2},
-        {3, -1, (struct sprite *[]){&data->sprite_xm1y3r, &data->sprite_xm1y3f}, 2},
-        {3, 0, (struct sprite *[]){&data->sprite_x0y3f}, 1},
-        {3, 1, (struct sprite *[]){&data->sprite_x1y3l, &data->sprite_x1y3f}, 2},
-        {3, 2, (struct sprite *[]){&data->sprite_x2y3l, &data->sprite_x2y3f}, 2},
+        {3, -2, (Sprite *[]){data->sprite_xm2y3r, data->sprite_xm2y3f}, 2},
+        {3, -1, (Sprite *[]){data->sprite_xm1y3r, data->sprite_xm1y3f}, 2},
+        {3, 0, (Sprite *[]){data->sprite_x0y3f}, 1},
+        {3, 1, (Sprite *[]){data->sprite_x1y3l, data->sprite_x1y3f}, 2},
+        {3, 2, (Sprite *[]){data->sprite_x2y3l, data->sprite_x2y3f}, 2},
 
-        {2, -2, (struct sprite *[]){&data->sprite_xm2y2r}, 1},
-        {2, -1, (struct sprite *[]){&data->sprite_xm1y2r, &data->sprite_xm1y2f}, 2},
-        {2, 0, (struct sprite *[]){&data->sprite_x0y2f}, 1},
-        {2, 1, (struct sprite *[]){&data->sprite_x1y2l, &data->sprite_x1y2f}, 2},
-        {2, 2, (struct sprite *[]){&data->sprite_x2y2l}, 1},
+        {2, -2, (Sprite *[]){data->sprite_xm2y2r}, 1},
+        {2, -1, (Sprite *[]){data->sprite_xm1y2r, data->sprite_xm1y2f}, 2},
+        {2, 0, (Sprite *[]){data->sprite_x0y2f}, 1},
+        {2, 1, (Sprite *[]){data->sprite_x1y2l, data->sprite_x1y2f}, 2},
+        {2, 2, (Sprite *[]){data->sprite_x2y2l}, 1},
 
-        {1, -1, (struct sprite *[]){&data->sprite_xm1y1r, &data->sprite_xm1y1f}, 2},
-        {1, 0, (struct sprite *[]){&data->sprite_x0y1f}, 1},
-        {1, 1, (struct sprite *[]){&data->sprite_x1y1l, &data->sprite_x1y1f}, 2},
+        {1, -1, (Sprite *[]){data->sprite_xm1y1r, data->sprite_xm1y1f}, 2},
+        {1, 0, (Sprite *[]){data->sprite_x0y1f}, 1},
+        {1, 1, (Sprite *[]){data->sprite_x1y1l, data->sprite_x1y1f}, 2},
 
-        {0, -1, (struct sprite *[]){&data->sprite_xm1y0r}, 1},
-        {0, 1, (struct sprite *[]){&data->sprite_x1y0l}, 1},
+        {0, -1, (Sprite *[]){data->sprite_xm1y0r}, 1},
+        {0, 1, (Sprite *[]){data->sprite_x1y0l}, 1},
     };
 
     int num_checks = sizeof(checks) / sizeof checks[0];
@@ -967,7 +1009,11 @@ static void game_scene_flip_backdrop(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    data->sprite_backdrop.source.width *= -1;
+    Rectangle source = sprite_get_source(data->sprite_backdrop);
+
+    source.width *= -1;
+
+    sprite_set_source(data->sprite_backdrop, source);
 }
 
 static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *dir_vec, int forward_distance, int *side_vec, int sideways_distance)
