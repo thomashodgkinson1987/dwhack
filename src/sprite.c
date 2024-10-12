@@ -9,18 +9,18 @@
  */
 struct sprite_impl
 {
-    bool is_visible;          ///< Whether the sprite is visible.
-    Texture2D texture;        ///< The texture of the sprite.
-    Rectangle source;         ///< The source rectangle of the sprite within the texture.
-    Rectangle dest;           ///< The destination rectangle of the sprite on the screen.
-    Vector2 origin;          ///< The origin of the sprite (rotation point).
-    float rotation;          ///< The rotation of the sprite in degrees.
-    Color tint;              ///< The tint color of the sprite.
+    bool is_visible;   // Whether the sprite is visible.
+    Texture2D texture; // The texture of the sprite.
+    Rectangle source;  // The source rectangle of the sprite within the texture.
+    Rectangle dest;    // The destination rectangle of the sprite on the screen.
+    Vector2 origin;    // The origin of the sprite (rotation point).
+    float rotation;    // The rotation of the sprite in degrees.
+    Color tint;        // The tint color of the sprite.
 };
 
 /**
  * @brief Creates a new sprite.
- * 
+ *
  * @param texture The texture to use for the sprite.
  * @param x The x-coordinate of the sprite's top-left corner.
  * @param y The y-coordinate of the sprite's top-left corner.
@@ -52,7 +52,7 @@ Sprite *sprite_create(Texture2D texture, float x, float y, float w, float h)
 
 /**
  * @brief Frees the memory allocated for a sprite.
- * 
+ *
  * @param sprite A pointer to the sprite to free.
  */
 void sprite_free(Sprite *sprite)
@@ -113,7 +113,7 @@ void sprite_set_h(Sprite *sprite, float h) { sprite->dest.height = h; }
 
 /**
  * @brief Draws the sprite using raylib's DrawTexturePro function.
- * 
+ *
  * @param sprite A pointer to the sprite to draw.
  */
 void sprite_draw(const Sprite *sprite)
