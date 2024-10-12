@@ -3,7 +3,13 @@
 
 #include "raylib.h"
 
-enum enemy_direction { ENEMY_NORTH, ENEMY_EAST, ENEMY_SOUTH, ENEMY_WEST };
+enum enemy_direction
+{
+    ENEMY_NORTH,
+    ENEMY_EAST,
+    ENEMY_SOUTH,
+    ENEMY_WEST
+};
 
 struct enemy
 {
