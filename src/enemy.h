@@ -22,7 +22,7 @@ enum enemy_direction
 
 /**
  * @brief Creates a new enemy.
- * 
+ *
  * @param x The x-coordinate of the enemy.
  * @param y The y-coordinate of the enemy.
  * @param facing The initial direction the enemy is facing.
@@ -34,14 +34,14 @@ Enemy *enemy_create(int x, int y, enum enemy_direction facing, int health, Color
 
 /**
  * @brief Frees the memory allocated for an enemy.
- * 
+ *
  * @param enemy A pointer to the enemy to be freed.  It's safe to pass NULL.
  */
 void enemy_free(Enemy *enemy);
 
 /**
  * @brief Gets the x-coordinate of the enemy.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @return The x-coordinate of the enemy.
  */
@@ -49,7 +49,7 @@ int enemy_get_x(const Enemy *enemy);
 
 /**
  * @brief Gets the y-coordinate of the enemy.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @return The y-coordinate of the enemy.
  */
@@ -57,7 +57,7 @@ int enemy_get_y(const Enemy *enemy);
 
 /**
  * @brief Gets the direction the enemy is facing.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @return The direction the enemy is facing.
  */
@@ -65,7 +65,7 @@ enum enemy_direction enemy_get_facing(const Enemy *enemy);
 
 /**
  * @brief Gets the health of the enemy.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @return The health of the enemy.
  */
@@ -73,7 +73,7 @@ int enemy_get_health(const Enemy *enemy);
 
 /**
  * @brief Gets the color of the enemy.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @return The color of the enemy.
  */
@@ -81,7 +81,7 @@ Color enemy_get_color(const Enemy *enemy);
 
 /**
  * @brief Sets the x-coordinate of the enemy.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @param x The new x-coordinate.
  */
@@ -89,7 +89,7 @@ void enemy_set_x(Enemy *enemy, int x);
 
 /**
  * @brief Sets the y-coordinate of the enemy.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @param y The new y-coordinate.
  */
@@ -97,7 +97,7 @@ void enemy_set_y(Enemy *enemy, int y);
 
 /**
  * @brief Sets the direction the enemy is facing.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @param facing The new direction.
  */
@@ -105,7 +105,7 @@ void enemy_set_facing(Enemy *enemy, enum enemy_direction facing);
 
 /**
  * @brief Sets the health of the enemy.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @param health The new health.
  */
@@ -113,7 +113,7 @@ void enemy_set_health(Enemy *enemy, int health);
 
 /**
  * @brief Sets the color of the enemy.
- * 
+ *
  * @param enemy A pointer to the enemy.
  * @param color The new color.
  */
