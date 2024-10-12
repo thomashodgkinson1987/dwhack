@@ -105,7 +105,7 @@ static void game_init(void)
 static void game_init_virtual_screen(void)
 {
     render_texture_data.texture = LoadRenderTexture(virtual_screen_width, virtual_screen_height);
-    render_texture_data.source = (Rectangle){0.0f, 0.0f, (float)render_texture_data.texture.width, -(float)render_texture_data.texture.height};
+    render_texture_data.source = (Rectangle){0.0f, 0.0f, (float)render_texture_data.texture.texture.width, -(float)render_texture_data.texture.texture.height};
     render_texture_data.dest = (Rectangle){0.0f, 0.0f, (float)window_width, (float)window_height};
     render_texture_data.origin = (Vector2){0.0f, 0.0f};
     render_texture_data.rotation = 0.0f;
@@ -201,7 +201,7 @@ static void game_draw(void)
     BeginDrawing();
     ClearBackground(WHITE);
     DrawTexturePro(
-        render_texture_data.texture,
+        render_texture_data.texture.texture,
         render_texture_data.source,
         render_texture_data.dest,
         render_texture_data.origin,
