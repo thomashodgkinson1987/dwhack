@@ -32,8 +32,5 @@ struct rectanglei rectanglei_create(int x, int y, int w, int h)
  */
 void rectanglei_free(struct rectanglei *rectanglei)
 {
-    rectanglei->x = 0;
-    rectanglei->y = 0;
-    rectanglei->w = 0;
-    rectanglei->h = 0;
+    *rectanglei = (struct rectanglei){0};
 }
