@@ -1,4 +1,5 @@
 #include "rectanglei.h"
+#include <string.h>
 
 /**
  * @brief Creates a new rectanglei.
@@ -23,15 +24,11 @@ struct rectanglei rectanglei_create(int x, int y, int w, int h)
 }
 
 /**
- * @brief Frees the memory allocated for a rectanglei (does nothing in this case, as it's a simple struct).
+ * @brief Frees the memory allocated for a rectanglei. Sets all members to zero.
  *
- * @param rectanglei A pointer to the rectanglei to free.
+ * @param rectanglei A pointer to the rectanglei to clear.
  */
 void rectanglei_free(struct rectanglei *rectanglei)
 {
-    //In this simple case, there is no dynamic memory allocation, so nothing needs to be freed.
-    rectanglei->x = 0;
-    rectanglei->y = 0;
-    rectanglei->w = 0;
-    rectanglei->h = 0;
+    memset(rectanglei, 0, sizeof(struct rectanglei));
 }
