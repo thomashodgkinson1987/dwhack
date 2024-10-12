@@ -3,7 +3,6 @@
  * @brief This file implements functions for working with integer rectangles.
  */
 #include "rectanglei.h"
-#include <string.h>
 
 /**
  * @brief Creates a new rectanglei.
@@ -33,5 +32,8 @@ struct rectanglei rectanglei_create(int x, int y, int w, int h)
  */
 void rectanglei_free(struct rectanglei *rectanglei)
 {
-    memset(rectanglei, 0, sizeof *rectanglei);
+    rectanglei->x = 0;
+    rectanglei->y = 0;
+    rectanglei->w = 0;
+    rectanglei->h = 0;
 }
