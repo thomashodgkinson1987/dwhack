@@ -13,7 +13,6 @@ enum enemy_direction
     ENEMY_WEST
 };
 
-
 Enemy *enemy_create(int x, int y, enum enemy_direction facing, int health, Color color);
 void enemy_free(Enemy *enemy);
 

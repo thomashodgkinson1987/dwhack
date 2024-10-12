@@ -1,8 +1,9 @@
 #include "enemy.h"
-#include <stdlib.h> // for malloc and free
 
-// Define the actual structure implementation.  This is hidden from external code.
-struct enemy_impl {
+#include <stdlib.h>
+
+struct enemy_impl
+{
     int x;
     int y;
     enum enemy_direction facing;
@@ -10,25 +11,26 @@ struct enemy_impl {
     Color color;
 };
 
-
 Enemy *enemy_create(int x, int y, enum enemy_direction facing, int health, Color color)
 {
     Enemy *enemy = (Enemy *)malloc(sizeof(struct enemy_impl));
-    if (enemy == NULL) {
-        // Handle memory allocation failure appropriately (e.g., return NULL, exit, etc.)
-        return NULL; //Example: return NULL;
+
+    if (enemy != NULL)
+    {
+        enemy->x = x;
+        enemy->y = y;
+        enemy->facing = facing;
+        enemy->health = health;
+        enemy->color = color;
     }
-    enemy->x = x;
-    enemy->y = y;
-    enemy->facing = facing;
-    enemy->health = health;
-    enemy->color = color;
+
     return enemy;
 }
 
 void enemy_free(Enemy *enemy)
 {
-    if (enemy != NULL) {
+    if (enemy != NULL)
+    {
         free(enemy);
     }
 }

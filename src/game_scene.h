@@ -137,7 +137,7 @@ struct game_scene_data
 
     size_t enemies_count;
     size_t enemies_capacity;
-    struct enemy *enemies;
+    Enemy **enemies;
 };
 
 struct scene game_scene_create(void);
