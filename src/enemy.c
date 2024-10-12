@@ -13,8 +13,5 @@ struct enemy enemy_create(int x, int y, int f, Color color)
 
 void enemy_free(struct enemy *enemy)
 {
-    enemy->x = 0;
-    enemy->y = 0;
-    enemy->f = 0;
-    enemy->color = BLANK;
+    *enemy = (struct enemy){0};
 }
