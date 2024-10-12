@@ -19,6 +19,10 @@ static void game_scene_free_map(struct scene *scene);
 static void game_scene_free_player(struct scene *scene);
 static void game_scene_free_enemies(struct scene *scene);
 
+static void game_scene_draw_world(struct scene *scene);
+static void game_scene_draw_main(struct scene *scene);
+static void game_scene_draw_ui(struct scene *scene);
+
 static void game_scene_update_compass(struct scene *scene);
 static void game_scene_recalculate_visible_walls(struct scene *scene);
 static void game_scene_flip_backdrop(struct scene *scene);
@@ -55,7 +59,7 @@ void game_scene_free(struct scene *scene)
     game_scene_free_coords(scene);
 }
 
-void game_scene_on_enter(struct scene *scene)
+void game_scene_enter(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
@@ -67,13 +71,13 @@ void game_scene_on_enter(struct scene *scene)
     game_scene_update_compass(scene);
     game_scene_recalculate_visible_walls(scene);
 }
-void game_scene_on_exit(struct scene *scene)
+void game_scene_exit(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
     (void)data;
 }
-void game_scene_on_tick(struct scene *scene, float delta)
+void game_scene_tick(struct scene *scene, float delta)
 {
     struct game_scene_data *data = scene->data;
 
@@ -97,7 +101,7 @@ void game_scene_on_tick(struct scene *scene, float delta)
             }
             int new_x = enemy->x + dx;
             int new_y = enemy->y + dy;
-            if (new_x >= 0 && new_x < map_get_width(&data->map) && new_y >= 0 && new_y < map_get_height(&data->map))
+            if (new_x >= 0 && new_x < (int)map_get_width(&data->map) && new_y >= 0 && new_y < (int)map_get_height(&data->map))
             {
                 if (map_data_get_at(&data->map, new_x, new_y) == 0)
                 {
@@ -181,7 +185,17 @@ void game_scene_on_tick(struct scene *scene, float delta)
         }
     }
 }
-void game_scene_on_draw(struct scene *scene)
+void game_scene_draw(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
+
+    (void)data;
+
+    game_scene_draw_world(scene);
+    game_scene_draw_main(scene);
+    game_scene_draw_ui(scene);
+}
+static void game_scene_draw_world(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
@@ -199,7 +213,7 @@ void game_scene_on_draw(struct scene *scene)
     int right_f = (front_f + 1) % 4;
 
     int *front_vec = dir_vecs[front_f];
-    int *left_vec = dir_vecs[left_f];
+    //int *left_vec = dir_vecs[left_f];
     int *right_vec = dir_vecs[right_f];
 
     struct enemy_position_check
@@ -220,14 +234,14 @@ void game_scene_on_draw(struct scene *scene)
 
     {
         struct enemy_position_check checks[] = {
-            {3, -2, data->coords.xm2y3f.x + 34, data->coords.xm2y3f.y + 12, 2.0f},
-            {3, -1, data->coords.xm1y3f.x + 30, data->coords.xm1y3f.y + 12, 2.0f},
-            {3, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 12, 2.0f},
-            {3, 1, data->coords.x1y3f.x + 30, data->coords.x1y3f.y + 12, 2.0f},
-            {3, 2, data->coords.x2y3f.x + 34, data->coords.x2y3f.y + 12, 2.0f},
+            {3, -2, data->coords.xm2y3f.x + 40, data->coords.xm2y3f.y + 12, 4.0f},
+            {3, -1, data->coords.xm1y3f.x + 30, data->coords.xm1y3f.y + 12, 4.0f},
+            {3, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 12, 4.0f},
+            {3, 1, data->coords.x1y3f.x + data->coords.x1y3f.w - 30, data->coords.x1y3f.y + 12, 4.0f},
+            {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.w - 40, data->coords.x2y3f.y + 12, 4.0f},
         };
 
-        for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
+        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
             struct enemy_position_check *check = &checks[i];
 
@@ -236,9 +250,9 @@ void game_scene_on_draw(struct scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (int i = 0; i < data->enemies_count; ++i)
+                for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[i];
+                    struct enemy *enemy = &data->enemies[j];
                     if (enemy->x == target_x && enemy->y == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
@@ -261,12 +275,12 @@ void game_scene_on_draw(struct scene *scene)
 
     {
         struct enemy_position_check checks[] = {
-            {2, -1, data->coords.xm1y3f.x + 24, data->coords.xm1y3f.y + 16, 4.0f},
-            {2, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 4.0f},
-            {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 4.0f},
+            {2, -1, data->coords.xm1y3f.x + 24, data->coords.xm1y3f.y + 16, 8.0f},
+            {2, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 8.0f},
+            {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f},
         };
 
-        for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
+        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
             struct enemy_position_check *check = &checks[i];
 
@@ -275,9 +289,9 @@ void game_scene_on_draw(struct scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (int i = 0; i < data->enemies_count; ++i)
+                for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[i];
+                    struct enemy *enemy = &data->enemies[j];
                     if (enemy->x == target_x && enemy->y == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
@@ -296,12 +310,12 @@ void game_scene_on_draw(struct scene *scene)
 
     {
         struct enemy_position_check checks[] = {
-            {1, -1, data->coords.xm1y2f.x + 40, data->coords.xm1y2f.y + 30, 8.0f},
-            {1, 0, data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 8.0f},
-            {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 8.0f},
+            {1, -1, data->coords.xm1y2f.x + 40, data->coords.xm1y2f.y + 30, 16.0f},
+            {1, 0, data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 16.0f},
+            {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f},
         };
 
-        for (int i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
+        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
             struct enemy_position_check *check = &checks[i];
 
@@ -310,9 +324,9 @@ void game_scene_on_draw(struct scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (int i = 0; i < data->enemies_count; ++i)
+                for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[i];
+                    struct enemy *enemy = &data->enemies[j];
                     if (enemy->x == target_x && enemy->y == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
@@ -328,8 +342,16 @@ void game_scene_on_draw(struct scene *scene)
 
     sprite_draw(&data->sprite_xm1y0r);
     sprite_draw(&data->sprite_x1y0l);
+}
+static void game_scene_draw_main(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
 
     sprite_draw(&data->sprite_main);
+}
+static void game_scene_draw_ui(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
 
     sprite_draw(&data->sprite_ui_inventory);
     sprite_draw(&data->sprite_ui_button_camp);
@@ -695,7 +717,7 @@ static void game_scene_init_map(struct scene *scene)
     {
         for (size_t x = 1; x < map_get_width(&data->map) - 1; ++x)
         {
-            map_data_set_at(&data->map, x, y, GetRandomValue(0, 100) > 70 ? 1 : 0);
+            map_data_set_at(&data->map, x, y, GetRandomValue(0, 100) > 75 ? 1 : 0);
         }
     }
 }
