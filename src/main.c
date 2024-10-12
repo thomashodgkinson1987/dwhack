@@ -71,8 +71,10 @@ int main(void)
 
         // Get frame time
         delta = GetFrameTime();
+
         // Update game state
         game_tick(delta);
+
         // Draw game
         game_draw();
     }
