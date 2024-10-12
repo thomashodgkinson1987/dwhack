@@ -8,10 +8,12 @@
  * @brief Count of registered scene function tables.
  */
 static size_t vtable_count = 0;
+
 /**
  * @brief Capacity of the scene function table array.
  */
 static size_t vtable_capacity = 0;
+
 /**
  * @brief Array of scene function tables.
  */
