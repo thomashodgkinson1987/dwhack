@@ -6,6 +6,7 @@
 #include "coords.h"
 #include "enemy.h"
 #include "map.h"
+#include "player.h"
 #include "sprite.h"
 
 #include "raylib.h"
@@ -129,9 +130,7 @@ struct game_scene_data
 
     //
 
-    int player_x;
-    int player_y;
-    int player_f;
+    Player *player;
 
     //
 
