@@ -37,7 +37,7 @@ void scene_vtable_free(void)
  * @brief Registers a set of scene functions into the virtual function table.
  *
  * @param scene_funcs The function pointers to register.
- * @return A unique identifier for the registered scene functions.  Returns 0 on failure.
+ * @return A unique identifier for the registered scene functions.
  */
 size_t scene_vtable_register(struct scene_funcs scene_funcs)
 {
