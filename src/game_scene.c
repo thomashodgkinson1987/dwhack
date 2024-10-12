@@ -754,12 +754,13 @@ static void game_scene_init_enemies(struct scene *scene)
 
         int x = GetRandomValue(1, map_get_width(&data->map) - 2);
         int y = GetRandomValue(1, map_get_height(&data->map) - 2);
-        int f = GetRandomValue(0, 3);
+        enum enemy_direction facing = ENEMY_NORTH;
+        int health = 10;
         unsigned char r = GetRandomValue(0, 255);
         unsigned char g = GetRandomValue(0, 255);
         unsigned char b = GetRandomValue(0, 255);
         Color color = (Color){r, g, b, 255};
-        struct enemy enemy = enemy_create(x, y, f, color);
+        struct enemy enemy = enemy_create(x, y, facing, health, color);
 
         data->enemies[data->enemies_count++] = enemy;
     }
