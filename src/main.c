@@ -1,3 +1,16 @@
+/**
+ * @file main.c
+ * @brief This file contains the main function and game loop for the "Dungeon Whack" game.
+ *
+ * It initializes the game window using raylib, manages game resources including textures and sprites,
+ * handles user input (restart with 'R'), and orchestrates the game loop. The game uses a virtual
+ * screen for rendering, scaling the output to the actual window size. Scene management is implemented
+ * using a custom scene system defined in `scene.h`, allowing for transitions between different game states.
+ * The game world is represented by a map (`map.h`), populated with enemies (`enemy.h`). The player's
+ * position and orientation are tracked using integer coordinates (`player_x`, `player_y`, `player_f`)
+ * within `game_scene.h`.  The `coords` structure (`coords.h`) defines rectangular regions for UI elements
+ * and potentially some game elements. Sprite rendering is handled by the `sprite.h` module.
+ */
 #include "game_scene.h"
 
 #include "raylib.h"
