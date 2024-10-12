@@ -1,3 +1,7 @@
+/**
+ * @file rectanglei.c
+ * @brief This file implements functions for working with integer rectangles.
+ */
 #include "rectanglei.h"
 #include <string.h>
 
