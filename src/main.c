@@ -29,7 +29,8 @@ static const int window_width = virtual_screen_width * screen_size_multiplier;
 static const int window_height = virtual_screen_height * screen_size_multiplier;
 
 // Struct to hold render texture data
-struct render_texture_data {
+struct render_texture_data
+{
     RenderTexture2D texture;
     Rectangle source;
     Rectangle dest;
@@ -37,7 +38,6 @@ struct render_texture_data {
     float rotation;
     Color tint;
 };
-
 
 // Game scene
 static struct scene game_scene;
