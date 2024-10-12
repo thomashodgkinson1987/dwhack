@@ -4,21 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * @brief Count of registered scene function tables.
- */
+// Global variables for managing the scene virtual function table.
 static size_t vtable_count = 0;
-/**
- * @brief Capacity of the scene function table array.
- */
 static size_t vtable_capacity = 0;
-/**
- * @brief Array of scene function tables.
- */
 static struct scene_funcs *vtable = NULL;
 
 /**
- * @brief Initialize the scene virtual function table.
+ * @brief Initializes the scene virtual function table.
+ * Should be called once before using any other scene functions.
  */
 void scene_vtable_init(void)
 {
@@ -30,7 +23,7 @@ void scene_vtable_init(void)
 }
 
 /**
- * @brief Free the scene virtual function table.
+ * @brief Frees the resources used by the scene virtual function table.
  */
 void scene_vtable_free(void)
 {
@@ -41,14 +34,14 @@ void scene_vtable_free(void)
 }
 
 /**
- * @brief Register a scene function table.
+ * @brief Registers a set of scene functions into the virtual function table.
  *
- * @param scene_funcs The scene function table to register.
- * @return size_t The index of the registered scene function table.
+ * @param scene_funcs The function pointers to register.
+ * @return A unique identifier for the registered scene functions.  Returns 0 on failure.
  */
 size_t scene_vtable_register(struct scene_funcs scene_funcs)
 {
-    // Resize the vtable if necessary
+    // Double the capacity if the table is full.
     if (vtable_count == vtable_capacity)
     {
         struct scene_funcs *ptr = realloc(vtable, sizeof *vtable * vtable_capacity * 2);
@@ -58,20 +51,23 @@ size_t scene_vtable_register(struct scene_funcs scene_funcs)
         vtable_capacity *= 2;
     }
 
+    // Add the new functions to the table.
     vtable[vtable_count++] = scene_funcs;
 
+    // Return the index of the newly registered functions.
     return vtable_count - 1;
 }
 
 /**
- * @brief Create a new scene.
+ * @brief Creates a new scene.
  *
- * @param tag The tag of the scene.
- * @param data The data associated with the scene.
- * @return struct scene The newly created scene.
+ * @param tag Unique identifier for the scene.
+ * @param data Pointer to scene-specific data.
+ * @return A scene struct.  The data pointer is copied, not the data itself.
  */
 struct scene scene_create(size_t tag, void *data)
 {
+    // Create and return a new scene struct.
     struct scene scene = {
         .tag = tag,
         .data = data,
@@ -81,20 +77,20 @@ struct scene scene_create(size_t tag, void *data)
 }
 
 /**
- * @brief Free a scene.
- *
- * @param scene The scene to free.
+ * @brief Frees the resources associated with the scene.
  */
 void scene_free(struct scene *scene)
 {
-    // Call the scene's free function if it exists
+    // Free scene-specific resources if a free function is registered.
     if (vtable[scene->tag].free != NULL)
     {
         vtable[scene->tag].free(scene);
     }
 
+    // Reset the scene tag.
     scene->tag = 0;
 
+    // Free scene-specific data if it exists.
     if (scene->data != NULL)
     {
         free(scene->data);
@@ -103,13 +99,11 @@ void scene_free(struct scene *scene)
 }
 
 /**
- * @brief Enter a scene.
- *
- * @param scene The scene to enter.
+ * @brief Called when the scene is entered.
  */
 void scene_enter(struct scene *scene)
 {
-    // Call the scene's enter function if it exists
+    // Call the scene's enter function if it exists.
     if (vtable[scene->tag].enter != NULL)
     {
         vtable[scene->tag].enter(scene);
@@ -117,13 +111,11 @@ void scene_enter(struct scene *scene)
 }
 
 /**
- * @brief Exit a scene.
- *
- * @param scene The scene to exit.
+ * @brief Called when the scene is exited.
  */
 void scene_exit(struct scene *scene)
 {
-    // Call the scene's exit function if it exists
+    // Call the scene's exit function if it exists.
     if (vtable[scene->tag].exit != NULL)
     {
         vtable[scene->tag].exit(scene);
@@ -131,14 +123,14 @@ void scene_exit(struct scene *scene)
 }
 
 /**
- * @brief Update a scene.
+ * @brief Updates the scene's state.
  *
  * @param scene The scene to update.
  * @param delta The time delta.
  */
 void scene_tick(struct scene *scene, float delta)
 {
-    // Call the scene's tick function if it exists
+    // Call the scene's tick function if it exists.
     if (vtable[scene->tag].tick != NULL)
     {
         vtable[scene->tag].tick(scene, delta);
@@ -146,13 +138,11 @@ void scene_tick(struct scene *scene, float delta)
 }
 
 /**
- * @brief Draw a scene.
- *
- * @param scene The scene to draw.
+ * @brief Renders the scene.
  */
 void scene_draw(struct scene *scene)
 {
-    // Call the scene's draw function if it exists
+    // Call the scene's draw function if it exists.
     if (vtable[scene->tag].draw != NULL)
     {
         vtable[scene->tag].draw(scene);
