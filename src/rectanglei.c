@@ -12,12 +12,11 @@
  */
 struct rectanglei rectanglei_create(int x, int y, int w, int h)
 {
-    struct rectanglei rectanglei =
-    {
+    struct rectanglei rectanglei = {
         .x = x,
         .y = y,
         .w = w,
-        .h = h
+        .h = h,
     };
 
     return rectanglei;
