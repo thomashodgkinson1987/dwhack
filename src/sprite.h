@@ -3,43 +3,56 @@
 
 #include "raylib.h"
 
-struct sprite
-{
-    bool is_visible;
-    Texture2D texture;
-    Rectangle source;
-    Rectangle dest;
-    Vector2 origin;
-    float rotation;
-    Color tint;
-};
+typedef struct sprite_impl Sprite;
 
-struct sprite sprite_create(Texture2D texture, float x, float y, float w, float h);
-void sprite_free(struct sprite *sprite);
+Sprite *sprite_create(Texture2D texture, float x, float y, float w, float h);
 
-bool sprite_get_is_visible(struct sprite *sprite);
+void sprite_free(Sprite *sprite);
 
-Texture2D sprite_get_texture(struct sprite *sprite);
+bool sprite_get_is_visible(const Sprite *sprite);
 
-float sprite_get_x(struct sprite *sprite);
-float sprite_get_y(struct sprite *sprite);
-float sprite_get_w(struct sprite *sprite);
-float sprite_get_h(struct sprite *sprite);
+Texture2D sprite_get_texture(const Sprite *sprite);
 
-void sprite_set_is_visible(struct sprite *sprite, bool is_visible);
+Rectangle sprite_get_source(const Sprite *sprite);
 
-void sprite_set_texture(struct sprite *sprite, Texture2D texture);
+Rectangle sprite_get_dest(const Sprite *sprite);
 
-void sprite_set_x(struct sprite *sprite, float x);
-void sprite_set_y(struct sprite *sprite, float y);
-void sprite_set_w(struct sprite *sprite, float w);
-void sprite_set_h(struct sprite *sprite, float h);
+Vector2 sprite_get_origin(const Sprite *sprite);
 
-void sprite_set_position(struct sprite *sprite, float x, float y);
-void sprite_set_size(struct sprite *sprite, float w, float h);
+float sprite_get_rotation(const Sprite *sprite);
 
-void sprite_toggle_is_visible(struct sprite *sprite);
+Color sprite_get_tint(const Sprite *sprite);
 
-void sprite_draw(struct sprite *sprite);
+void sprite_set_is_visible(Sprite *sprite, bool is_visible);
+
+void sprite_set_texture(Sprite *sprite, Texture2D texture);
+
+void sprite_set_source(Sprite *sprite, Rectangle source);
+
+void sprite_set_dest(Sprite *sprite, Rectangle dest);
+
+void sprite_set_origin(Sprite *sprite, Vector2 origin);
+
+void sprite_set_rotation(Sprite *sprite, float rotation);
+
+void sprite_set_tint(Sprite *sprite, Color tint);
+
+float sprite_get_x(const Sprite *sprite);
+
+float sprite_get_y(const Sprite *sprite);
+
+float sprite_get_w(const Sprite *sprite);
+
+float sprite_get_h(const Sprite *sprite);
+
+void sprite_set_x(Sprite *sprite, float x);
+
+void sprite_set_y(Sprite *sprite, float y);
+
+void sprite_set_w(Sprite *sprite, float w);
+
+void sprite_set_h(Sprite *sprite, float h);
+
+void sprite_draw(const Sprite *sprite);
 
 #endif
