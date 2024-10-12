@@ -1,6 +1,8 @@
 #include "game_scene.h"
+
 #include "raylib.h"
-#include <string.h> // Include for memset
+
+#include <string.h>
 
 // Virtual screen dimensions
 static const int virtual_screen_width = 320;
@@ -155,7 +157,7 @@ static void game_free(void)
 static void game_free_virtual_screen(void)
 {
     UnloadRenderTexture(render_texture_data.texture);
-    memset(&render_texture_data, 0, sizeof(render_texture_data)); // Use memset here
+    memset(&render_texture_data, 0, sizeof(render_texture_data));
 }
 
 /**
