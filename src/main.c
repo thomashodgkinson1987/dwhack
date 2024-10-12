@@ -1,5 +1,4 @@
 #include "game_scene.h"
-
 #include "raylib.h"
 
 // Virtual screen dimensions
@@ -13,21 +12,22 @@ static const int screen_size_multiplier = 4;
 static const int window_width = virtual_screen_width * screen_size_multiplier;
 static const int window_height = virtual_screen_height * screen_size_multiplier;
 
-// Render texture for virtual screen
-static RenderTexture2D render_texture_virtual_screen;
-// Source rectangle for virtual screen rendering
-static Rectangle render_texture_virtual_screen_source;
-// Destination rectangle for virtual screen rendering
-static Rectangle render_texture_virtual_screen_dest;
-// Origin for virtual screen rendering
-static Vector2 render_texture_virtual_screen_origin;
-// Rotation for virtual screen rendering
-static float render_texture_virtual_screen_rotation;
-// Tint for virtual screen rendering
-static Color render_texture_virtual_screen_tint;
+// Struct to hold render texture data
+struct render_texture_data {
+    RenderTexture2D texture;
+    Rectangle source;
+    Rectangle dest;
+    Vector2 origin;
+    float rotation;
+    Color tint;
+};
+
 
 // Game scene
 static struct scene game_scene;
+
+// Render texture data
+static struct render_texture_data render_texture_data;
 
 // Function prototypes
 static void game_init(void);
@@ -104,12 +104,12 @@ static void game_init(void)
  */
 static void game_init_virtual_screen(void)
 {
-    render_texture_virtual_screen = LoadRenderTexture(virtual_screen_width, virtual_screen_height);
-    render_texture_virtual_screen_source = (Rectangle){0.0f, 0.0f, (float)render_texture_virtual_screen.texture.width, -(float)render_texture_virtual_screen.texture.height};
-    render_texture_virtual_screen_dest = (Rectangle){0.0f, 0.0f, (float)window_width, (float)window_height};
-    render_texture_virtual_screen_origin = (Vector2){0.0f, 0.0f};
-    render_texture_virtual_screen_rotation = 0.0f;
-    render_texture_virtual_screen_tint = WHITE;
+    render_texture_data.texture = LoadRenderTexture(virtual_screen_width, virtual_screen_height);
+    render_texture_data.source = (Rectangle){0.0f, 0.0f, (float)render_texture_data.texture.width, -(float)render_texture_data.texture.height};
+    render_texture_data.dest = (Rectangle){0.0f, 0.0f, (float)window_width, (float)window_height};
+    render_texture_data.origin = (Vector2){0.0f, 0.0f};
+    render_texture_data.rotation = 0.0f;
+    render_texture_data.tint = WHITE;
 }
 
 /**
@@ -151,12 +151,12 @@ static void game_free(void)
  */
 static void game_free_virtual_screen(void)
 {
-    UnloadRenderTexture(render_texture_virtual_screen);
-    render_texture_virtual_screen_source = (Rectangle){0.0f, 0.0f, 0.0f, 0.0f};
-    render_texture_virtual_screen_dest = (Rectangle){0.0f, 0.0f, 0.0f, 0.0f};
-    render_texture_virtual_screen_origin = (Vector2){0.0f, 0.0f};
-    render_texture_virtual_screen_rotation = 0.0f;
-    render_texture_virtual_screen_tint = BLANK;
+    UnloadRenderTexture(render_texture_data.texture);
+    render_texture_data.source = (Rectangle){0.0f, 0.0f, 0.0f, 0.0f};
+    render_texture_data.dest = (Rectangle){0.0f, 0.0f, 0.0f, 0.0f};
+    render_texture_data.origin = (Vector2){0.0f, 0.0f};
+    render_texture_data.rotation = 0.0f;
+    render_texture_data.tint = BLANK;
 }
 
 /**
@@ -193,7 +193,7 @@ static void game_tick(float delta)
  */
 static void game_draw(void)
 {
-    BeginTextureMode(render_texture_virtual_screen);
+    BeginTextureMode(render_texture_data.texture);
     ClearBackground(BLANK);
     scene_draw(&game_scene);
     EndTextureMode();
@@ -201,11 +201,11 @@ static void game_draw(void)
     BeginDrawing();
     ClearBackground(WHITE);
     DrawTexturePro(
-        render_texture_virtual_screen.texture,
-        render_texture_virtual_screen_source,
-        render_texture_virtual_screen_dest,
-        render_texture_virtual_screen_origin,
-        render_texture_virtual_screen_rotation,
-        render_texture_virtual_screen_tint);
+        render_texture_data.texture,
+        render_texture_data.source,
+        render_texture_data.dest,
+        render_texture_data.origin,
+        render_texture_data.rotation,
+        render_texture_data.tint);
     EndDrawing();
 }
