@@ -1,6 +1,6 @@
 #include "enemy.h"
 
-struct enemy enemy_create(int x, int y, EnemyDirection facing, int health, Color color)
+struct enemy enemy_create(int x, int y, enum enemy_direction facing, int health, Color color)
 {
     struct enemy enemy = (struct enemy){
         .x = x,
