@@ -35,10 +35,15 @@ struct scene_funcs
     void (*draw)(struct scene *scene);
 };
 
-/** @brief Initializes the scene virtual function table.  Should be called once before using any other scene functions. */
+/**
+ * @brief Initializes the scene virtual function table.
+ * Should be called once before using any other scene functions.
+ */
 void scene_vtable_init(void);
 
-/** @brief Frees the resources used by the scene virtual function table. */
+/**
+ * @brief Frees the resources used by the scene virtual function table.
+ */
 void scene_vtable_free(void);
 
 /**
@@ -58,19 +63,32 @@ size_t scene_vtable_register(struct scene_funcs scene_funcs);
  */
 struct scene scene_create(size_t tag, void *data);
 
-/** @brief Frees the resources associated with the scene. */
+/**
+ * @brief Frees the resources associated with the scene.
+ */
 void scene_free(struct scene *scene);
 
-/** @brief Called when the scene is entered. */
+/**
+ * @brief Called when the scene is entered.
+ */
 void scene_enter(struct scene *scene);
 
-/** @brief Called when the scene is exited. */
+/**
+ * @brief Called when the scene is exited.
+ */
 void scene_exit(struct scene *scene);
 
-/** @brief Updates the scene's state. */
+/**
+ * @brief Updates the scene's state.
+ *
+ * @param scene The scene to update.
+ * @param delta The time delta.
+ */
 void scene_tick(struct scene *scene, float delta);
 
-/** @brief Renders the scene. */
+/**
+ * @brief Renders the scene.
+ */
 void scene_draw(struct scene *scene);
 
 #endif
