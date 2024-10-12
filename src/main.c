@@ -170,7 +170,7 @@ static void game_free(void)
 static void game_free_virtual_screen(void)
 {
     UnloadRenderTexture(render_texture_data.texture);
-    memset(&render_texture_data, 0, sizeof(render_texture_data));
+    render_texture_data = (struct render_texture_data){0};
 }
 
 /**
