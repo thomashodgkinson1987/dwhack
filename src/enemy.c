@@ -1,30 +1,46 @@
 #include "enemy.h"
+#include <stdlib.h> // for malloc and free
 
-struct enemy enemy_create(int x, int y, enum enemy_direction facing, int health, Color color)
+// Define the actual structure implementation.  This is hidden from external code.
+struct enemy_impl {
+    int x;
+    int y;
+    enum enemy_direction facing;
+    int health;
+    Color color;
+};
+
+
+Enemy *enemy_create(int x, int y, enum enemy_direction facing, int health, Color color)
 {
-    struct enemy enemy = (struct enemy){
-        .x = x,
-        .y = y,
-        .facing = facing,
-        .health = health,
-        .color = color};
-
+    Enemy *enemy = (Enemy *)malloc(sizeof(struct enemy_impl));
+    if (enemy == NULL) {
+        // Handle memory allocation failure appropriately (e.g., return NULL, exit, etc.)
+        return NULL; //Example: return NULL;
+    }
+    enemy->x = x;
+    enemy->y = y;
+    enemy->facing = facing;
+    enemy->health = health;
+    enemy->color = color;
     return enemy;
 }
 
-void enemy_free(struct enemy *enemy)
+void enemy_free(Enemy *enemy)
 {
-    *enemy = (struct enemy){0};
+    if (enemy != NULL) {
+        free(enemy);
+    }
 }
 
-int enemy_get_x(const struct enemy *enemy) { return enemy->x; }
-int enemy_get_y(const struct enemy *enemy) { return enemy->y; }
-enum enemy_direction enemy_get_facing(const struct enemy *enemy) { return enemy->facing; }
-int enemy_get_health(const struct enemy *enemy) { return enemy->health; }
-Color enemy_get_color(const struct enemy *enemy) { return enemy->color; }
+int enemy_get_x(const Enemy *enemy) { return enemy->x; }
+int enemy_get_y(const Enemy *enemy) { return enemy->y; }
+enum enemy_direction enemy_get_facing(const Enemy *enemy) { return enemy->facing; }
+int enemy_get_health(const Enemy *enemy) { return enemy->health; }
+Color enemy_get_color(const Enemy *enemy) { return enemy->color; }
 
-void enemy_set_x(struct enemy *enemy, int x) { enemy->x = x; }
-void enemy_set_y(struct enemy *enemy, int y) { enemy->y = y; }
-void enemy_set_facing(struct enemy *enemy, enum enemy_direction facing) { enemy->facing = facing; }
-void enemy_set_health(struct enemy *enemy, int health) { enemy->health = health; }
-void enemy_set_color(struct enemy *enemy, Color color) { enemy->color = color; }
+void enemy_set_x(Enemy *enemy, int x) { enemy->x = x; }
+void enemy_set_y(Enemy *enemy, int y) { enemy->y = y; }
+void enemy_set_facing(Enemy *enemy, enum enemy_direction facing) { enemy->facing = facing; }
+void enemy_set_health(Enemy *enemy, int health) { enemy->health = health; }
+void enemy_set_color(Enemy *enemy, Color color) { enemy->color = color; }
