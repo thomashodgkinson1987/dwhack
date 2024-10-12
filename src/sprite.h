@@ -1,3 +1,8 @@
+/**
+ * @file sprite.h
+ * @brief This file defines the interface for the Sprite data structure and its associated functions.
+ *        Sprites are used to represent images in the game.
+ */
 #ifndef SPRITE_H
 #define SPRITE_H
 
@@ -23,7 +28,7 @@ Sprite *sprite_create(Texture2D texture, float x, float y, float w, float h);
 /**
  * @brief Frees the memory allocated for a sprite.
  *
- * @param sprite A pointer to the sprite to free.  Setting the pointer to NULL after calling this function is recommended.
+ * @param sprite A pointer to the sprite to free. Pointer is set to NULL.
  */
 void sprite_free(Sprite *sprite);
 
