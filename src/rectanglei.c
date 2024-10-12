@@ -30,5 +30,5 @@ struct rectanglei rectanglei_create(int x, int y, int w, int h)
  */
 void rectanglei_free(struct rectanglei *rectanglei)
 {
-    memset(rectanglei, 0, sizeof(struct rectanglei));
+    memset(rectanglei, 0, sizeof *rectanglei);
 }
