@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 static void game_scene_init_coords(struct scene *scene);
@@ -126,14 +127,16 @@ void game_scene_tick(struct scene *scene, float delta)
 
     if (IsKeyPressed(KEY_Q) && !IsKeyPressed(KEY_E))
     {
-        data->player_f = (data->player_f + 3) % 4;
+        int new_facing = (player_get_facing(data->player) + 3) % 4;
+        player_set_facing(data->player, (enum player_direction)new_facing);
         game_scene_update_compass(scene);
         game_scene_flip_backdrop(scene);
         game_scene_recalculate_visible_walls(scene);
     }
     else if (!IsKeyPressed(KEY_Q) && IsKeyPressed(KEY_E))
     {
-        data->player_f = (data->player_f + 1) % 4;
+        int new_facing = (player_get_facing(data->player) + 1) % 4;
+        player_set_facing(data->player, (enum player_direction)new_facing);
         game_scene_update_compass(scene);
         game_scene_flip_backdrop(scene);
         game_scene_recalculate_visible_walls(scene);
@@ -150,38 +153,38 @@ void game_scene_tick(struct scene *scene, float delta)
 
         if (IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
         {
-            movement_vec[0] += dir_vecs[data->player_f][0];
-            movement_vec[1] += dir_vecs[data->player_f][1];
+            movement_vec[0] += dir_vecs[player_get_facing(data->player)][0];
+            movement_vec[1] += dir_vecs[player_get_facing(data->player)][1];
         }
         else if (!IsKeyPressed(KEY_W) && IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
         {
-            movement_vec[0] -= dir_vecs[data->player_f][0];
-            movement_vec[1] -= dir_vecs[data->player_f][1];
+            movement_vec[0] -= dir_vecs[player_get_facing(data->player)][0];
+            movement_vec[1] -= dir_vecs[player_get_facing(data->player)][1];
         }
         else if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
         {
-            int left_f = (data->player_f + 3) % 4;
+            int left_f = (player_get_facing(data->player) + 3) % 4;
             movement_vec[0] += dir_vecs[left_f][0];
             movement_vec[1] += dir_vecs[left_f][1];
         }
         if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && IsKeyPressed(KEY_D))
         {
-            int right_f = (data->player_f + 1) % 4;
+            int right_f = (player_get_facing(data->player) + 1) % 4;
             movement_vec[0] += dir_vecs[right_f][0];
             movement_vec[1] += dir_vecs[right_f][1];
         }
 
         if (movement_vec[0] != 0 || movement_vec[1] != 0)
         {
-            int new_x = data->player_x + movement_vec[0];
-            int new_y = data->player_y + movement_vec[1];
+            int new_x = player_get_x(data->player) + movement_vec[0];
+            int new_y = player_get_y(data->player) + movement_vec[1];
 
             if (new_x >= 0 && new_x < (int)map_get_width(&data->map) && new_y >= 0 && new_y < (int)map_get_height(&data->map))
             {
                 if (map_data_get_at(&data->map, new_x, new_y) == 0)
                 {
-                    data->player_x = new_x;
-                    data->player_y = new_y;
+                    player_set_x(data->player, new_x);
+                    player_set_y(data->player, new_y);
                     game_scene_flip_backdrop(scene);
                     game_scene_recalculate_visible_walls(scene);
                 }
@@ -212,8 +215,8 @@ static void game_scene_draw_world(struct scene *scene)
         {0, 1},
         {-1, 0}};
 
-    int front_f = data->player_f;
-    //int left_f = (front_f + 3) % 4;
+    int front_f = player_get_facing(data->player);
+    // int left_f = (front_f + 3) % 4;
     int right_f = (front_f + 1) % 4;
 
     int *front_vec = dir_vecs[front_f];
@@ -249,8 +252,8 @@ static void game_scene_draw_world(struct scene *scene)
         {
             struct enemy_position_check *check = &checks[i];
 
-            int target_x = data->player_x + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = data->player_y + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+            int target_x = player_get_x(data->player) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+            int target_y = player_get_y(data->player) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
@@ -288,8 +291,8 @@ static void game_scene_draw_world(struct scene *scene)
         {
             struct enemy_position_check *check = &checks[i];
 
-            int target_x = data->player_x + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = data->player_y + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+            int target_x = player_get_x(data->player) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+            int target_y = player_get_y(data->player) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
@@ -323,8 +326,8 @@ static void game_scene_draw_world(struct scene *scene)
         {
             struct enemy_position_check *check = &checks[i];
 
-            int target_x = data->player_x + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = data->player_y + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+            int target_x = player_get_x(data->player) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+            int target_y = player_get_y(data->player) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
@@ -729,9 +732,19 @@ static void game_scene_init_player(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    data->player_x = 1;
-    data->player_y = map_get_height(&data->map) - 2;
-    data->player_f = 0;
+    int x = 1;
+    int y = map_get_height(&data->map) - 2;
+    enum player_direction facing = PLAYER_NORTH;
+    int health = 10;
+    Color color = (Color){255, 255, 255, 255};
+
+    data->player = player_create(x, y, facing, health, color);
+
+    if (data->player == NULL)
+    {
+        fprintf(stderr, "Error creating player!\n");
+        exit(1);
+    }
 }
 static void game_scene_init_enemies(struct scene *scene)
 {
@@ -826,9 +839,7 @@ static void game_scene_free_player(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    data->player_x = 0;
-    data->player_y = 0;
-    data->player_f = 0;
+    player_free(data->player);
 }
 static void game_scene_free_enemies(struct scene *scene)
 {
@@ -850,7 +861,7 @@ static void game_scene_update_compass(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    switch (data->player_f)
+    switch (player_get_facing(data->player))
     {
     case 0:
         data->sprite_ui_compass.texture = data->texture_ui_compass_north;
@@ -885,7 +896,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
         {0, 1},
         {-1, 0}};
 
-    int front_f = data->player_f;
+    int front_f = player_get_facing(data->player);
     int left_f = (front_f + 3) % 4;
     int right_f = (front_f + 1) % 4;
 
@@ -934,12 +945,12 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
         int *side_vec = check->sizeways_distance < 0 ? left_vec : right_vec;
         int sideways_distance = abs(check->sizeways_distance);
 
-        game_scene_calculate_target_position(&target_x, &target_y, data->player_x, data->player_y, front_vec, check->forward_distance, side_vec, sideways_distance);
+        game_scene_calculate_target_position(&target_x, &target_y, player_get_x(data->player), player_get_y(data->player), front_vec, check->forward_distance, side_vec, sideways_distance);
 
         if (sideways_distance == 0)
         {
-            target_x = data->player_x + front_vec[0] * check->forward_distance;
-            target_y = data->player_y + front_vec[1] * check->forward_distance;
+            target_x = player_get_x(data->player) + front_vec[0] * check->forward_distance;
+            target_y = player_get_y(data->player) + front_vec[1] * check->forward_distance;
         }
 
         if (game_scene_is_wall_at(&data->map, target_x, target_y))
