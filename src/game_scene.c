@@ -87,10 +87,12 @@ void game_scene_tick(struct scene *scene, float delta)
     {
         for (size_t i = 0; i < data->enemies_count; ++i)
         {
-            struct enemy *enemy = &data->enemies[i];
+            Enemy *enemy = data->enemies[i];
+
             int move_state = GetRandomValue(0, 1);
             int dx = GetRandomValue(-1, 1);
             int dy = GetRandomValue(-1, 1);
+
             if (move_state == 0)
             {
                 dy = 0;
@@ -99,14 +101,16 @@ void game_scene_tick(struct scene *scene, float delta)
             {
                 dx = 0;
             }
-            int new_x = enemy->x + dx;
-            int new_y = enemy->y + dy;
+
+            int new_x = enemy_get_x(enemy) + dx;
+            int new_y = enemy_get_y(enemy) + dy;
+
             if (new_x >= 0 && new_x < (int)map_get_width(&data->map) && new_y >= 0 && new_y < (int)map_get_height(&data->map))
             {
                 if (map_data_get_at(&data->map, new_x, new_y) == 0)
                 {
-                    enemy->x = new_x;
-                    enemy->y = new_y;
+                    enemy_set_x(enemy, new_x);
+                    enemy_set_y(enemy, new_y);
                 }
             }
         }
@@ -209,11 +213,11 @@ static void game_scene_draw_world(struct scene *scene)
         {-1, 0}};
 
     int front_f = data->player_f;
-    int left_f = (front_f + 3) % 4;
+    //int left_f = (front_f + 3) % 4;
     int right_f = (front_f + 1) % 4;
 
     int *front_vec = dir_vecs[front_f];
-    //int *left_vec = dir_vecs[left_f];
+    // int *left_vec = dir_vecs[left_f];
     int *right_vec = dir_vecs[right_f];
 
     struct enemy_position_check
@@ -252,10 +256,10 @@ static void game_scene_draw_world(struct scene *scene)
             {
                 for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[j];
-                    if (enemy->x == target_x && enemy->y == target_y)
+                    Enemy *enemy = data->enemies[j];
+                    if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
-                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
+                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
                     }
                 }
             }
@@ -291,10 +295,10 @@ static void game_scene_draw_world(struct scene *scene)
             {
                 for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[j];
-                    if (enemy->x == target_x && enemy->y == target_y)
+                    Enemy *enemy = data->enemies[j];
+                    if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
-                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
+                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
                     }
                 }
             }
@@ -326,10 +330,10 @@ static void game_scene_draw_world(struct scene *scene)
             {
                 for (size_t j = 0; j < data->enemies_count; ++j)
                 {
-                    struct enemy *enemy = &data->enemies[j];
-                    if (enemy->x == target_x && enemy->y == target_y)
+                    Enemy *enemy = data->enemies[j];
+                    if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
-                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy->color);
+                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
                     }
                 }
             }
@@ -745,7 +749,7 @@ static void game_scene_init_enemies(struct scene *scene)
     {
         if (data->enemies_count == data->enemies_capacity)
         {
-            struct enemy *ptr = realloc(data->enemies, sizeof *data->enemies * data->enemies_capacity * 2);
+            Enemy **ptr = realloc(data->enemies, sizeof *data->enemies * data->enemies_capacity * 2);
             assert(ptr != NULL);
             memset(&ptr[data->enemies_capacity], 0, sizeof *data->enemies * data->enemies_capacity);
             data->enemies = ptr;
@@ -754,12 +758,16 @@ static void game_scene_init_enemies(struct scene *scene)
 
         int x = GetRandomValue(1, map_get_width(&data->map) - 2);
         int y = GetRandomValue(1, map_get_height(&data->map) - 2);
-        int f = GetRandomValue(0, 3);
+        enum enemy_direction facing = ENEMY_NORTH;
+        int health = 10;
         unsigned char r = GetRandomValue(0, 255);
         unsigned char g = GetRandomValue(0, 255);
         unsigned char b = GetRandomValue(0, 255);
         Color color = (Color){r, g, b, 255};
-        struct enemy enemy = enemy_create(x, y, f, color);
+
+        Enemy *enemy = enemy_create(x, y, facing, health, color);
+
+        assert(enemy != NULL);
 
         data->enemies[data->enemies_count++] = enemy;
     }
@@ -825,6 +833,12 @@ static void game_scene_free_player(struct scene *scene)
 static void game_scene_free_enemies(struct scene *scene)
 {
     struct game_scene_data *data = (struct game_scene_data *)scene->data;
+
+    for (size_t i = 0; i < data->enemies_count; ++i)
+    {
+        Enemy *enemy = data->enemies[i];
+        enemy_free(enemy);
+    }
 
     data->enemies_count = 0;
     data->enemies_capacity = 0;
