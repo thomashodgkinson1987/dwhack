@@ -1,11 +1,12 @@
 #include "enemy.h"
 
-struct enemy enemy_create(int x, int y, int f, Color color)
+struct enemy enemy_create(int x, int y, EnemyDirection facing, int health, Color color)
 {
     struct enemy enemy = (struct enemy){
         .x = x,
         .y = y,
-        .f = f,
+        .facing = facing,
+        .health = health,
         .color = color};
 
     return enemy;
