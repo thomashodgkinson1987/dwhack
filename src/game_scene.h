@@ -129,7 +129,7 @@ struct game_scene_data
 
     //
 
-    struct map map;
+    Map *map;
 
     //
 

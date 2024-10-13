@@ -1,6 +1,5 @@
 #include "game_scene.h"
 
-#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,14 +31,20 @@ static void game_scene_recalculate_visible_walls(struct scene *scene);
 static void game_scene_flip_backdrop(struct scene *scene);
 
 static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *front_vec, int front_distance, int *side_vec, int side_distance);
-static bool game_scene_is_wall_at(struct map *map, int x, int y);
+static bool game_scene_is_wall_at(Map *map, int x, int y);
 
 size_t GAME_SCENE_TAG = 0;
 
 struct scene game_scene_create(void)
 {
     struct game_scene_data *data = malloc(sizeof *data);
-    assert(data != NULL);
+
+    if (data == NULL)
+    {
+        fprintf(stderr, "Error creating game_scene_data\n");
+        exit(1);
+    }
+
     memset(data, 0, sizeof *data);
 
     struct scene scene = scene_create(GAME_SCENE_TAG, data);
@@ -112,9 +117,9 @@ void game_scene_tick(struct scene *scene, float delta)
             int new_x = enemy_get_x(enemy) + dx;
             int new_y = enemy_get_y(enemy) + dy;
 
-            if (new_x >= 0 && new_x < (int)map_get_width(&data->map) && new_y >= 0 && new_y < (int)map_get_height(&data->map))
+            if (new_x >= 0 && new_x < (int)map_get_width(data->map) && new_y >= 0 && new_y < (int)map_get_height(data->map))
             {
-                if (map_data_get_at(&data->map, new_x, new_y) == 0)
+                if (map_data_get_at(data->map, new_x, new_y) == 0)
                 {
                     enemy_set_x(enemy, new_x);
                     enemy_set_y(enemy, new_y);
@@ -187,9 +192,9 @@ void game_scene_tick(struct scene *scene, float delta)
             int new_x = player_get_x(data->player) + movement_vec[0];
             int new_y = player_get_y(data->player) + movement_vec[1];
 
-            if (new_x >= 0 && new_x < (int)map_get_width(&data->map) && new_y >= 0 && new_y < (int)map_get_height(&data->map))
+            if (new_x >= 0 && new_x < (int)map_get_width(data->map) && new_y >= 0 && new_y < (int)map_get_height(data->map))
             {
-                if (map_data_get_at(&data->map, new_x, new_y) == 0)
+                if (map_data_get_at(data->map, new_x, new_y) == 0)
                 {
                     player_set_x(data->player, new_x);
                     player_set_y(data->player, new_y);
@@ -215,8 +220,8 @@ static void game_scene_draw_world(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    int map_width = (int)map_get_width(&data->map);
-    int map_height = (int)map_get_height(&data->map);
+    int map_width = (int)map_get_width(data->map);
+    int map_height = (int)map_get_height(data->map);
 
     int dir_vecs[4][2] = {
         {0, -1},
@@ -521,7 +526,13 @@ static void game_scene_init_textures(struct scene *scene)
     data->array_textures_count = 0;
     data->array_textures_capacity = 72;
     data->array_textures = malloc(sizeof *data->array_textures * data->array_textures_capacity);
-    assert(data->array_textures != NULL);
+
+    if (data->array_textures == NULL)
+    {
+        fprintf(stderr, "Error creating array_textures\n");
+        exit(1);
+    }
+
     memset(data->array_textures, 0, sizeof *data->array_textures * data->array_textures_capacity);
 
     data->array_textures[data->array_textures_count++] = &data->texture_main;
@@ -742,22 +753,22 @@ static void game_scene_init_map(struct scene *scene)
 
     data->map = map_create(16, 16);
 
-    for (size_t y = 0; y < map_get_height(&data->map); ++y)
+    for (size_t y = 0; y < map_get_height(data->map); ++y)
     {
-        for (size_t x = 0; x < map_get_width(&data->map); ++x)
+        for (size_t x = 0; x < map_get_width(data->map); ++x)
         {
-            if ((y == 0 || y == map_get_height(&data->map) - 1) || (x == 0 || x == map_get_width(&data->map) - 1))
+            if ((y == 0 || y == map_get_height(data->map) - 1) || (x == 0 || x == map_get_width(data->map) - 1))
             {
-                map_data_set_at(&data->map, x, y, 1);
+                map_data_set_at(data->map, x, y, 1);
             }
         }
     }
 
-    for (size_t y = 1; y < map_get_height(&data->map) - 1; ++y)
+    for (size_t y = 1; y < map_get_height(data->map) - 1; ++y)
     {
-        for (size_t x = 1; x < map_get_width(&data->map) - 1; ++x)
+        for (size_t x = 1; x < map_get_width(data->map) - 1; ++x)
         {
-            map_data_set_at(&data->map, x, y, GetRandomValue(0, 100) > 75 ? 1 : 0);
+            map_data_set_at(data->map, x, y, GetRandomValue(0, 100) > 75 ? 1 : 0);
         }
     }
 }
@@ -766,7 +777,7 @@ static void game_scene_init_player(struct scene *scene)
     struct game_scene_data *data = scene->data;
 
     int x = 1;
-    int y = map_get_height(&data->map) - 2;
+    int y = map_get_height(data->map) - 2;
     CardinalDirection facing = CARDINAL_DIRECTION_NORTH;
     int health = 10;
     Color color = (Color){255, 255, 255, 255};
@@ -808,8 +819,8 @@ static void game_scene_init_enemies(struct scene *scene)
             data->enemies_capacity *= 2;
         }
 
-        int x = GetRandomValue(1, map_get_width(&data->map) - 2);
-        int y = GetRandomValue(1, map_get_height(&data->map) - 2);
+        int x = GetRandomValue(1, map_get_width(data->map) - 2);
+        int y = GetRandomValue(1, map_get_height(data->map) - 2);
         CardinalDirection facing = CARDINAL_DIRECTION_NORTH;
         int health = 10;
         unsigned char r = GetRandomValue(0, 255);
@@ -882,7 +893,7 @@ static void game_scene_free_map(struct scene *scene)
 {
     struct game_scene_data *data = scene->data;
 
-    map_free(&data->map);
+    map_free(data->map);
 }
 static void game_scene_free_player(struct scene *scene)
 {
@@ -1021,7 +1032,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
             target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance;
         }
 
-        if (game_scene_is_wall_at(&data->map, target_x, target_y))
+        if (game_scene_is_wall_at(data->map, target_x, target_y))
         {
             for (size_t j = 0; j < check->sprites_count; ++j)
             {
@@ -1048,7 +1059,7 @@ static void game_scene_calculate_target_position(int *target_x, int *target_y, i
     *target_y = y + dir_vec[1] * forward_distance + side_vec[1] * sideways_distance;
 }
 
-static bool game_scene_is_wall_at(struct map *map, int x, int y)
+static bool game_scene_is_wall_at(Map *map, int x, int y)
 {
     if (x >= 0 && x < (int)map_get_width(map) && y >= 0 && y < (int)map_get_height(map))
     {
