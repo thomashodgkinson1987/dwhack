@@ -21,62 +21,30 @@ typedef struct
     Enemy **enemies;
 } EnemyArray;
 
+typedef struct
+{
+    char *name;
+    Texture2D texture;
+} TextureResource;
+
+typedef struct
+{
+    size_t count;
+    size_t capacity;
+    TextureResource *texture_resources;
+} TextureResourceArray;
+
 struct game_scene_data
 {
     struct coords coords;
 
     //
 
-    Texture2D texture_main;
+    TextureResourceArray texture_resource_array;
 
-    Texture2D texture_ui_inventory;
-    Texture2D texture_ui_button_camp;
-    Texture2D texture_ui_equipment;
-    Texture2D texture_ui_character_sheet;
-    Texture2D texture_ui_minimap;
-    Texture2D texture_ui_spells;
-    Texture2D texture_ui_portrait_hands;
-    Texture2D texture_ui_compass_north;
-    Texture2D texture_ui_compass_east;
-    Texture2D texture_ui_compass_south;
-    Texture2D texture_ui_compass_west;
-    Texture2D texture_ui_buttons_direction;
-
-    Texture2D array_texture_backdrops[36];
-
-    Texture2D texture_xm1y0r;
-    Texture2D texture_x1y0l;
-
-    Texture2D texture_xm1y1f;
-    Texture2D texture_x0y1f;
-    Texture2D texture_x1y1f;
-
-    Texture2D texture_xm1y1r;
-    Texture2D texture_x1y1l;
-
-    Texture2D texture_xm1y2f;
-    Texture2D texture_x0y2f;
-    Texture2D texture_x1y2f;
-
-    Texture2D texture_xm2y2r;
-    Texture2D texture_xm1y2r;
-    Texture2D texture_x1y2l;
-    Texture2D texture_x2y2l;
-
-    Texture2D texture_xm2y3f;
-    Texture2D texture_xm1y3f;
-    Texture2D texture_x0y3f;
-    Texture2D texture_x1y3f;
-    Texture2D texture_x2y3f;
-
-    Texture2D texture_xm2y3r;
-    Texture2D texture_xm1y3r;
-    Texture2D texture_x1y3l;
-    Texture2D texture_x2y3l;
-
-    size_t array_textures_count;
-    size_t array_textures_capacity;
-    Texture2D **array_textures;
+    size_t backdrop_textures_count;
+    size_t backdrop_textures_capacity;
+    TextureResource **backdrop_textures;
 
     //
 
