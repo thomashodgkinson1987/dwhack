@@ -1,15 +1,16 @@
 #include "player.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 // Structure implementation for the Player type.
 struct player_impl
 {
-    int x;                        // The player's x-coordinate.
-    int y;                        // The player's y-coordinate.
-    enum player_direction facing; // The player's facing direction.
-    int health;                   // The player's health.
-    Color color;                  // The player's color.
+    int x;                    // The player's x-coordinate.
+    int y;                    // The player's y-coordinate.
+    CardinalDirection facing; // The player's facing direction.
+    int health;               // The player's health.
+    Color color;              // The player's color.
 };
 
 /**
@@ -22,18 +23,21 @@ struct player_impl
  * @param color The player's color.
  * @return A pointer to the newly created player, or NULL if memory allocation fails.
  */
-Player *player_create(int x, int y, enum player_direction facing, int health, Color color)
+Player *player_create(int x, int y, CardinalDirection facing, int health, Color color)
 {
     Player *player = (Player *)malloc(sizeof(struct player_impl));
 
-    if (player != NULL)
+    if (player == NULL)
     {
-        player->x = x;
-        player->y = y;
-        player->facing = facing;
-        player->health = health;
-        player->color = color;
+        fprintf(stderr, "Error creating player\n");
+        exit(1);
     }
+
+    player->x = x;
+    player->y = y;
+    player->facing = facing;
+    player->health = health;
+    player->color = color;
 
     return player;
 }
@@ -41,16 +45,12 @@ Player *player_create(int x, int y, enum player_direction facing, int health, Co
 /**
  * @brief Frees the memory allocated for a player.
  *
- * @param player A pointer to the player to be freed.
+ * @param player A pointer to the player to be freed. Sets the pointer to NULL after freeing.
  */
 void player_free(Player *player)
 {
-    if (player != NULL)
-    {
-        free(player);
-        // Setting player to NULL is good practice but not strictly necessary as the pointer is no longer valid after free().
-        player = NULL;
-    }
+    free(player);
+    player = NULL;
 }
 
 /**
@@ -75,7 +75,7 @@ int player_get_y(const Player *player) { return player->y; }
  * @param player A pointer to the player.
  * @return The player's facing direction.
  */
-enum player_direction player_get_facing(const Player *player) { return player->facing; }
+CardinalDirection player_get_facing(const Player *player) { return player->facing; }
 
 /**
  * @brief Gets the player's health.
@@ -115,7 +115,7 @@ void player_set_y(Player *player, int y) { player->y = y; }
  * @param player A pointer to the player.
  * @param facing The new facing direction.
  */
-void player_set_facing(Player *player, enum player_direction facing) { player->facing = facing; }
+void player_set_facing(Player *player, CardinalDirection facing) { player->facing = facing; }
 
 /**
  * @brief Sets the player's health.
