@@ -5,16 +5,17 @@
  */
 #include "enemy.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 // Structure implementation for Enemy.
 struct enemy_impl
 {
-    int x;                       // x-coordinate
-    int y;                       // y-coordinate
-    enum enemy_direction facing; // Direction the enemy is facing
-    int health;                  // Enemy's health
-    Color color;                 // Enemy's color
+    int x;                    // x-coordinate
+    int y;                    // y-coordinate
+    CardinalDirection facing; // Direction the enemy is facing
+    int health;               // Enemy's health
+    Color color;              // Enemy's color
 };
 
 /**
@@ -27,18 +28,21 @@ struct enemy_impl
  * @param color The color of the enemy.
  * @return A pointer to the newly created enemy, or NULL if memory allocation fails.
  */
-Enemy *enemy_create(int x, int y, enum enemy_direction facing, int health, Color color)
+Enemy *enemy_create(int x, int y, CardinalDirection facing, int health, Color color)
 {
     Enemy *enemy = (Enemy *)malloc(sizeof(struct enemy_impl));
 
-    if (enemy != NULL)
+    if (enemy == NULL)
     {
-        enemy->x = x;
-        enemy->y = y;
-        enemy->facing = facing;
-        enemy->health = health;
-        enemy->color = color;
+        fprintf(stderr, "Error creating enemy\n");
+        exit(1);
     }
+
+    enemy->x = x;
+    enemy->y = y;
+    enemy->facing = facing;
+    enemy->health = health;
+    enemy->color = color;
 
     return enemy;
 }
@@ -46,14 +50,12 @@ Enemy *enemy_create(int x, int y, enum enemy_direction facing, int health, Color
 /**
  * @brief Frees the memory allocated for an enemy.
  *
- * @param enemy A pointer to the enemy to be freed. It's safe to pass NULL.
+ * @param enemy A pointer to the enemy to be freed. Sets the pointer to NULL after freeing.
  */
 void enemy_free(Enemy *enemy)
 {
-    if (enemy != NULL)
-    {
-        free(enemy);
-    }
+    free(enemy);
+    enemy = NULL;
 }
 
 /**
@@ -78,7 +80,7 @@ int enemy_get_y(const Enemy *enemy) { return enemy->y; }
  * @param enemy A pointer to the enemy.
  * @return The direction the enemy is facing.
  */
-enum enemy_direction enemy_get_facing(const Enemy *enemy) { return enemy->facing; }
+CardinalDirection enemy_get_facing(const Enemy *enemy) { return enemy->facing; }
 
 /**
  * @brief Gets the health of the enemy.
@@ -118,7 +120,7 @@ void enemy_set_y(Enemy *enemy, int y) { enemy->y = y; }
  * @param enemy A pointer to the enemy.
  * @param facing The new direction.
  */
-void enemy_set_facing(Enemy *enemy, enum enemy_direction facing) { enemy->facing = facing; }
+void enemy_set_facing(Enemy *enemy, CardinalDirection facing) { enemy->facing = facing; }
 
 /**
  * @brief Sets the health of the enemy.

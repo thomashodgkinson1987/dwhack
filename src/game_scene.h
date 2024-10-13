@@ -4,6 +4,7 @@
 #include "scene.h"
 
 #include "coords.h"
+#include "dungeon_camera.h"
 #include "enemy.h"
 #include "map.h"
 #include "player.h"
@@ -139,6 +140,10 @@ struct game_scene_data
     size_t enemies_count;
     size_t enemies_capacity;
     Enemy **enemies;
+
+    //
+
+    DungeonCamera *dungeon_camera;
 };
 
 struct scene game_scene_create(void);
