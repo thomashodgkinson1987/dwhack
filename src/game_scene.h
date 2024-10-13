@@ -138,15 +138,9 @@ struct game_scene_data
 
     Map *map;
 
-    //
-
     Player *player;
 
-    //
-
     EnemyArray enemy_array;
-
-    //
 
     DungeonCamera *dungeon_camera;
 };
