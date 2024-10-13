@@ -12,14 +12,14 @@
  */
 struct dungeon_camera_impl
 {
-    int x;          ///< The x-coordinate of the camera.
-    int y;          ///< The y-coordinate of the camera.
-    CardinalDirection facing; ///< The facing direction of the camera.
+    int x;                    // The x-coordinate of the camera.
+    int y;                    // The y-coordinate of the camera.
+    CardinalDirection facing; // The facing direction of the camera.
 };
 
 /**
  * @brief Creates a new dungeon camera object.
- * 
+ *
  * @param x The initial x-coordinate of the camera.
  * @param y The initial y-coordinate of the camera.
  * @param facing The initial facing direction of the camera.
@@ -44,18 +44,18 @@ DungeonCamera *dungeon_camera_create(int x, int y, CardinalDirection facing)
 
 /**
  * @brief Frees the memory allocated for a dungeon camera object.
- * 
+ *
  * @param dungeon_camera A pointer to the DungeonCamera object to be freed.
  */
 void dungeon_camera_free(DungeonCamera *dungeon_camera)
 {
     free(dungeon_camera);
-    dungeon_camera = NULL; // good practice to set to NULL after free
+    dungeon_camera = NULL;
 }
 
 /**
  * @brief Gets the x-coordinate of the dungeon camera.
- * 
+ *
  * @param dungeon_camera A pointer to the DungeonCamera object.
  * @return The x-coordinate of the camera.
  */
@@ -63,7 +63,7 @@ int dungeon_camera_get_x(const DungeonCamera *dungeon_camera) { return dungeon_c
 
 /**
  * @brief Gets the y-coordinate of the dungeon camera.
- * 
+ *
  * @param dungeon_camera A pointer to the DungeonCamera object.
  * @return The y-coordinate of the camera.
  */
@@ -71,7 +71,7 @@ int dungeon_camera_get_y(const DungeonCamera *dungeon_camera) { return dungeon_c
 
 /**
  * @brief Gets the facing direction of the dungeon camera.
- * 
+ *
  * @param dungeon_camera A pointer to the DungeonCamera object.
  * @return The facing direction of the camera.
  */
@@ -79,7 +79,7 @@ CardinalDirection dungeon_camera_get_facing(const DungeonCamera *dungeon_camera)
 
 /**
  * @brief Sets the x-coordinate of the dungeon camera.
- * 
+ *
  * @param dungeon_camera A pointer to the DungeonCamera object.
  * @param x The new x-coordinate of the camera.
  */
@@ -87,7 +87,7 @@ void dungeon_camera_set_x(DungeonCamera *dungeon_camera, int x) { dungeon_camera
 
 /**
  * @brief Sets the y-coordinate of the dungeon camera.
- * 
+ *
  * @param dungeon_camera A pointer to the DungeonCamera object.
  * @param y The new y-coordinate of the camera.
  */
@@ -95,7 +95,7 @@ void dungeon_camera_set_y(DungeonCamera *dungeon_camera, int y) { dungeon_camera
 
 /**
  * @brief Sets the facing direction of the dungeon camera.
- * 
+ *
  * @param dungeon_camera A pointer to the DungeonCamera object.
  * @param facing The new facing direction of the camera.
  */

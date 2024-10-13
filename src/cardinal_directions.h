@@ -10,10 +10,10 @@
  */
 typedef enum
 {
-    CARDINAL_DIRECTION_NORTH = 0, ///< North direction
-    CARDINAL_DIRECTION_EAST = 1,  ///< East direction
-    CARDINAL_DIRECTION_SOUTH = 2, ///< South direction
-    CARDINAL_DIRECTION_WEST = 3  ///< West direction
+    CARDINAL_DIRECTION_NORTH = 0, // North direction
+    CARDINAL_DIRECTION_EAST = 1,  // East direction
+    CARDINAL_DIRECTION_SOUTH = 2, // South direction
+    CARDINAL_DIRECTION_WEST = 3   // West direction
 } CardinalDirection;
 
 #endif
