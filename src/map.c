@@ -4,10 +4,6 @@
  *
  *  This module provides the implementation details for creating, manipulating, and accessing data within a 2D map.
  *  Error handling is minimal; memory allocation failures will result in program termination.
- *
- * @version 1.0
- * @author Bard
- * @date 2023-10-27
  */
 #include "map.h"
 
@@ -20,9 +16,9 @@
  */
 struct map_impl
 {
-    size_t width;  /**< The width of the map (number of columns). */
-    size_t height; /**< The height of the map (number of rows). */
-    int *data;     /**< A 1D array storing the map data. */
+    size_t width;  // The width of the map (number of columns).
+    size_t height; // The height of the map (number of rows).
+    int *data;     // A 1D array storing the map data.
 };
 
 /**
@@ -30,7 +26,7 @@ struct map_impl
  *
  * @param width The width of the map (number of columns). Must be greater than 0.
  * @param height The height of the map (number of rows). Must be greater than 0.
- * @return A pointer to the newly created Map, or NULL if memory allocation fails.
+ * @return A pointer to the newly created Map.
  */
 Map *map_create(size_t width, size_t height)
 {
@@ -72,9 +68,9 @@ Map *map_create(size_t width, size_t height)
  */
 void map_free(Map *map)
 {
-    free(map->data); // Free the map data
-    free(map);       // Free the map structure
-    map = NULL;      // Set the pointer to NULL to prevent dangling pointers
+    free(map->data);
+    free(map);
+    map = NULL;
 }
 
 /**
@@ -83,10 +79,7 @@ void map_free(Map *map)
  * @param map A pointer to the Map.
  * @return The width of the map.
  */
-size_t map_get_width(Map *map)
-{
-    return map->width;
-}
+size_t map_get_width(Map *map) { return map->width; }
 
 /**
  * @brief Returns the height of the map.
@@ -94,10 +87,7 @@ size_t map_get_width(Map *map)
  * @param map A pointer to the Map.
  * @return The height of the map.
  */
-size_t map_get_height(Map *map)
-{
-    return map->height;
-}
+size_t map_get_height(Map *map) { return map->height; }
 
 /**
  * @brief Returns a pointer to the internal 1D array representing the map data.
@@ -105,10 +95,7 @@ size_t map_get_height(Map *map)
  * @param map A pointer to the Map.
  * @return A pointer to the map's data array.  Modifying this array directly is discouraged; use map_data_set_at() and map_data_get_at() instead.
  */
-int *map_get_data(Map *map)
-{
-    return map->data;
-}
+int *map_get_data(Map *map) { return map->data; }
 
 /**
  * @brief Gets the value at the specified coordinates in the map.
@@ -118,10 +105,7 @@ int *map_get_data(Map *map)
  * @param y The y-coordinate (row index). Must be less than map_get_height(map).
  * @return The integer value at the specified coordinates.
  */
-int map_data_get_at(Map *map, size_t x, size_t y)
-{
-    return map->data[y * map->width + x];
-}
+int map_data_get_at(Map *map, size_t x, size_t y) { return map->data[y * map->width + x]; }
 
 /**
  * @brief Sets the value at the specified coordinates in the map.
@@ -131,10 +115,7 @@ int map_data_get_at(Map *map, size_t x, size_t y)
  * @param y The y-coordinate (row index). Must be less than map_get_height(map).
  * @param value The integer value to set at the specified coordinates.
  */
-void map_data_set_at(Map *map, size_t x, size_t y, int value)
-{
-    map->data[y * map->width + x] = value;
-}
+void map_data_set_at(Map *map, size_t x, size_t y, int value) { map->data[y * map->width + x] = value; }
 
 /**
  * @brief Sets all values in the map to the specified value.

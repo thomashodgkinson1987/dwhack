@@ -4,10 +4,6 @@
  *
  *  This module provides functions for creating, manipulating, and accessing data within a 2D map represented
  *  as a 1D array.  Error handling is minimal, relying on the caller to handle potential memory allocation failures.
- *
- * @version 1.0
- * @author Bard
- * @date 2023-10-27
  */
 #ifndef MAP_H
 #define MAP_H
@@ -24,7 +20,7 @@ typedef struct map_impl Map;
  *
  * @param width The width of the map (number of columns). Must be greater than 0.
  * @param height The height of the map (number of rows). Must be greater than 0.
- * @return A pointer to the newly created Map, or NULL if memory allocation fails.  The caller is responsible for freeing the allocated memory using map_free().
+ * @return A pointer to the newly created Map.  The caller is responsible for freeing the allocated memory using map_free().
  */
 Map *map_create(size_t width, size_t height);
 
