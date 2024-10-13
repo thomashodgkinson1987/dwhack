@@ -14,6 +14,13 @@
 
 extern size_t GAME_SCENE_TAG;
 
+typedef struct
+{
+    size_t count;
+    size_t capacity;
+    Enemy **enemies;
+} EnemyArray;
+
 struct game_scene_data
 {
     struct coords coords;
@@ -137,9 +144,7 @@ struct game_scene_data
 
     //
 
-    size_t enemies_count;
-    size_t enemies_capacity;
-    Enemy **enemies;
+    EnemyArray enemy_array;
 
     //
 
