@@ -12,6 +12,7 @@ static void game_scene_init_sprites(struct scene *scene);
 static void game_scene_init_map(struct scene *scene);
 static void game_scene_init_player(struct scene *scene);
 static void game_scene_init_enemies(struct scene *scene);
+static void game_scene_init_dungeon_camera(struct scene *scene);
 
 static void game_scene_free_coords(struct scene *scene);
 static void game_scene_free_textures(struct scene *scene);
@@ -19,11 +20,13 @@ static void game_scene_free_sprites(struct scene *scene);
 static void game_scene_free_map(struct scene *scene);
 static void game_scene_free_player(struct scene *scene);
 static void game_scene_free_enemies(struct scene *scene);
+static void game_scene_free_dungeon_camera(struct scene *scene);
 
 static void game_scene_draw_world(struct scene *scene);
 static void game_scene_draw_main(struct scene *scene);
 static void game_scene_draw_ui(struct scene *scene);
 
+static void game_scene_update_dungeon_camera(struct scene *scene);
 static void game_scene_update_compass(struct scene *scene);
 static void game_scene_recalculate_visible_walls(struct scene *scene);
 static void game_scene_flip_backdrop(struct scene *scene);
@@ -47,11 +50,13 @@ struct scene game_scene_create(void)
     game_scene_init_map(&scene);
     game_scene_init_player(&scene);
     game_scene_init_enemies(&scene);
+    game_scene_init_dungeon_camera(&scene);
 
     return scene;
 }
 void game_scene_free(struct scene *scene)
 {
+    game_scene_free_dungeon_camera(scene);
     game_scene_free_enemies(scene);
     game_scene_free_player(scene);
     game_scene_free_map(scene);
@@ -69,6 +74,7 @@ void game_scene_enter(struct scene *scene)
 
     sprite_set_texture(data->sprite_backdrop, data->array_texture_backdrops[GetRandomValue(0, (sizeof(data->array_texture_backdrops) / sizeof(Texture2D)) - 1)]);
 
+    game_scene_update_dungeon_camera(scene);
     game_scene_update_compass(scene);
     game_scene_recalculate_visible_walls(scene);
 }
@@ -127,16 +133,18 @@ void game_scene_tick(struct scene *scene, float delta)
 
     if (IsKeyPressed(KEY_Q) && !IsKeyPressed(KEY_E))
     {
-        int new_facing = (player_get_facing(data->player) + 3) % 4;
-        player_set_facing(data->player, (enum player_direction)new_facing);
+        CardinalDirection new_facing = (CardinalDirection)((player_get_facing(data->player) + 3) % 4);
+        player_set_facing(data->player, new_facing);
+        game_scene_update_dungeon_camera(scene);
         game_scene_update_compass(scene);
         game_scene_flip_backdrop(scene);
         game_scene_recalculate_visible_walls(scene);
     }
     else if (!IsKeyPressed(KEY_Q) && IsKeyPressed(KEY_E))
     {
-        int new_facing = (player_get_facing(data->player) + 1) % 4;
-        player_set_facing(data->player, (enum player_direction)new_facing);
+        CardinalDirection new_facing = (CardinalDirection)((player_get_facing(data->player) + 1) % 4);
+        player_set_facing(data->player, new_facing);
+        game_scene_update_dungeon_camera(scene);
         game_scene_update_compass(scene);
         game_scene_flip_backdrop(scene);
         game_scene_recalculate_visible_walls(scene);
@@ -185,6 +193,7 @@ void game_scene_tick(struct scene *scene, float delta)
                 {
                     player_set_x(data->player, new_x);
                     player_set_y(data->player, new_y);
+                    game_scene_update_dungeon_camera(scene);
                     game_scene_flip_backdrop(scene);
                     game_scene_recalculate_visible_walls(scene);
                 }
@@ -215,7 +224,7 @@ static void game_scene_draw_world(struct scene *scene)
         {0, 1},
         {-1, 0}};
 
-    int front_f = player_get_facing(data->player);
+    int front_f = dungeon_camera_get_facing(data->dungeon_camera);
     // int left_f = (front_f + 3) % 4;
     int right_f = (front_f + 1) % 4;
 
@@ -252,8 +261,8 @@ static void game_scene_draw_world(struct scene *scene)
         {
             struct enemy_position_check *check = &checks[i];
 
-            int target_x = player_get_x(data->player) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = player_get_y(data->player) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+            int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+            int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
@@ -291,8 +300,8 @@ static void game_scene_draw_world(struct scene *scene)
         {
             struct enemy_position_check *check = &checks[i];
 
-            int target_x = player_get_x(data->player) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = player_get_y(data->player) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+            int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+            int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
@@ -326,8 +335,8 @@ static void game_scene_draw_world(struct scene *scene)
         {
             struct enemy_position_check *check = &checks[i];
 
-            int target_x = player_get_x(data->player) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = player_get_y(data->player) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+            int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+            int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
@@ -683,18 +692,6 @@ static void game_scene_init_sprites(struct scene *scene)
 
     //
 
-    for (size_t i = 0; i < data->sprites_count; ++i)
-    {
-        Sprite *sprite = data->sprites[i];
-        if (sprite == NULL)
-        {
-            fprintf(stderr, "Error creaing sprite #%zu!\n", i);
-            exit(1);
-        }
-    }
-
-    //
-
     data->wall_sprites_count = 0;
     data->wall_sprites_capacity = 23;
     data->wall_sprites = (Sprite **)malloc(sizeof *data->wall_sprites * data->wall_sprites_capacity);
@@ -770,17 +767,11 @@ static void game_scene_init_player(struct scene *scene)
 
     int x = 1;
     int y = map_get_height(&data->map) - 2;
-    enum player_direction facing = PLAYER_NORTH;
+    CardinalDirection facing = CARDINAL_DIRECTION_NORTH;
     int health = 10;
     Color color = (Color){255, 255, 255, 255};
 
     data->player = player_create(x, y, facing, health, color);
-
-    if (data->player == NULL)
-    {
-        fprintf(stderr, "Error creating player!\n");
-        exit(1);
-    }
 }
 static void game_scene_init_enemies(struct scene *scene)
 {
@@ -789,7 +780,13 @@ static void game_scene_init_enemies(struct scene *scene)
     data->enemies_count = 0;
     data->enemies_capacity = 1;
     data->enemies = malloc(sizeof *data->enemies * data->enemies_capacity);
-    assert(data->enemies != NULL);
+
+    if (data->enemies == NULL)
+    {
+        fprintf(stderr, "Error creating enemies array\n");
+        exit(1);
+    }
+
     memset(data->enemies, 0, sizeof *data->enemies * data->enemies_capacity);
 
     int num_enemies = 16;
@@ -799,7 +796,13 @@ static void game_scene_init_enemies(struct scene *scene)
         if (data->enemies_count == data->enemies_capacity)
         {
             Enemy **ptr = realloc(data->enemies, sizeof *data->enemies * data->enemies_capacity * 2);
-            assert(ptr != NULL);
+
+            if (ptr == NULL)
+            {
+                fprintf(stderr, "Error reallocating enemies array\n");
+                exit(1);
+            }
+
             memset(&ptr[data->enemies_capacity], 0, sizeof *data->enemies * data->enemies_capacity);
             data->enemies = ptr;
             data->enemies_capacity *= 2;
@@ -807,7 +810,7 @@ static void game_scene_init_enemies(struct scene *scene)
 
         int x = GetRandomValue(1, map_get_width(&data->map) - 2);
         int y = GetRandomValue(1, map_get_height(&data->map) - 2);
-        enum enemy_direction facing = ENEMY_NORTH;
+        CardinalDirection facing = CARDINAL_DIRECTION_NORTH;
         int health = 10;
         unsigned char r = GetRandomValue(0, 255);
         unsigned char g = GetRandomValue(0, 255);
@@ -816,10 +819,14 @@ static void game_scene_init_enemies(struct scene *scene)
 
         Enemy *enemy = enemy_create(x, y, facing, health, color);
 
-        assert(enemy != NULL);
-
         data->enemies[data->enemies_count++] = enemy;
     }
+}
+static void game_scene_init_dungeon_camera(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
+
+    data->dungeon_camera = dungeon_camera_create(0, 0, CARDINAL_DIRECTION_NORTH);
 }
 
 static void game_scene_free_coords(struct scene *scene)
@@ -898,6 +905,25 @@ static void game_scene_free_enemies(struct scene *scene)
     free(data->enemies);
     data->enemies = NULL;
 }
+static void game_scene_free_dungeon_camera(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
+
+    dungeon_camera_free(data->dungeon_camera);
+}
+
+static void game_scene_update_dungeon_camera(struct scene *scene)
+{
+    struct game_scene_data *data = scene->data;
+
+    int x = player_get_x(data->player);
+    int y = player_get_y(data->player);
+    CardinalDirection facing = player_get_facing(data->player);
+
+    dungeon_camera_set_x(data->dungeon_camera, x);
+    dungeon_camera_set_y(data->dungeon_camera, y);
+    dungeon_camera_set_facing(data->dungeon_camera, facing);
+}
 
 static void game_scene_update_compass(struct scene *scene)
 {
@@ -938,7 +964,7 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
         {0, 1},
         {-1, 0}};
 
-    int front_f = player_get_facing(data->player);
+    int front_f = dungeon_camera_get_facing(data->dungeon_camera);
     int left_f = (front_f + 3) % 4;
     int right_f = (front_f + 1) % 4;
 
@@ -987,12 +1013,12 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
         int *side_vec = check->sizeways_distance < 0 ? left_vec : right_vec;
         int sideways_distance = abs(check->sizeways_distance);
 
-        game_scene_calculate_target_position(&target_x, &target_y, player_get_x(data->player), player_get_y(data->player), front_vec, check->forward_distance, side_vec, sideways_distance);
+        game_scene_calculate_target_position(&target_x, &target_y, dungeon_camera_get_x(data->dungeon_camera), dungeon_camera_get_y(data->dungeon_camera), front_vec, check->forward_distance, side_vec, sideways_distance);
 
         if (sideways_distance == 0)
         {
-            target_x = player_get_x(data->player) + front_vec[0] * check->forward_distance;
-            target_y = player_get_y(data->player) + front_vec[1] * check->forward_distance;
+            target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance;
+            target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance;
         }
 
         if (game_scene_is_wall_at(&data->map, target_x, target_y))

@@ -6,19 +6,12 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
+#include "cardinal_directions.h"
+
 #include "raylib.h"
 
 // Opaque struct definition for Enemy.  Implementation details are hidden.
 typedef struct enemy_impl Enemy;
-
-// Enum defining the possible directions an enemy can face.
-enum enemy_direction
-{
-    ENEMY_NORTH,
-    ENEMY_EAST,
-    ENEMY_SOUTH,
-    ENEMY_WEST
-};
 
 /**
  * @brief Creates a new enemy.
@@ -30,12 +23,12 @@ enum enemy_direction
  * @param color The color of the enemy.
  * @return A pointer to the newly created enemy, or NULL if memory allocation fails.
  */
-Enemy *enemy_create(int x, int y, enum enemy_direction facing, int health, Color color);
+Enemy *enemy_create(int x, int y, CardinalDirection facing, int health, Color color);
 
 /**
  * @brief Frees the memory allocated for an enemy.
  *
- * @param enemy A pointer to the enemy to be freed.  It's safe to pass NULL.
+ * @param enemy A pointer to the enemy to be freed. Sets the pointer to NULL after freeing.
  */
 void enemy_free(Enemy *enemy);
 
@@ -61,7 +54,7 @@ int enemy_get_y(const Enemy *enemy);
  * @param enemy A pointer to the enemy.
  * @return The direction the enemy is facing.
  */
-enum enemy_direction enemy_get_facing(const Enemy *enemy);
+CardinalDirection enemy_get_facing(const Enemy *enemy);
 
 /**
  * @brief Gets the health of the enemy.
@@ -101,7 +94,7 @@ void enemy_set_y(Enemy *enemy, int y);
  * @param enemy A pointer to the enemy.
  * @param facing The new direction.
  */
-void enemy_set_facing(Enemy *enemy, enum enemy_direction facing);
+void enemy_set_facing(Enemy *enemy, CardinalDirection facing);
 
 /**
  * @brief Sets the health of the enemy.

@@ -1,19 +1,12 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "cardinal_directions.h"
+
 #include "raylib.h"
 
 // Opaque struct definition for Player. Implementation details are hidden.
 typedef struct player_impl Player;
-
-// Enum defining the possible directions a player can face.
-enum player_direction
-{
-    PLAYER_NORTH = 0,
-    PLAYER_EAST = 1,
-    PLAYER_SOUTH = 2,
-    PLAYER_WEST = 3
-};
 
 /**
  * @brief Creates a new player.
@@ -25,12 +18,12 @@ enum player_direction
  * @param color The player's color.
  * @return A pointer to the newly created player, or NULL if memory allocation fails.
  */
-Player *player_create(int x, int y, enum player_direction facing, int health, Color color);
+Player *player_create(int x, int y, CardinalDirection facing, int health, Color color);
 
 /**
  * @brief Frees the memory allocated for a player.
  *
- * @param player A pointer to the player to be freed.  Sets the pointer to NULL after freeing.
+ * @param player A pointer to the player to be freed. Sets the pointer to NULL after freeing.
  */
 void player_free(Player *player);
 
@@ -56,7 +49,7 @@ int player_get_y(const Player *player);
  * @param player A pointer to the player.
  * @return The player's facing direction.
  */
-enum player_direction player_get_facing(const Player *player);
+CardinalDirection player_get_facing(const Player *player);
 
 /**
  * @brief Gets the player's health.
@@ -96,7 +89,7 @@ void player_set_y(Player *player, int y);
  * @param player A pointer to the player.
  * @param facing The new facing direction.
  */
-void player_set_facing(Player *player, enum player_direction facing);
+void player_set_facing(Player *player, CardinalDirection facing);
 
 /**
  * @brief Sets the player's health.
