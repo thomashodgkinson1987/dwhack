@@ -1,34 +1,34 @@
 #include "game_scene.h"
 
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-static void game_scene_init_coords(struct scene *scene);
-static void game_scene_init_textures(struct scene *scene);
-static void game_scene_init_sprites(struct scene *scene);
-static void game_scene_init_map(struct scene *scene);
-static void game_scene_init_player(struct scene *scene);
-static void game_scene_init_enemies(struct scene *scene);
-static void game_scene_init_dungeon_camera(struct scene *scene);
+static void game_scene_init_coords(const Scene *scene);
+static void game_scene_init_textures(const Scene *scene);
+static void game_scene_init_sprites(const Scene *scene);
+static void game_scene_init_map(const Scene *scene);
+static void game_scene_init_player(const Scene *scene);
+static void game_scene_init_enemies(const Scene *scene);
+static void game_scene_init_dungeon_camera(const Scene *scene);
 
-static void game_scene_free_coords(struct scene *scene);
-static void game_scene_free_textures(struct scene *scene);
-static void game_scene_free_sprites(struct scene *scene);
-static void game_scene_free_map(struct scene *scene);
-static void game_scene_free_player(struct scene *scene);
-static void game_scene_free_enemies(struct scene *scene);
-static void game_scene_free_dungeon_camera(struct scene *scene);
+static void game_scene_free_coords(const Scene *scene);
+static void game_scene_free_textures(const Scene *scene);
+static void game_scene_free_sprites(const Scene *scene);
+static void game_scene_free_map(const Scene *scene);
+static void game_scene_free_player(const Scene *scene);
+static void game_scene_free_enemies(const Scene *scene);
+static void game_scene_free_dungeon_camera(const Scene *scene);
 
-static void game_scene_draw_world(struct scene *scene);
-static void game_scene_draw_main(struct scene *scene);
-static void game_scene_draw_ui(struct scene *scene);
+static void game_scene_draw_world(const Scene *scene);
+static void game_scene_draw_main(const Scene *scene);
+static void game_scene_draw_ui(const Scene *scene);
 
-static void game_scene_update_dungeon_camera(struct scene *scene);
-static void game_scene_update_compass(struct scene *scene);
-static void game_scene_recalculate_visible_walls(struct scene *scene);
-static void game_scene_flip_backdrop(struct scene *scene);
+static void game_scene_update_dungeon_camera(const Scene *scene);
+static void game_scene_update_compass(const Scene *scene);
+static void game_scene_recalculate_visible_walls(const Scene *scene);
+static void game_scene_flip_backdrop(const Scene *scene);
 
 static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *front_vec, int front_distance, int *side_vec, int side_distance);
 static bool game_scene_is_wall_at(Map *map, int x, int y);
@@ -36,35 +36,33 @@ static bool game_scene_is_wall_at(Map *map, int x, int y);
 static void load_texture_resource(TextureResourceArray *texture_resource_array, const char *filename);
 static TextureResource *get_texture_resource(TextureResourceArray *texture_resource_array, const char *filename);
 
-static void add_backdrop_texture(struct scene *scene, TextureResource *texture_resource);
+static void add_backdrop_texture(const Scene *scene, TextureResource *texture_resource);
 
 size_t GAME_SCENE_TAG = 0;
 
-struct scene game_scene_create(void)
+Scene *game_scene_create(void)
 {
-    struct game_scene_data *data = malloc(sizeof *data);
+    struct game_scene_data *data = calloc(1, sizeof *data);
 
     if (data == NULL)
     {
-        fprintf(stderr, "Error creating game_scene_data\n");
+        fprintf(stderr, "Error creating game scene data\n");
         exit(1);
     }
 
-    memset(data, 0, sizeof *data);
+    Scene *scene = scene_create(GAME_SCENE_TAG, data);
 
-    struct scene scene = scene_create(GAME_SCENE_TAG, data);
-
-    game_scene_init_coords(&scene);
-    game_scene_init_textures(&scene);
-    game_scene_init_sprites(&scene);
-    game_scene_init_map(&scene);
-    game_scene_init_player(&scene);
-    game_scene_init_enemies(&scene);
-    game_scene_init_dungeon_camera(&scene);
+    game_scene_init_coords(scene);
+    game_scene_init_textures(scene);
+    game_scene_init_sprites(scene);
+    game_scene_init_map(scene);
+    game_scene_init_player(scene);
+    game_scene_init_enemies(scene);
+    game_scene_init_dungeon_camera(scene);
 
     return scene;
 }
-void game_scene_free(struct scene *scene)
+void game_scene_free(const Scene *scene)
 {
     game_scene_free_dungeon_camera(scene);
     game_scene_free_enemies(scene);
@@ -75,9 +73,9 @@ void game_scene_free(struct scene *scene)
     game_scene_free_coords(scene);
 }
 
-void game_scene_enter(struct scene *scene)
+void game_scene_enter(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     sprite_set_is_visible(data->sprite_ui_character_sheet, false);
     sprite_set_is_visible(data->sprite_ui_spells, false);
@@ -95,15 +93,15 @@ void game_scene_enter(struct scene *scene)
     game_scene_update_compass(scene);
     game_scene_recalculate_visible_walls(scene);
 }
-void game_scene_exit(struct scene *scene)
+void game_scene_exit(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     (void)data;
 }
-void game_scene_tick(struct scene *scene, float delta)
+void game_scene_tick(const Scene *scene, float delta)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     (void)delta;
 
@@ -218,9 +216,9 @@ void game_scene_tick(struct scene *scene, float delta)
         }
     }
 }
-void game_scene_draw(struct scene *scene)
+void game_scene_draw(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     (void)data;
 
@@ -228,9 +226,9 @@ void game_scene_draw(struct scene *scene)
     game_scene_draw_main(scene);
     game_scene_draw_ui(scene);
 }
-static void game_scene_draw_world(struct scene *scene)
+static void game_scene_draw_world(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     int map_width = (int)map_get_width(data->map);
     int map_height = (int)map_get_height(data->map);
@@ -242,11 +240,9 @@ static void game_scene_draw_world(struct scene *scene)
         {-1, 0}};
 
     int front_f = dungeon_camera_get_facing(data->dungeon_camera);
-    // int left_f = (front_f + 3) % 4;
     int right_f = (front_f + 1) % 4;
 
     int *front_vec = dir_vecs[front_f];
-    // int *left_vec = dir_vecs[left_f];
     int *right_vec = dir_vecs[right_f];
 
     struct enemy_position_check
@@ -271,8 +267,7 @@ static void game_scene_draw_world(struct scene *scene)
             {3, -1, data->coords.xm1y3f.x + 30, data->coords.xm1y3f.y + 12, 4.0f},
             {3, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 12, 4.0f},
             {3, 1, data->coords.x1y3f.x + data->coords.x1y3f.w - 30, data->coords.x1y3f.y + 12, 4.0f},
-            {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.w - 40, data->coords.x2y3f.y + 12, 4.0f},
-        };
+            {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.w - 40, data->coords.x2y3f.y + 12, 4.0f}};
 
         for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
@@ -310,8 +305,7 @@ static void game_scene_draw_world(struct scene *scene)
         struct enemy_position_check checks[] = {
             {2, -1, data->coords.xm1y3f.x + 24, data->coords.xm1y3f.y + 16, 8.0f},
             {2, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 8.0f},
-            {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f},
-        };
+            {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f}};
 
         for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
@@ -345,8 +339,7 @@ static void game_scene_draw_world(struct scene *scene)
         struct enemy_position_check checks[] = {
             {1, -1, data->coords.xm1y2f.x + 40, data->coords.xm1y2f.y + 30, 16.0f},
             {1, 0, data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 16.0f},
-            {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f},
-        };
+            {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f}};
 
         for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
@@ -376,15 +369,15 @@ static void game_scene_draw_world(struct scene *scene)
     sprite_draw(data->sprite_xm1y0r);
     sprite_draw(data->sprite_x1y0l);
 }
-static void game_scene_draw_main(struct scene *scene)
+static void game_scene_draw_main(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     sprite_draw(data->sprite_main);
 }
-static void game_scene_draw_ui(struct scene *scene)
+static void game_scene_draw_ui(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     sprite_draw(data->sprite_ui_inventory);
     sprite_draw(data->sprite_ui_button_camp);
@@ -397,9 +390,9 @@ static void game_scene_draw_ui(struct scene *scene)
     sprite_draw(data->sprite_ui_buttons_direction);
 }
 
-static void game_scene_init_coords(struct scene *scene)
+static void game_scene_init_coords(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     data->coords = coords_create();
 
@@ -447,9 +440,9 @@ static void game_scene_init_coords(struct scene *scene)
     data->coords.x1y3l = (struct rectanglei){242, 41, 8, 35};
     data->coords.x2y3l = (struct rectanglei){274, 41, 24, 35};
 }
-static void game_scene_init_textures(struct scene *scene)
+static void game_scene_init_textures(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     //
 
@@ -618,9 +611,9 @@ static void game_scene_init_textures(struct scene *scene)
     add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop35.png"));
     add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop36.png"));
 }
-static void game_scene_init_sprites(struct scene *scene)
+static void game_scene_init_sprites(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     //
 
@@ -778,9 +771,9 @@ static void game_scene_init_sprites(struct scene *scene)
     data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y3l;
     data->wall_sprites[data->wall_sprites_count++] = data->sprite_x2y3l;
 }
-static void game_scene_init_map(struct scene *scene)
+static void game_scene_init_map(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     data->map = map_create(16, 16);
 
@@ -803,9 +796,9 @@ static void game_scene_init_map(struct scene *scene)
         }
     }
 }
-static void game_scene_init_player(struct scene *scene)
+static void game_scene_init_player(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     int x = 1;
     int y = map_get_height(data->map) - 2;
@@ -815,9 +808,9 @@ static void game_scene_init_player(struct scene *scene)
 
     data->player = player_create(x, y, facing, health, color);
 }
-static void game_scene_init_enemies(struct scene *scene)
+static void game_scene_init_enemies(const Scene *scene)
 {
-    struct game_scene_data *data = (struct game_scene_data *)scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     data->enemy_array.count = 0;
     data->enemy_array.capacity = 1;
@@ -864,22 +857,22 @@ static void game_scene_init_enemies(struct scene *scene)
         data->enemy_array.enemies[data->enemy_array.count++] = enemy;
     }
 }
-static void game_scene_init_dungeon_camera(struct scene *scene)
+static void game_scene_init_dungeon_camera(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     data->dungeon_camera = dungeon_camera_create(0, 0, CARDINAL_DIRECTION_NORTH);
 }
 
-static void game_scene_free_coords(struct scene *scene)
+static void game_scene_free_coords(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     coords_free(&data->coords);
 }
-static void game_scene_free_textures(struct scene *scene)
+static void game_scene_free_textures(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     //
 
@@ -901,9 +894,9 @@ static void game_scene_free_textures(struct scene *scene)
     free(data->texture_resource_array.texture_resources);
     data->texture_resource_array = (TextureResourceArray){0};
 }
-static void game_scene_free_sprites(struct scene *scene)
+static void game_scene_free_sprites(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     //
 
@@ -927,21 +920,21 @@ static void game_scene_free_sprites(struct scene *scene)
     free(data->wall_sprites);
     data->wall_sprites = NULL;
 }
-static void game_scene_free_map(struct scene *scene)
+static void game_scene_free_map(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     map_free(data->map);
 }
-static void game_scene_free_player(struct scene *scene)
+static void game_scene_free_player(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     player_free(data->player);
 }
-static void game_scene_free_enemies(struct scene *scene)
+static void game_scene_free_enemies(const Scene *scene)
 {
-    struct game_scene_data *data = (struct game_scene_data *)scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     for (size_t i = 0; i < data->enemy_array.count; ++i)
     {
@@ -952,16 +945,16 @@ static void game_scene_free_enemies(struct scene *scene)
     free(data->enemy_array.enemies);
     data->enemy_array = (EnemyArray){0};
 }
-static void game_scene_free_dungeon_camera(struct scene *scene)
+static void game_scene_free_dungeon_camera(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     dungeon_camera_free(data->dungeon_camera);
 }
 
-static void game_scene_update_dungeon_camera(struct scene *scene)
+static void game_scene_update_dungeon_camera(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     int x = player_get_x(data->player);
     int y = player_get_y(data->player);
@@ -972,9 +965,9 @@ static void game_scene_update_dungeon_camera(struct scene *scene)
     dungeon_camera_set_facing(data->dungeon_camera, facing);
 }
 
-static void game_scene_update_compass(struct scene *scene)
+static void game_scene_update_compass(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     switch (player_get_facing(data->player))
     {
@@ -996,9 +989,9 @@ static void game_scene_update_compass(struct scene *scene)
     }
 }
 
-static void game_scene_recalculate_visible_walls(struct scene *scene)
+static void game_scene_recalculate_visible_walls(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     for (size_t i = 0; i < data->wall_sprites_count; ++i)
     {
@@ -1078,9 +1071,9 @@ static void game_scene_recalculate_visible_walls(struct scene *scene)
     }
 }
 
-static void game_scene_flip_backdrop(struct scene *scene)
+static void game_scene_flip_backdrop(const Scene *scene)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     Rectangle source = sprite_get_source(data->sprite_backdrop);
 
@@ -1135,15 +1128,13 @@ static void load_texture_resource(TextureResourceArray *texture_resource_array, 
         exit(1);
     }
 
-    // strcpy(name, filename);
     strncpy(name, filename, strlen(filename) + 1);
 
     Texture2D texture = LoadTexture(filename);
 
     TextureResource texture_resource = (TextureResource){
         .name = name,
-        .texture = texture,
-    };
+        .texture = texture};
 
     texture_resource_array->texture_resources[texture_resource_array->count++] = texture_resource;
 }
@@ -1170,9 +1161,9 @@ static TextureResource *get_texture_resource(TextureResourceArray *texture_resou
     return texture_resource;
 }
 
-static void add_backdrop_texture(struct scene *scene, TextureResource *texture_resource)
+static void add_backdrop_texture(const Scene *scene, TextureResource *texture_resource)
 {
-    struct game_scene_data *data = scene->data;
+    struct game_scene_data *data = scene_get_data(scene);
 
     if (data->backdrop_textures_count == data->backdrop_textures_capacity)
     {

@@ -2,8 +2,6 @@
 
 #include "raylib.h"
 
-#include <string.h>
-
 static const int virtual_screen_width = 320;
 static const int virtual_screen_height = 200;
 
@@ -22,7 +20,7 @@ struct render_texture_data
     Color tint;
 };
 
-static struct scene game_scene;
+static Scene *game_scene;
 
 static struct render_texture_data render_texture_data;
 
@@ -97,7 +95,7 @@ static void game_init_scenes(void)
 
     game_scene = game_scene_create();
 
-    scene_enter(&game_scene);
+    scene_enter(game_scene);
 }
 
 static void game_free(void)
@@ -114,9 +112,9 @@ static void game_free_virtual_screen(void)
 
 static void game_free_scenes(void)
 {
-    scene_exit(&game_scene);
+    scene_exit(game_scene);
 
-    scene_free(&game_scene);
+    scene_free(game_scene);
 
     GAME_SCENE_TAG = 0;
 
@@ -125,14 +123,14 @@ static void game_free_scenes(void)
 
 static void game_tick(float delta)
 {
-    scene_tick(&game_scene, delta);
+    scene_tick(game_scene, delta);
 }
 
 static void game_draw(void)
 {
     BeginTextureMode(render_texture_data.texture);
     ClearBackground(BLANK);
-    scene_draw(&game_scene);
+    scene_draw(game_scene);
     EndTextureMode();
 
     BeginDrawing();
