@@ -12,7 +12,7 @@ struct map_impl
 
 Map *map_create(size_t width, size_t height)
 {
-    Map *map = (Map *)malloc(sizeof(struct map_impl));
+    Map *map = malloc(sizeof(struct map_impl));
 
     if (map == NULL)
     {
@@ -26,7 +26,7 @@ Map *map_create(size_t width, size_t height)
 
     if (map->data == NULL)
     {
-        fprintf(stderr, "Error creating map  memory allocation failed\n");
+        fprintf(stderr, "Error creating map memory allocation failed\n");
         exit(1);
     }
 
