@@ -113,12 +113,12 @@ struct game_scene_data
     DungeonCamera *dungeon_camera;
 };
 
-struct scene game_scene_create(void);
-void game_scene_free(struct scene *scene);
+Scene *game_scene_create(void);
+void game_scene_free(const Scene *scene);
 
-void game_scene_enter(struct scene *scene);
-void game_scene_exit(struct scene *scene);
-void game_scene_tick(struct scene *scene, float delta);
-void game_scene_draw(struct scene *scene);
+void game_scene_enter(const Scene *scene);
+void game_scene_exit(const Scene *scene);
+void game_scene_tick(const Scene *scene, float delta);
+void game_scene_draw(const Scene *scene);
 
 #endif
