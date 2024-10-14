@@ -9,15 +9,6 @@ struct scene_impl
     void *data;
 };
 
-struct scene_funcs_impl
-{
-    void (*free)(const Scene *scene);
-    void (*enter)(const Scene *scene);
-    void (*exit)(const Scene *scene);
-    void (*tick)(const Scene *scene, float delta);
-    void (*draw)(const Scene *scene);
-};
-
 typedef struct
 {
     size_t count;
