@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 struct map_impl
 {
@@ -14,21 +13,25 @@ struct map_impl
 Map *map_create(size_t width, size_t height)
 {
     Map *map = (Map *)malloc(sizeof(struct map_impl));
+
     if (map == NULL)
     {
         fprintf(stderr, "Error creating map: memory allocation failed\n");
         exit(1);
     }
+
     map->width = width;
     map->height = height;
     map->data = malloc(sizeof *map->data * map->width * map->height);
+
     if (map->data == NULL)
     {
         fprintf(stderr, "Error creating map  memory allocation failed\n");
-        free(map);
         exit(1);
     }
+
     memset(map->data, 0, sizeof *map->data * map->width * map->height);
+
     return map;
 }
 

@@ -1,8 +1,8 @@
 #include "game_scene.h"
 
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static void game_scene_init_coords(struct scene *scene);
@@ -242,11 +242,9 @@ static void game_scene_draw_world(struct scene *scene)
         {-1, 0}};
 
     int front_f = dungeon_camera_get_facing(data->dungeon_camera);
-    // int left_f = (front_f + 3) % 4;
     int right_f = (front_f + 1) % 4;
 
     int *front_vec = dir_vecs[front_f];
-    // int *left_vec = dir_vecs[left_f];
     int *right_vec = dir_vecs[right_f];
 
     struct enemy_position_check
@@ -271,8 +269,7 @@ static void game_scene_draw_world(struct scene *scene)
             {3, -1, data->coords.xm1y3f.x + 30, data->coords.xm1y3f.y + 12, 4.0f},
             {3, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 12, 4.0f},
             {3, 1, data->coords.x1y3f.x + data->coords.x1y3f.w - 30, data->coords.x1y3f.y + 12, 4.0f},
-            {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.w - 40, data->coords.x2y3f.y + 12, 4.0f},
-        };
+            {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.w - 40, data->coords.x2y3f.y + 12, 4.0f}};
 
         for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
@@ -310,8 +307,7 @@ static void game_scene_draw_world(struct scene *scene)
         struct enemy_position_check checks[] = {
             {2, -1, data->coords.xm1y3f.x + 24, data->coords.xm1y3f.y + 16, 8.0f},
             {2, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 8.0f},
-            {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f},
-        };
+            {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f}};
 
         for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
@@ -345,8 +341,7 @@ static void game_scene_draw_world(struct scene *scene)
         struct enemy_position_check checks[] = {
             {1, -1, data->coords.xm1y2f.x + 40, data->coords.xm1y2f.y + 30, 16.0f},
             {1, 0, data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 16.0f},
-            {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f},
-        };
+            {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f}};
 
         for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
         {
@@ -1135,15 +1130,13 @@ static void load_texture_resource(TextureResourceArray *texture_resource_array, 
         exit(1);
     }
 
-    // strcpy(name, filename);
     strncpy(name, filename, strlen(filename) + 1);
 
     Texture2D texture = LoadTexture(filename);
 
     TextureResource texture_resource = (TextureResource){
         .name = name,
-        .texture = texture,
-    };
+        .texture = texture};
 
     texture_resource_array->texture_resources[texture_resource_array->count++] = texture_resource;
 }
