@@ -29,11 +29,7 @@ struct game_scene_data
 
     SpriteResourceArray *sprite_resources;
 
-    //
-
-    size_t wall_sprites_count;
-    size_t wall_sprites_capacity;
-    Sprite **wall_sprites;
+    SpriteResourceArray *wall_sprite_resources;
 
     //
 

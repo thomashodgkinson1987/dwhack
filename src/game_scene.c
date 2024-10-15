@@ -652,49 +652,37 @@ static void game_scene_init_sprites(const Scene *scene)
 
     //
 
-    data->wall_sprites_count = 0;
-    data->wall_sprites_capacity = 23;
-    data->wall_sprites = (Sprite **)malloc(sizeof *data->wall_sprites * data->wall_sprites_capacity);
+    data->wall_sprite_resources = sprite_resource_array_create();
 
-    if (data->wall_sprites == NULL)
-    {
-        fprintf(stderr, "Error malloc wall_sprites!\n");
-        exit(1);
-    }
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y0r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y0l"));
 
-    memset(data->wall_sprites, 0, sizeof *data->wall_sprites * data->wall_sprites_capacity);
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y1f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x0y1f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y1f"));
 
-    //
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y1r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y1l"));
 
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm1y0r");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x1y0l");
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y2f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x0y2f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y2f"));
 
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm1y1f");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x0y1f");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x1y1f");
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm2y2r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y2r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y2l"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x2y2l"));
 
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm1y1r");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x1y1l");
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm2y3f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y3f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x0y3f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y3f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x2y3f"));
 
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm1y2f");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x0y2f");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x1y2f");
-
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm2y2r");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm1y2r");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x1y2l");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x2y2l");
-
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm2y3f");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm1y3f");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x0y3f");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x1y3f");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x2y3f");
-
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm2y3r");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "xm1y3r");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x1y3l");
-    data->wall_sprites[data->wall_sprites_count++] = get_sprite(data->sprite_resources, "x2y3l");
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm2y3r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y3r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y3l"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x2y3l"));
 }
 static void game_scene_init_map(const Scene *scene)
 {
@@ -775,6 +763,7 @@ static void game_scene_free_textures(const Scene *scene)
     struct game_scene_data *data = scene_get_data(scene);
 
     texture_resource_array_free(data->backdrop_texture_resources);
+    data->backdrop_texture_resources = NULL;
 
     for (size_t i = 0; i < texture_resource_array_get_count(data->texture_resources); ++i)
     {
@@ -790,12 +779,8 @@ static void game_scene_free_sprites(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    data->wall_sprites_count = 0;
-    data->wall_sprites_capacity = 0;
-    free(data->wall_sprites);
-    data->wall_sprites = NULL;
-
-    //
+    sprite_resource_array_free(data->wall_sprite_resources);
+    data->wall_sprite_resources = NULL;
 
     for (size_t i = 0; i < sprite_resource_array_get_count(data->sprite_resources); ++i)
     {
@@ -885,9 +870,11 @@ static void game_scene_recalculate_visible_walls(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    for (size_t i = 0; i < data->wall_sprites_count; ++i)
+    for (size_t i = 0; i < sprite_resource_array_get_count(data->wall_sprite_resources); ++i)
     {
-        sprite_set_is_visible(data->wall_sprites[i], false);
+        SpriteResource *sprite_resource = sprite_resource_array_get(data->wall_sprite_resources, i);
+        Sprite *sprite = sprite_resource_get_sprite(sprite_resource);
+        sprite_set_is_visible(sprite, false);
     }
 
     int dir_vecs[4][2] = {
