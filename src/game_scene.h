@@ -23,9 +23,7 @@ struct game_scene_data
 
     TextureResourceArray *texture_resources;
 
-    size_t backdrop_textures_count;
-    size_t backdrop_textures_capacity;
-    TextureResource **backdrop_textures;
+    TextureResourceArray *backdrop_texture_resources;
 
     //
 
