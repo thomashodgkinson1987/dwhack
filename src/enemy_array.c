@@ -80,7 +80,4 @@ void enemy_array_add(EnemyArray *enemy_array, Enemy *enemy)
     enemy_array->data[enemy_array->count++] = enemy;
 }
 
-Enemy *enemy_array_get(EnemyArray *enemy_array, size_t index)
-{
-    return enemy_array->data[index];
-}
+Enemy *enemy_array_get(EnemyArray *enemy_array, size_t index) { return enemy_array->data[index]; }
