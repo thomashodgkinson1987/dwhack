@@ -15,7 +15,7 @@ struct sprite_impl
     Color tint;
 };
 
-Sprite *sprite_create(Texture2D texture, float x, float y, float w, float h)
+Sprite *sprite_create(Texture2D texture, float x, float y, float width, float height)
 {
     Sprite *sprite = (Sprite *)malloc(sizeof(struct sprite_impl));
     if (sprite != NULL)
@@ -23,7 +23,7 @@ Sprite *sprite_create(Texture2D texture, float x, float y, float w, float h)
         sprite->is_visible = true;
         sprite->texture = texture;
         sprite->source = (Rectangle){0.0f, 0.0f, (float)texture.width, (float)texture.height};
-        sprite->dest = (Rectangle){x, y, w, h};
+        sprite->dest = (Rectangle){x, y, width, height};
         sprite->origin = (Vector2){0.0f, 0.0f};
         sprite->rotation = 0.0f;
         sprite->tint = (Color){255, 255, 255, 255};
@@ -72,17 +72,17 @@ float sprite_get_x(const Sprite *sprite) { return sprite->dest.x; }
 
 float sprite_get_y(const Sprite *sprite) { return sprite->dest.y; }
 
-float sprite_get_w(const Sprite *sprite) { return sprite->dest.width; }
+float sprite_get_width(const Sprite *sprite) { return sprite->dest.width; }
 
-float sprite_get_h(const Sprite *sprite) { return sprite->dest.height; }
+float sprite_get_height(const Sprite *sprite) { return sprite->dest.height; }
 
 void sprite_set_x(Sprite *sprite, float x) { sprite->dest.x = x; }
 
 void sprite_set_y(Sprite *sprite, float y) { sprite->dest.y = y; }
 
-void sprite_set_w(Sprite *sprite, float w) { sprite->dest.width = w; }
+void sprite_set_width(Sprite *sprite, float width) { sprite->dest.width = width; }
 
-void sprite_set_h(Sprite *sprite, float h) { sprite->dest.height = h; }
+void sprite_set_height(Sprite *sprite, float height) { sprite->dest.height = height; }
 
 void sprite_draw(const Sprite *sprite)
 {

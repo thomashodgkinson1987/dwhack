@@ -5,7 +5,7 @@
 
 typedef struct sprite_impl Sprite;
 
-Sprite *sprite_create(Texture2D texture, float x, float y, float w, float h);
+Sprite *sprite_create(Texture2D texture, float x, float y, float width, float height);
 
 void sprite_free(Sprite *sprite);
 
@@ -41,17 +41,17 @@ float sprite_get_x(const Sprite *sprite);
 
 float sprite_get_y(const Sprite *sprite);
 
-float sprite_get_w(const Sprite *sprite);
+float sprite_get_width(const Sprite *sprite);
 
-float sprite_get_h(const Sprite *sprite);
+float sprite_get_height(const Sprite *sprite);
 
 void sprite_set_x(Sprite *sprite, float x);
 
 void sprite_set_y(Sprite *sprite, float y);
 
-void sprite_set_w(Sprite *sprite, float w);
+void sprite_set_width(Sprite *sprite, float width);
 
-void sprite_set_h(Sprite *sprite, float h);
+void sprite_set_height(Sprite *sprite, float height);
 
 void sprite_draw(const Sprite *sprite);
 
