@@ -17,7 +17,7 @@ Map *map_create(size_t width, size_t height)
 
     if (map == NULL)
     {
-        fprintf(stderr, "Error creating map: memory allocation failed\n");
+        fprintf(stderr, "Error creating map\n");
         exit(1);
     }
 
@@ -27,7 +27,7 @@ Map *map_create(size_t width, size_t height)
 
     if (map->data == NULL)
     {
-        fprintf(stderr, "Error creating map memory allocation failed\n");
+        fprintf(stderr, "Error creating map data\n");
         exit(1);
     }
 
