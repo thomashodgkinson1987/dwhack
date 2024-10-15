@@ -5,28 +5,15 @@
 
 #include "coords.h"
 #include "dungeon_camera.h"
-#include "enemy.h"
 #include "enemy_array.h"
 #include "map.h"
 #include "player.h"
 #include "sprite.h"
+#include "texture_resource_array.h"
 
 #include "raylib.h"
 
 extern size_t GAME_SCENE_TAG;
-
-typedef struct
-{
-    char *name;
-    Texture2D texture;
-} TextureResource;
-
-typedef struct
-{
-    size_t count;
-    size_t capacity;
-    TextureResource *texture_resources;
-} TextureResourceArray;
 
 struct game_scene_data
 {
@@ -34,7 +21,7 @@ struct game_scene_data
 
     //
 
-    TextureResourceArray texture_resource_array;
+    TextureResourceArray *texture_resource_array;
 
     size_t backdrop_textures_count;
     size_t backdrop_textures_capacity;
