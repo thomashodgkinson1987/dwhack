@@ -1,5 +1,7 @@
 #include "game_scene.h"
 
+#include "sprite_resource.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,10 +35,11 @@ static void game_scene_flip_backdrop(const Scene *scene);
 static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *front_vec, int front_distance, int *side_vec, int side_distance);
 static bool game_scene_is_wall_at(Map *map, int x, int y);
 
-static void load_texture_resource(TextureResourceArray *texture_resource_array, const char *filename);
 static TextureResource *get_texture_resource(TextureResourceArray *texture_resource_array, const char *filename);
+static Texture2D get_texture(TextureResourceArray *texture_resource_array, const char *filename);
 
-static void add_backdrop_texture(const Scene *scene, TextureResource *texture_resource);
+static SpriteResource *get_sprite_resource(SpriteResourceArray *sprite_resource_array, const char *name);
+static Sprite *get_sprite(SpriteResourceArray *sprite_resource_array, const char *name);
 
 size_t GAME_SCENE_TAG = 0;
 
@@ -77,14 +80,15 @@ void game_scene_enter(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    sprite_set_is_visible(data->sprite_ui_character_sheet, false);
-    sprite_set_is_visible(data->sprite_ui_spells, false);
+    sprite_set_is_visible(get_sprite(data->sprite_resources, "ui_character_sheet"), false);
+    sprite_set_is_visible(get_sprite(data->sprite_resources, "ui_spells"), false);
 
     {
-        Sprite *sprite = data->sprite_backdrop;
+        Sprite *sprite = get_sprite(data->sprite_resources, "backdrop");
 
-        size_t index = GetRandomValue(0, data->backdrop_textures_count - 1);
-        Texture2D texture = data->backdrop_textures[index]->texture;
+        size_t index = GetRandomValue(0, texture_resource_array_get_count(data->backdrop_texture_resources) - 1);
+        TextureResource *texture_resource = texture_resource_array_get(data->backdrop_texture_resources, index);
+        Texture2D texture = texture_resource_get_texture(texture_resource);
 
         sprite_set_texture(sprite, texture);
     }
@@ -107,9 +111,9 @@ void game_scene_tick(const Scene *scene, float delta)
 
     if (IsKeyPressed(KEY_Z))
     {
-        for (size_t i = 0; i < data->enemy_array.count; ++i)
+        for (size_t i = 0; i < enemy_array_get_count(data->enemy_array); ++i)
         {
-            Enemy *enemy = data->enemy_array.enemies[i];
+            Enemy *enemy = enemy_array_get(data->enemy_array, i);
 
             int move_state = GetRandomValue(0, 1);
             int dx = GetRandomValue(-1, 1);
@@ -140,10 +144,17 @@ void game_scene_tick(const Scene *scene, float delta)
 
     if (IsKeyPressed(KEY_C))
     {
-        sprite_set_is_visible(data->sprite_ui_inventory, !sprite_get_is_visible(data->sprite_ui_inventory));
-        sprite_set_is_visible(data->sprite_ui_equipment, !sprite_get_is_visible(data->sprite_ui_equipment));
-        sprite_set_is_visible(data->sprite_ui_character_sheet, !sprite_get_is_visible(data->sprite_ui_character_sheet));
-        sprite_set_is_visible(data->sprite_ui_minimap, !sprite_get_is_visible(data->sprite_ui_minimap));
+        Sprite *sprites[] = {
+            get_sprite(data->sprite_resources, "ui_inventory"),
+            get_sprite(data->sprite_resources, "ui_equipment"),
+            get_sprite(data->sprite_resources, "ui_character_sheet"),
+            get_sprite(data->sprite_resources, "ui_minimap")};
+
+        for (size_t i = 0; i < sizeof(sprites) / sizeof *sprites; ++i)
+        {
+            Sprite *sprite = sprites[i];
+            sprite_set_is_visible(sprite, !sprite_get_is_visible(sprite));
+        }
     }
 
     if (IsKeyPressed(KEY_Q) && !IsKeyPressed(KEY_E))
@@ -254,12 +265,12 @@ static void game_scene_draw_world(const Scene *scene)
         float radius;
     };
 
-    sprite_draw(data->sprite_backdrop);
+    sprite_draw(get_sprite(data->sprite_resources, "backdrop"));
 
-    sprite_draw(data->sprite_xm2y3r);
-    sprite_draw(data->sprite_xm1y3r);
-    sprite_draw(data->sprite_x1y3l);
-    sprite_draw(data->sprite_x2y3l);
+    sprite_draw(get_sprite(data->sprite_resources, "xm2y3r"));
+    sprite_draw(get_sprite(data->sprite_resources, "xm1y3r"));
+    sprite_draw(get_sprite(data->sprite_resources, "x1y3l"));
+    sprite_draw(get_sprite(data->sprite_resources, "x2y3l"));
 
     {
         struct enemy_position_check checks[] = {
@@ -278,9 +289,9 @@ static void game_scene_draw_world(const Scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (size_t j = 0; j < data->enemy_array.count; ++j)
+                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
                 {
-                    Enemy *enemy = data->enemy_array.enemies[j];
+                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
                     if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
@@ -290,16 +301,16 @@ static void game_scene_draw_world(const Scene *scene)
         }
     }
 
-    sprite_draw(data->sprite_xm2y3f);
-    sprite_draw(data->sprite_xm1y3f);
-    sprite_draw(data->sprite_x0y3f);
-    sprite_draw(data->sprite_x1y3f);
-    sprite_draw(data->sprite_x2y3f);
+    sprite_draw(get_sprite(data->sprite_resources, "xm2y3f"));
+    sprite_draw(get_sprite(data->sprite_resources, "xm1y3f"));
+    sprite_draw(get_sprite(data->sprite_resources, "x0y3f"));
+    sprite_draw(get_sprite(data->sprite_resources, "x1y3f"));
+    sprite_draw(get_sprite(data->sprite_resources, "x2y3f"));
 
-    sprite_draw(data->sprite_xm2y2r);
-    sprite_draw(data->sprite_xm1y2r);
-    sprite_draw(data->sprite_x1y2l);
-    sprite_draw(data->sprite_x2y2l);
+    sprite_draw(get_sprite(data->sprite_resources, "xm2y2r"));
+    sprite_draw(get_sprite(data->sprite_resources, "xm1y2r"));
+    sprite_draw(get_sprite(data->sprite_resources, "x1y2l"));
+    sprite_draw(get_sprite(data->sprite_resources, "x2y2l"));
 
     {
         struct enemy_position_check checks[] = {
@@ -316,9 +327,9 @@ static void game_scene_draw_world(const Scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (size_t j = 0; j < data->enemy_array.count; ++j)
+                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
                 {
-                    Enemy *enemy = data->enemy_array.enemies[j];
+                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
                     if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
@@ -328,12 +339,12 @@ static void game_scene_draw_world(const Scene *scene)
         }
     }
 
-    sprite_draw(data->sprite_xm1y2f);
-    sprite_draw(data->sprite_x0y2f);
-    sprite_draw(data->sprite_x1y2f);
+    sprite_draw(get_sprite(data->sprite_resources, "xm1y2f"));
+    sprite_draw(get_sprite(data->sprite_resources, "x0y2f"));
+    sprite_draw(get_sprite(data->sprite_resources, "x1y2f"));
 
-    sprite_draw(data->sprite_xm1y1r);
-    sprite_draw(data->sprite_x1y1l);
+    sprite_draw(get_sprite(data->sprite_resources, "xm1y1r"));
+    sprite_draw(get_sprite(data->sprite_resources, "x1y1l"));
 
     {
         struct enemy_position_check checks[] = {
@@ -350,9 +361,9 @@ static void game_scene_draw_world(const Scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (size_t j = 0; j < data->enemy_array.count; ++j)
+                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
                 {
-                    Enemy *enemy = data->enemy_array.enemies[j];
+                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
                     if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
@@ -362,32 +373,32 @@ static void game_scene_draw_world(const Scene *scene)
         }
     }
 
-    sprite_draw(data->sprite_xm1y1f);
-    sprite_draw(data->sprite_x0y1f);
-    sprite_draw(data->sprite_x1y1f);
+    sprite_draw(get_sprite(data->sprite_resources, "xm1y1f"));
+    sprite_draw(get_sprite(data->sprite_resources, "x0y1f"));
+    sprite_draw(get_sprite(data->sprite_resources, "x1y1f"));
 
-    sprite_draw(data->sprite_xm1y0r);
-    sprite_draw(data->sprite_x1y0l);
+    sprite_draw(get_sprite(data->sprite_resources, "xm1y0r"));
+    sprite_draw(get_sprite(data->sprite_resources, "x1y0l"));
 }
 static void game_scene_draw_main(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    sprite_draw(data->sprite_main);
+    sprite_draw(get_sprite(data->sprite_resources, "main"));
 }
 static void game_scene_draw_ui(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    sprite_draw(data->sprite_ui_inventory);
-    sprite_draw(data->sprite_ui_button_camp);
-    sprite_draw(data->sprite_ui_equipment);
-    sprite_draw(data->sprite_ui_character_sheet);
-    sprite_draw(data->sprite_ui_minimap);
-    sprite_draw(data->sprite_ui_spells);
-    sprite_draw(data->sprite_ui_portrait_hands);
-    sprite_draw(data->sprite_ui_compass);
-    sprite_draw(data->sprite_ui_buttons_direction);
+    sprite_draw(get_sprite(data->sprite_resources, "ui_inventory"));
+    sprite_draw(get_sprite(data->sprite_resources, "ui_button_camp"));
+    sprite_draw(get_sprite(data->sprite_resources, "ui_equipment"));
+    sprite_draw(get_sprite(data->sprite_resources, "ui_character_sheet"));
+    sprite_draw(get_sprite(data->sprite_resources, "ui_minimap"));
+    sprite_draw(get_sprite(data->sprite_resources, "ui_spells"));
+    sprite_draw(get_sprite(data->sprite_resources, "ui_portrait_hands"));
+    sprite_draw(get_sprite(data->sprite_resources, "ui_compass"));
+    sprite_draw(get_sprite(data->sprite_resources, "ui_buttons_direction"));
 }
 
 static void game_scene_init_coords(const Scene *scene)
@@ -446,170 +457,142 @@ static void game_scene_init_textures(const Scene *scene)
 
     //
 
-    data->texture_resource_array.count = 0;
-    data->texture_resource_array.capacity = 1;
-    data->texture_resource_array.texture_resources = malloc(sizeof *data->texture_resource_array.texture_resources * data->texture_resource_array.capacity);
+    data->texture_resources = texture_resource_array_create();
 
-    if (data->texture_resource_array.texture_resources == NULL)
-    {
-        fprintf(stderr, "Error creating texture resource array\n");
-        exit(1);
-    }
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop01.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop02.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop03.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop04.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop05.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop06.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop07.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop08.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop09.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop10.png"));
 
-    for (size_t i = 0; i < data->texture_resource_array.capacity; ++i)
-    {
-        TextureResource *texture_resource = &data->texture_resource_array.texture_resources[i];
-        *texture_resource = (TextureResource){0};
-    }
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop11.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop12.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop13.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop14.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop15.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop16.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop17.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop18.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop19.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop20.png"));
 
-    //
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop21.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop22.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop23.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop24.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop25.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop26.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop27.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop28.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop29.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop30.png"));
 
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop01.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop02.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop03.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop04.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop05.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop06.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop07.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop08.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop09.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop10.png");
-
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop11.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop12.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop13.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop14.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop15.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop16.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop17.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop18.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop19.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop20.png");
-
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop21.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop22.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop23.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop24.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop25.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop26.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop27.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop28.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop29.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop30.png");
-
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop31.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop32.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop33.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop34.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop35.png");
-    load_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop36.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop31.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop32.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop33.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop34.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop35.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop36.png"));
 
     //
 
-    load_texture_resource(&data->texture_resource_array, "res/xm1y0r.png");
-    load_texture_resource(&data->texture_resource_array, "res/x1y0l.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y0r.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y0l.png"));
 
-    load_texture_resource(&data->texture_resource_array, "res/xm1y1f.png");
-    load_texture_resource(&data->texture_resource_array, "res/x0y1f.png");
-    load_texture_resource(&data->texture_resource_array, "res/x1y1f.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y1f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y1f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y1f.png"));
 
-    load_texture_resource(&data->texture_resource_array, "res/xm1y1r.png");
-    load_texture_resource(&data->texture_resource_array, "res/x1y1l.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y1r.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y1l.png"));
 
-    load_texture_resource(&data->texture_resource_array, "res/xm1y2f.png");
-    load_texture_resource(&data->texture_resource_array, "res/x0y2f.png");
-    load_texture_resource(&data->texture_resource_array, "res/x1y2f.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y2f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y2f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y2f.png"));
 
-    load_texture_resource(&data->texture_resource_array, "res/xm2y2r.png");
-    load_texture_resource(&data->texture_resource_array, "res/xm1y2r.png");
-    load_texture_resource(&data->texture_resource_array, "res/x1y2l.png");
-    load_texture_resource(&data->texture_resource_array, "res/x2y2l.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y2r.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y2r.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y2l.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y2l.png"));
 
-    load_texture_resource(&data->texture_resource_array, "res/xm2y3f.png");
-    load_texture_resource(&data->texture_resource_array, "res/xm1y3f.png");
-    load_texture_resource(&data->texture_resource_array, "res/x0y3f.png");
-    load_texture_resource(&data->texture_resource_array, "res/x1y3f.png");
-    load_texture_resource(&data->texture_resource_array, "res/x2y3f.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y3f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y3f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y3f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y3f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y3f.png"));
 
-    load_texture_resource(&data->texture_resource_array, "res/xm2y3r.png");
-    load_texture_resource(&data->texture_resource_array, "res/xm1y3r.png");
-    load_texture_resource(&data->texture_resource_array, "res/x1y3l.png");
-    load_texture_resource(&data->texture_resource_array, "res/x2y3l.png");
-
-    //
-
-    load_texture_resource(&data->texture_resource_array, "res/main5.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y3r.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y3r.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y3l.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y3l.png"));
 
     //
 
-    load_texture_resource(&data->texture_resource_array, "res/ui_inventory.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_button_camp.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_equipment.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_character_sheet.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_minimap.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_spells.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_portrait_hands.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_compass_north.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_compass_east.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_compass_south.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_compass_west.png");
-    load_texture_resource(&data->texture_resource_array, "res/ui_buttons_direction.png");
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/main5.png"));
 
     //
 
-    data->backdrop_textures_count = 0;
-    data->backdrop_textures_capacity = 1;
-    data->backdrop_textures = malloc(sizeof *data->backdrop_textures * data->backdrop_textures_capacity);
-
-    if (data->backdrop_textures == NULL)
-    {
-        fprintf(stderr, "Error creating backdrop textures array\n");
-        exit(1);
-    }
-
-    memset(data->backdrop_textures, 0, sizeof *data->backdrop_textures * data->backdrop_textures_capacity);
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_inventory.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_button_camp.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_equipment.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_character_sheet.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_minimap.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_spells.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_portrait_hands.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_north.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_east.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_south.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_west.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_buttons_direction.png"));
 
     //
 
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop01.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop02.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop03.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop04.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop05.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop06.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop07.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop08.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop09.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop10.png"));
+    data->backdrop_texture_resources = texture_resource_array_create();
 
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop11.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop12.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop13.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop14.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop15.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop16.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop17.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop18.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop19.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop20.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop01.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop02.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop03.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop04.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop05.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop06.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop07.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop08.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop09.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop10.png"));
 
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop21.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop22.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop23.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop24.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop25.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop26.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop27.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop28.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop29.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop30.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop11.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop12.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop13.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop14.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop15.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop16.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop17.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop18.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop19.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop20.png"));
 
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop31.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop32.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop33.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop34.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop35.png"));
-    add_backdrop_texture(scene, get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop36.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop21.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop22.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop23.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop24.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop25.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop26.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop27.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop28.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop29.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop30.png"));
+
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop31.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop32.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop33.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop34.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop35.png"));
+    texture_resource_array_add(data->backdrop_texture_resources, get_texture_resource(data->texture_resources, "res/backdrops/backdrop36.png"));
 }
 static void game_scene_init_sprites(const Scene *scene)
 {
@@ -621,155 +604,85 @@ static void game_scene_init_sprites(const Scene *scene)
 
     //
 
-    data->sprite_backdrop = sprite_create(get_texture_resource(&data->texture_resource_array, "res/backdrops/backdrop01.png")->texture, (float)coords.backdrop.x, (float)coords.backdrop.y, (float)coords.backdrop.w, (float)coords.backdrop.h);
+    data->sprite_resources = sprite_resource_array_create();
 
-    data->sprite_xm1y0r = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm1y0r.png")->texture, (float)coords.xm1y0r.x, (float)coords.xm1y0r.y, (float)coords.xm1y0r.w, (float)coords.xm1y0r.h);
-    data->sprite_x1y0l = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x1y0l.png")->texture, (float)coords.x1y0l.x, (float)coords.x1y0l.y, (float)coords.x1y0l.w, (float)coords.x1y0l.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("backdrop", sprite_create(get_texture(data->texture_resources, "res/backdrops/backdrop01.png"), (float)coords.backdrop.x, (float)coords.backdrop.y, (float)coords.backdrop.w, (float)coords.backdrop.h)));
 
-    data->sprite_xm1y1f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm1y1f.png")->texture, (float)coords.xm1y1f.x, (float)coords.xm1y1f.y, (float)coords.xm1y1f.w, (float)coords.xm1y1f.h);
-    data->sprite_x0y1f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x0y1f.png")->texture, (float)coords.x0y1f.x, (float)coords.x0y1f.y, (float)coords.x0y1f.w, (float)coords.x0y1f.h);
-    data->sprite_x1y1f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x1y1f.png")->texture, (float)coords.x1y1f.x, (float)coords.x1y1f.y, (float)coords.x1y1f.w, (float)coords.x1y1f.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm1y0r", sprite_create(get_texture(data->texture_resources, "res/xm1y0r.png"), (float)coords.xm1y0r.x, (float)coords.xm1y0r.y, (float)coords.xm1y0r.w, (float)coords.xm1y0r.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x1y0l", sprite_create(get_texture(data->texture_resources, "res/x1y0l.png"), (float)coords.x1y0l.x, (float)coords.x1y0l.y, (float)coords.x1y0l.w, (float)coords.x1y0l.h)));
 
-    data->sprite_xm1y1r = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm1y1r.png")->texture, (float)coords.xm1y1r.x, (float)coords.xm1y1r.y, (float)coords.xm1y1r.w, (float)coords.xm1y1r.h);
-    data->sprite_x1y1l = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x1y1l.png")->texture, (float)coords.x1y1l.x, (float)coords.x1y1l.y, (float)coords.x1y1l.w, (float)coords.x1y1l.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm1y1f", sprite_create(get_texture(data->texture_resources, "res/xm1y1f.png"), (float)coords.xm1y1f.x, (float)coords.xm1y1f.y, (float)coords.xm1y1f.w, (float)coords.xm1y1f.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x0y1f", sprite_create(get_texture(data->texture_resources, "res/x0y1f.png"), (float)coords.x0y1f.x, (float)coords.x0y1f.y, (float)coords.x0y1f.w, (float)coords.x0y1f.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x1y1f", sprite_create(get_texture(data->texture_resources, "res/x1y1f.png"), (float)coords.x1y1f.x, (float)coords.x1y1f.y, (float)coords.x1y1f.w, (float)coords.x1y1f.h)));
 
-    data->sprite_xm1y2f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm1y2f.png")->texture, (float)coords.xm1y2f.x, (float)coords.xm1y2f.y, (float)coords.xm1y2f.w, (float)coords.xm1y2f.h);
-    data->sprite_x0y2f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x0y2f.png")->texture, (float)coords.x0y2f.x, (float)coords.x0y2f.y, (float)coords.x0y2f.w, (float)coords.x0y2f.h);
-    data->sprite_x1y2f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x1y2f.png")->texture, (float)coords.x1y2f.x, (float)coords.x1y2f.y, (float)coords.x1y2f.w, (float)coords.x1y2f.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm1y1r", sprite_create(get_texture(data->texture_resources, "res/xm1y1r.png"), (float)coords.xm1y1r.x, (float)coords.xm1y1r.y, (float)coords.xm1y1r.w, (float)coords.xm1y1r.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x1y1l", sprite_create(get_texture(data->texture_resources, "res/x1y1l.png"), (float)coords.x1y1l.x, (float)coords.x1y1l.y, (float)coords.x1y1l.w, (float)coords.x1y1l.h)));
 
-    data->sprite_xm2y2r = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm2y2r.png")->texture, (float)coords.xm2y2r.x, (float)coords.xm2y2r.y, (float)coords.xm2y2r.w, (float)coords.xm2y2r.h);
-    data->sprite_xm1y2r = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm1y2r.png")->texture, (float)coords.xm1y2r.x, (float)coords.xm1y2r.y, (float)coords.xm1y2r.w, (float)coords.xm1y2r.h);
-    data->sprite_x1y2l = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x1y2l.png")->texture, (float)coords.x1y2l.x, (float)coords.x1y2l.y, (float)coords.x1y2l.w, (float)coords.x1y2l.h);
-    data->sprite_x2y2l = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x2y2l.png")->texture, (float)coords.x2y2l.x, (float)coords.x2y2l.y, (float)coords.x2y2l.w, (float)coords.x2y2l.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm1y2f", sprite_create(get_texture(data->texture_resources, "res/xm1y2f.png"), (float)coords.xm1y2f.x, (float)coords.xm1y2f.y, (float)coords.xm1y2f.w, (float)coords.xm1y2f.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x0y2f", sprite_create(get_texture(data->texture_resources, "res/x0y2f.png"), (float)coords.x0y2f.x, (float)coords.x0y2f.y, (float)coords.x0y2f.w, (float)coords.x0y2f.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x1y2f", sprite_create(get_texture(data->texture_resources, "res/x1y2f.png"), (float)coords.x1y2f.x, (float)coords.x1y2f.y, (float)coords.x1y2f.w, (float)coords.x1y2f.h)));
 
-    data->sprite_xm2y3f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm2y3f.png")->texture, (float)coords.xm2y3f.x, (float)coords.xm2y3f.y, (float)coords.xm2y3f.w, (float)coords.xm2y3f.h);
-    data->sprite_xm1y3f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm1y3f.png")->texture, (float)coords.xm1y3f.x, (float)coords.xm1y3f.y, (float)coords.xm1y3f.w, (float)coords.xm1y3f.h);
-    data->sprite_x0y3f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x0y3f.png")->texture, (float)coords.x0y3f.x, (float)coords.x0y3f.y, (float)coords.x0y3f.w, (float)coords.x0y3f.h);
-    data->sprite_x1y3f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x1y3f.png")->texture, (float)coords.x1y3f.x, (float)coords.x1y3f.y, (float)coords.x1y3f.w, (float)coords.x1y3f.h);
-    data->sprite_x2y3f = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x2y3f.png")->texture, (float)coords.x2y3f.x, (float)coords.x2y3f.y, (float)coords.x2y3f.w, (float)coords.x2y3f.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm2y2r", sprite_create(get_texture(data->texture_resources, "res/xm2y2r.png"), (float)coords.xm2y2r.x, (float)coords.xm2y2r.y, (float)coords.xm2y2r.w, (float)coords.xm2y2r.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm1y2r", sprite_create(get_texture(data->texture_resources, "res/xm1y2r.png"), (float)coords.xm1y2r.x, (float)coords.xm1y2r.y, (float)coords.xm1y2r.w, (float)coords.xm1y2r.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x1y2l", sprite_create(get_texture(data->texture_resources, "res/x1y2l.png"), (float)coords.x1y2l.x, (float)coords.x1y2l.y, (float)coords.x1y2l.w, (float)coords.x1y2l.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x2y2l", sprite_create(get_texture(data->texture_resources, "res/x2y2l.png"), (float)coords.x2y2l.x, (float)coords.x2y2l.y, (float)coords.x2y2l.w, (float)coords.x2y2l.h)));
 
-    data->sprite_xm2y3r = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm2y3r.png")->texture, (float)coords.xm2y3r.x, (float)coords.xm2y3r.y, (float)coords.xm2y3r.w, (float)coords.xm2y3r.h);
-    data->sprite_xm1y3r = sprite_create(get_texture_resource(&data->texture_resource_array, "res/xm1y3r.png")->texture, (float)coords.xm1y3r.x, (float)coords.xm1y3r.y, (float)coords.xm1y3r.w, (float)coords.xm1y3r.h);
-    data->sprite_x1y3l = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x1y3l.png")->texture, (float)coords.x1y3l.x, (float)coords.x1y3l.y, (float)coords.x1y3l.w, (float)coords.x1y3l.h);
-    data->sprite_x2y3l = sprite_create(get_texture_resource(&data->texture_resource_array, "res/x2y3l.png")->texture, (float)coords.x2y3l.x, (float)coords.x2y3l.y, (float)coords.x2y3l.w, (float)coords.x2y3l.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm2y3f", sprite_create(get_texture(data->texture_resources, "res/xm2y3f.png"), (float)coords.xm2y3f.x, (float)coords.xm2y3f.y, (float)coords.xm2y3f.w, (float)coords.xm2y3f.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm1y3f", sprite_create(get_texture(data->texture_resources, "res/xm1y3f.png"), (float)coords.xm1y3f.x, (float)coords.xm1y3f.y, (float)coords.xm1y3f.w, (float)coords.xm1y3f.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x0y3f", sprite_create(get_texture(data->texture_resources, "res/x0y3f.png"), (float)coords.x0y3f.x, (float)coords.x0y3f.y, (float)coords.x0y3f.w, (float)coords.x0y3f.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x1y3f", sprite_create(get_texture(data->texture_resources, "res/x1y3f.png"), (float)coords.x1y3f.x, (float)coords.x1y3f.y, (float)coords.x1y3f.w, (float)coords.x1y3f.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x2y3f", sprite_create(get_texture(data->texture_resources, "res/x2y3f.png"), (float)coords.x2y3f.x, (float)coords.x2y3f.y, (float)coords.x2y3f.w, (float)coords.x2y3f.h)));
 
-    data->sprite_main = sprite_create(get_texture_resource(&data->texture_resource_array, "res/main5.png")->texture, (float)coords.main.x, (float)coords.main.y, (float)coords.main.w, (float)coords.main.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm2y3r", sprite_create(get_texture(data->texture_resources, "res/xm2y3r.png"), (float)coords.xm2y3r.x, (float)coords.xm2y3r.y, (float)coords.xm2y3r.w, (float)coords.xm2y3r.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("xm1y3r", sprite_create(get_texture(data->texture_resources, "res/xm1y3r.png"), (float)coords.xm1y3r.x, (float)coords.xm1y3r.y, (float)coords.xm1y3r.w, (float)coords.xm1y3r.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x1y3l", sprite_create(get_texture(data->texture_resources, "res/x1y3l.png"), (float)coords.x1y3l.x, (float)coords.x1y3l.y, (float)coords.x1y3l.w, (float)coords.x1y3l.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("x2y3l", sprite_create(get_texture(data->texture_resources, "res/x2y3l.png"), (float)coords.x2y3l.x, (float)coords.x2y3l.y, (float)coords.x2y3l.w, (float)coords.x2y3l.h)));
 
-    data->sprite_ui_inventory = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_inventory.png")->texture, (float)coords.ui_inventory.x, (float)coords.ui_inventory.y, (float)coords.ui_inventory.w, (float)coords.ui_inventory.h);
-    data->sprite_ui_button_camp = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_button_camp.png")->texture, (float)coords.ui_camp_button.x, (float)coords.ui_camp_button.y, (float)coords.ui_camp_button.w, (float)coords.ui_camp_button.h);
-    data->sprite_ui_equipment = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_equipment.png")->texture, (float)coords.ui_equipment.x, (float)coords.ui_equipment.y, (float)coords.ui_equipment.w, (float)coords.ui_equipment.h);
-    data->sprite_ui_character_sheet = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_character_sheet.png")->texture, (float)coords.ui_character_sheet.x, (float)coords.ui_character_sheet.y, (float)coords.ui_character_sheet.w, (float)coords.ui_character_sheet.h);
-    data->sprite_ui_minimap = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_minimap.png")->texture, (float)coords.ui_minimap.x, (float)coords.ui_minimap.y, (float)coords.ui_minimap.w, (float)coords.ui_minimap.h);
-    data->sprite_ui_spells = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_spells.png")->texture, (float)coords.ui_spells.x, (float)coords.ui_spells.y, (float)coords.ui_spells.w, (float)coords.ui_spells.h);
-    data->sprite_ui_portrait_hands = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_portrait_hands.png")->texture, (float)coords.ui_portrait_hands.x, (float)coords.ui_portrait_hands.y, (float)coords.ui_portrait_hands.w, (float)coords.ui_portrait_hands.h);
-    data->sprite_ui_compass = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_compass_north.png")->texture, (float)coords.ui_compass.x, (float)coords.ui_compass.y, (float)coords.ui_compass.w, (float)coords.ui_compass.h);
-    data->sprite_ui_buttons_direction = sprite_create(get_texture_resource(&data->texture_resource_array, "res/ui_buttons_direction.png")->texture, (float)coords.ui_movement_buttons.x, (float)coords.ui_movement_buttons.y, (float)coords.ui_movement_buttons.w, (float)coords.ui_movement_buttons.h);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("main", sprite_create(get_texture(data->texture_resources, "res/main5.png"), (float)coords.main.x, (float)coords.main.y, (float)coords.main.w, (float)coords.main.h)));
 
-    //
-
-    data->sprites_count = 0;
-    data->sprites_capacity = 37;
-    data->sprites = (Sprite **)malloc(sizeof *data->sprites * data->sprites_capacity);
-
-    if (data->sprites == NULL)
-    {
-        fprintf(stderr, "Cannot malloc sprites array!\n");
-        exit(1);
-    }
-
-    memset(data->sprites, 0, sizeof *data->sprites * data->sprites_capacity);
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_inventory", sprite_create(get_texture(data->texture_resources, "res/ui_inventory.png"), (float)coords.ui_inventory.x, (float)coords.ui_inventory.y, (float)coords.ui_inventory.w, (float)coords.ui_inventory.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_button_camp", sprite_create(get_texture(data->texture_resources, "res/ui_button_camp.png"), (float)coords.ui_camp_button.x, (float)coords.ui_camp_button.y, (float)coords.ui_camp_button.w, (float)coords.ui_camp_button.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_equipment", sprite_create(get_texture(data->texture_resources, "res/ui_equipment.png"), (float)coords.ui_equipment.x, (float)coords.ui_equipment.y, (float)coords.ui_equipment.w, (float)coords.ui_equipment.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_character_sheet", sprite_create(get_texture(data->texture_resources, "res/ui_character_sheet.png"), (float)coords.ui_character_sheet.x, (float)coords.ui_character_sheet.y, (float)coords.ui_character_sheet.w, (float)coords.ui_character_sheet.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_minimap", sprite_create(get_texture(data->texture_resources, "res/ui_minimap.png"), (float)coords.ui_minimap.x, (float)coords.ui_minimap.y, (float)coords.ui_minimap.w, (float)coords.ui_minimap.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_spells", sprite_create(get_texture(data->texture_resources, "res/ui_spells.png"), (float)coords.ui_spells.x, (float)coords.ui_spells.y, (float)coords.ui_spells.w, (float)coords.ui_spells.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_portrait_hands", sprite_create(get_texture(data->texture_resources, "res/ui_portrait_hands.png"), (float)coords.ui_portrait_hands.x, (float)coords.ui_portrait_hands.y, (float)coords.ui_portrait_hands.w, (float)coords.ui_portrait_hands.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_compass", sprite_create(get_texture(data->texture_resources, "res/ui_compass_north.png"), (float)coords.ui_compass.x, (float)coords.ui_compass.y, (float)coords.ui_compass.w, (float)coords.ui_compass.h)));
+    sprite_resource_array_add(data->sprite_resources, sprite_resource_create("ui_buttons_direction", sprite_create(get_texture(data->texture_resources, "res/ui_buttons_direction.png"), (float)coords.ui_movement_buttons.x, (float)coords.ui_movement_buttons.y, (float)coords.ui_movement_buttons.w, (float)coords.ui_movement_buttons.h)));
 
     //
 
-    data->sprites[data->sprites_count++] = data->sprite_main;
+    data->wall_sprite_resources = sprite_resource_array_create();
 
-    data->sprites[data->sprites_count++] = data->sprite_ui_inventory;
-    data->sprites[data->sprites_count++] = data->sprite_ui_button_camp;
-    data->sprites[data->sprites_count++] = data->sprite_ui_equipment;
-    data->sprites[data->sprites_count++] = data->sprite_ui_character_sheet;
-    data->sprites[data->sprites_count++] = data->sprite_ui_minimap;
-    data->sprites[data->sprites_count++] = data->sprite_ui_spells;
-    data->sprites[data->sprites_count++] = data->sprite_ui_portrait_hands;
-    data->sprites[data->sprites_count++] = data->sprite_ui_compass;
-    data->sprites[data->sprites_count++] = data->sprite_ui_buttons_direction;
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y0r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y0l"));
 
-    data->sprites[data->sprites_count++] = data->sprite_backdrop;
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y1f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x0y1f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y1f"));
 
-    data->sprites[data->sprites_count++] = data->sprite_xm1y0r;
-    data->sprites[data->sprites_count++] = data->sprite_x1y0l;
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y1r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y1l"));
 
-    data->sprites[data->sprites_count++] = data->sprite_xm1y1f;
-    data->sprites[data->sprites_count++] = data->sprite_x0y1f;
-    data->sprites[data->sprites_count++] = data->sprite_x1y1f;
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y2f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x0y2f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y2f"));
 
-    data->sprites[data->sprites_count++] = data->sprite_xm1y1r;
-    data->sprites[data->sprites_count++] = data->sprite_x1y1l;
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm2y2r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y2r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y2l"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x2y2l"));
 
-    data->sprites[data->sprites_count++] = data->sprite_xm1y2f;
-    data->sprites[data->sprites_count++] = data->sprite_x0y2f;
-    data->sprites[data->sprites_count++] = data->sprite_x1y2f;
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm2y3f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y3f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x0y3f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y3f"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x2y3f"));
 
-    data->sprites[data->sprites_count++] = data->sprite_xm2y2r;
-    data->sprites[data->sprites_count++] = data->sprite_xm1y2r;
-    data->sprites[data->sprites_count++] = data->sprite_x1y2l;
-    data->sprites[data->sprites_count++] = data->sprite_x2y2l;
-
-    data->sprites[data->sprites_count++] = data->sprite_xm2y3f;
-    data->sprites[data->sprites_count++] = data->sprite_xm1y3f;
-    data->sprites[data->sprites_count++] = data->sprite_x0y3f;
-    data->sprites[data->sprites_count++] = data->sprite_x1y3f;
-    data->sprites[data->sprites_count++] = data->sprite_x2y3f;
-
-    data->sprites[data->sprites_count++] = data->sprite_xm2y3r;
-    data->sprites[data->sprites_count++] = data->sprite_xm1y3r;
-    data->sprites[data->sprites_count++] = data->sprite_x1y3l;
-    data->sprites[data->sprites_count++] = data->sprite_x2y3l;
-
-    //
-
-    data->wall_sprites_count = 0;
-    data->wall_sprites_capacity = 23;
-    data->wall_sprites = (Sprite **)malloc(sizeof *data->wall_sprites * data->wall_sprites_capacity);
-
-    if (data->wall_sprites == NULL)
-    {
-        fprintf(stderr, "Error malloc wall_sprites!\n");
-        exit(1);
-    }
-
-    memset(data->wall_sprites, 0, sizeof *data->wall_sprites * data->wall_sprites_capacity);
-
-    //
-
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y0r;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y0l;
-
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y1f;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x0y1f;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y1f;
-
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y1r;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y1l;
-
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y2f;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x0y2f;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y2f;
-
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm2y2r;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y2r;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y2l;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x2y2l;
-
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm2y3f;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y3f;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x0y3f;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y3f;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x2y3f;
-
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm2y3r;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_xm1y3r;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x1y3l;
-    data->wall_sprites[data->wall_sprites_count++] = data->sprite_x2y3l;
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm2y3r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "xm1y3r"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x1y3l"));
+    sprite_resource_array_add(data->wall_sprite_resources, get_sprite_resource(data->sprite_resources, "x2y3l"));
 }
 static void game_scene_init_map(const Scene *scene)
 {
@@ -812,37 +725,12 @@ static void game_scene_init_enemies(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    data->enemy_array.count = 0;
-    data->enemy_array.capacity = 1;
-    data->enemy_array.enemies = malloc(sizeof *data->enemy_array.enemies * data->enemy_array.capacity);
-
-    if (data->enemy_array.enemies == NULL)
-    {
-        fprintf(stderr, "Error creating enemies array\n");
-        exit(1);
-    }
-
-    memset(data->enemy_array.enemies, 0, sizeof *data->enemy_array.enemies * data->enemy_array.capacity);
+    data->enemy_array = enemy_array_create();
 
     int num_enemies = 16;
 
     for (int i = 0; i < num_enemies; ++i)
     {
-        if (data->enemy_array.count == data->enemy_array.capacity)
-        {
-            Enemy **ptr = realloc(data->enemy_array.enemies, sizeof *data->enemy_array.enemies * data->enemy_array.capacity * 2);
-
-            if (ptr == NULL)
-            {
-                fprintf(stderr, "Error reallocating enemies array\n");
-                exit(1);
-            }
-
-            memset(&ptr[data->enemy_array.capacity], 0, sizeof *data->enemy_array.enemies * data->enemy_array.capacity);
-            data->enemy_array.enemies = ptr;
-            data->enemy_array.capacity *= 2;
-        }
-
         int x = GetRandomValue(1, map_get_width(data->map) - 2);
         int y = GetRandomValue(1, map_get_height(data->map) - 2);
         CardinalDirection facing = CARDINAL_DIRECTION_NORTH;
@@ -854,7 +742,7 @@ static void game_scene_init_enemies(const Scene *scene)
 
         Enemy *enemy = enemy_create(x, y, facing, health, color);
 
-        data->enemy_array.enemies[data->enemy_array.count++] = enemy;
+        enemy_array_add(data->enemy_array, enemy);
     }
 }
 static void game_scene_init_dungeon_camera(const Scene *scene)
@@ -874,51 +762,35 @@ static void game_scene_free_textures(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    //
+    texture_resource_array_free(data->backdrop_texture_resources);
+    data->backdrop_texture_resources = NULL;
 
-    data->backdrop_textures_count = 0;
-    data->backdrop_textures_capacity = 0;
-    free(data->backdrop_textures);
-    data->backdrop_textures = NULL;
-
-    //
-
-    for (size_t i = 0; i < data->texture_resource_array.count; ++i)
+    for (size_t i = 0; i < texture_resource_array_get_count(data->texture_resources); ++i)
     {
-        TextureResource *texture_resource = &data->texture_resource_array.texture_resources[i];
-
-        free(texture_resource->name);
-        UnloadTexture(texture_resource->texture);
+        TextureResource *texture_resource = texture_resource_array_get(data->texture_resources, i);
+        // TODO: UnloadTexture here instead of inside texture resource?
+        texture_resource_free(texture_resource);
     }
 
-    free(data->texture_resource_array.texture_resources);
-    data->texture_resource_array = (TextureResourceArray){0};
+    texture_resource_array_free(data->texture_resources);
+    data->texture_resources = NULL;
 }
 static void game_scene_free_sprites(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    //
+    sprite_resource_array_free(data->wall_sprite_resources);
+    data->wall_sprite_resources = NULL;
 
-    for (size_t i = 0; i < data->sprites_count; ++i)
+    for (size_t i = 0; i < sprite_resource_array_get_count(data->sprite_resources); ++i)
     {
-        Sprite *sprite = data->sprites[i];
-        sprite_free(sprite);
+        SpriteResource *sprite_resource = sprite_resource_array_get(data->sprite_resources, i);
+        sprite_free(sprite_resource_get_sprite(sprite_resource));
+        sprite_resource_free(sprite_resource);
     }
 
-    //
-
-    data->sprites_count = 0;
-    data->sprites_capacity = 0;
-    free(data->sprites);
-    data->sprites = NULL;
-
-    //
-
-    data->wall_sprites_capacity = 0;
-    data->wall_sprites_count = 0;
-    free(data->wall_sprites);
-    data->wall_sprites = NULL;
+    sprite_resource_array_free(data->sprite_resources);
+    data->sprite_resources = NULL;
 }
 static void game_scene_free_map(const Scene *scene)
 {
@@ -936,14 +808,13 @@ static void game_scene_free_enemies(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    for (size_t i = 0; i < data->enemy_array.count; ++i)
+    for (size_t i = 0; i < enemy_array_get_count(data->enemy_array); ++i)
     {
-        Enemy *enemy = data->enemy_array.enemies[i];
+        Enemy *enemy = enemy_array_get(data->enemy_array, i);
         enemy_free(enemy);
     }
 
-    free(data->enemy_array.enemies);
-    data->enemy_array = (EnemyArray){0};
+    enemy_array_free(data->enemy_array);
 }
 static void game_scene_free_dungeon_camera(const Scene *scene)
 {
@@ -969,33 +840,41 @@ static void game_scene_update_compass(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
+    TextureResource *texture_resource = NULL;
+
     switch (player_get_facing(data->player))
     {
     case 0:
-        sprite_set_texture(data->sprite_ui_compass, get_texture_resource(&data->texture_resource_array, "res/ui_compass_north.png")->texture);
+        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_north.png");
         break;
     case 1:
-        sprite_set_texture(data->sprite_ui_compass, get_texture_resource(&data->texture_resource_array, "res/ui_compass_east.png")->texture);
+        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_east.png");
         break;
     case 2:
-        sprite_set_texture(data->sprite_ui_compass, get_texture_resource(&data->texture_resource_array, "res/ui_compass_south.png")->texture);
+        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_south.png");
         break;
     case 3:
-        sprite_set_texture(data->sprite_ui_compass, get_texture_resource(&data->texture_resource_array, "res/ui_compass_west.png")->texture);
+        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_west.png");
         break;
     default:
-        sprite_set_texture(data->sprite_ui_compass, get_texture_resource(&data->texture_resource_array, "res/ui_compass_north.png")->texture);
+        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_north.png");
         break;
     }
+
+    Texture2D texture = texture_resource_get_texture(texture_resource);
+
+    sprite_set_texture(get_sprite(data->sprite_resources, "ui_compass"), texture);
 }
 
 static void game_scene_recalculate_visible_walls(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    for (size_t i = 0; i < data->wall_sprites_count; ++i)
+    for (size_t i = 0; i < sprite_resource_array_get_count(data->wall_sprite_resources); ++i)
     {
-        sprite_set_is_visible(data->wall_sprites[i], false);
+        SpriteResource *sprite_resource = sprite_resource_array_get(data->wall_sprite_resources, i);
+        Sprite *sprite = sprite_resource_get_sprite(sprite_resource);
+        sprite_set_is_visible(sprite, false);
     }
 
     int dir_vecs[4][2] = {
@@ -1021,24 +900,24 @@ static void game_scene_recalculate_visible_walls(const Scene *scene)
     };
 
     struct position_check checks[] = {
-        {3, -2, (Sprite *[]){data->sprite_xm2y3r, data->sprite_xm2y3f}, 2},
-        {3, -1, (Sprite *[]){data->sprite_xm1y3r, data->sprite_xm1y3f}, 2},
-        {3, 0, (Sprite *[]){data->sprite_x0y3f}, 1},
-        {3, 1, (Sprite *[]){data->sprite_x1y3l, data->sprite_x1y3f}, 2},
-        {3, 2, (Sprite *[]){data->sprite_x2y3l, data->sprite_x2y3f}, 2},
+        {3, -2, (Sprite *[]){get_sprite(data->sprite_resources, "xm2y3r"), get_sprite(data->sprite_resources, "xm2y3f")}, 2},
+        {3, -1, (Sprite *[]){get_sprite(data->sprite_resources, "xm1y3r"), get_sprite(data->sprite_resources, "xm1y3f")}, 2},
+        {3, 0, (Sprite *[]){get_sprite(data->sprite_resources, "x0y3f")}, 1},
+        {3, 1, (Sprite *[]){get_sprite(data->sprite_resources, "x1y3l"), get_sprite(data->sprite_resources, "x1y3f")}, 2},
+        {3, 2, (Sprite *[]){get_sprite(data->sprite_resources, "x2y3l"), get_sprite(data->sprite_resources, "x2y3f")}, 2},
 
-        {2, -2, (Sprite *[]){data->sprite_xm2y2r}, 1},
-        {2, -1, (Sprite *[]){data->sprite_xm1y2r, data->sprite_xm1y2f}, 2},
-        {2, 0, (Sprite *[]){data->sprite_x0y2f}, 1},
-        {2, 1, (Sprite *[]){data->sprite_x1y2l, data->sprite_x1y2f}, 2},
-        {2, 2, (Sprite *[]){data->sprite_x2y2l}, 1},
+        {2, -2, (Sprite *[]){get_sprite(data->sprite_resources, "xm2y2r")}, 1},
+        {2, -1, (Sprite *[]){get_sprite(data->sprite_resources, "xm1y2r"), get_sprite(data->sprite_resources, "xm1y2f")}, 2},
+        {2, 0, (Sprite *[]){get_sprite(data->sprite_resources, "x0y2f")}, 1},
+        {2, 1, (Sprite *[]){get_sprite(data->sprite_resources, "x1y2l"), get_sprite(data->sprite_resources, "x1y2f")}, 2},
+        {2, 2, (Sprite *[]){get_sprite(data->sprite_resources, "x2y2l")}, 1},
 
-        {1, -1, (Sprite *[]){data->sprite_xm1y1r, data->sprite_xm1y1f}, 2},
-        {1, 0, (Sprite *[]){data->sprite_x0y1f}, 1},
-        {1, 1, (Sprite *[]){data->sprite_x1y1l, data->sprite_x1y1f}, 2},
+        {1, -1, (Sprite *[]){get_sprite(data->sprite_resources, "xm1y1r"), get_sprite(data->sprite_resources, "xm1y1f")}, 2},
+        {1, 0, (Sprite *[]){get_sprite(data->sprite_resources, "x0y1f")}, 1},
+        {1, 1, (Sprite *[]){get_sprite(data->sprite_resources, "x1y1l"), get_sprite(data->sprite_resources, "x1y1f")}, 2},
 
-        {0, -1, (Sprite *[]){data->sprite_xm1y0r}, 1},
-        {0, 1, (Sprite *[]){data->sprite_x1y0l}, 1},
+        {0, -1, (Sprite *[]){get_sprite(data->sprite_resources, "xm1y0r")}, 1},
+        {0, 1, (Sprite *[]){get_sprite(data->sprite_resources, "x1y0l")}, 1},
     };
 
     int num_checks = sizeof(checks) / sizeof checks[0];
@@ -1075,11 +954,11 @@ static void game_scene_flip_backdrop(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    Rectangle source = sprite_get_source(data->sprite_backdrop);
+    Rectangle source = sprite_get_source(get_sprite(data->sprite_resources, "backdrop"));
 
     source.width *= -1;
 
-    sprite_set_source(data->sprite_backdrop, source);
+    sprite_set_source(get_sprite(data->sprite_resources, "backdrop"), source);
 }
 
 static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *dir_vec, int forward_distance, int *side_vec, int sideways_distance)
@@ -1098,84 +977,42 @@ static bool game_scene_is_wall_at(Map *map, int x, int y)
     return false;
 }
 
-static void load_texture_resource(TextureResourceArray *texture_resource_array, const char *filename)
-{
-    if (texture_resource_array->count == texture_resource_array->capacity)
-    {
-        TextureResource *ptr = realloc(texture_resource_array->texture_resources, sizeof *texture_resource_array->texture_resources * texture_resource_array->capacity * 2);
-
-        if (ptr == NULL)
-        {
-            fprintf(stderr, "Error reallocating texture resource array\n");
-            exit(1);
-        }
-
-        for (size_t i = texture_resource_array->capacity; i < texture_resource_array->capacity * 2; ++i)
-        {
-            TextureResource *texture_resource = &ptr[i];
-            *texture_resource = (TextureResource){0};
-        }
-
-        texture_resource_array->capacity *= 2;
-        texture_resource_array->texture_resources = ptr;
-    }
-
-    char *name = malloc(strlen(filename) + 1);
-
-    if (name == NULL)
-    {
-        fprintf(stderr, "Error creating name for texture resource\n");
-        exit(1);
-    }
-
-    strncpy(name, filename, strlen(filename) + 1);
-
-    Texture2D texture = LoadTexture(filename);
-
-    TextureResource texture_resource = (TextureResource){
-        .name = name,
-        .texture = texture};
-
-    texture_resource_array->texture_resources[texture_resource_array->count++] = texture_resource;
-}
-
 static TextureResource *get_texture_resource(TextureResourceArray *texture_resource_array, const char *filename)
 {
-    TextureResource *texture_resource = NULL;
-
-    for (size_t i = 0; i < texture_resource_array->count; ++i)
+    for (size_t i = 0; i < texture_resource_array_get_count(texture_resource_array); ++i)
     {
-        if (strcmp(texture_resource_array->texture_resources[i].name, filename) == 0)
+        TextureResource *texture_resource = texture_resource_array_get(texture_resource_array, i);
+        if (strcmp(texture_resource_get_name(texture_resource), filename) == 0)
         {
-            texture_resource = &texture_resource_array->texture_resources[i];
-            break;
+            return texture_resource;
         }
     }
 
-    if (texture_resource == NULL)
-    {
-        fprintf(stderr, "Error getting texture resource '%s'\n", filename);
-        exit(1);
-    }
-
-    return texture_resource;
+    fprintf(stderr, "Error getting texture resource '%s'\n", filename);
+    exit(1);
 }
 
-static void add_backdrop_texture(const Scene *scene, TextureResource *texture_resource)
+static Texture2D get_texture(TextureResourceArray *texture_resource_array, const char *filename)
 {
-    struct game_scene_data *data = scene_get_data(scene);
+    return texture_resource_get_texture(get_texture_resource(texture_resource_array, filename));
+}
 
-    if (data->backdrop_textures_count == data->backdrop_textures_capacity)
+static SpriteResource *get_sprite_resource(SpriteResourceArray *sprite_resource_array, const char *name)
+{
+    for (size_t i = 0; i < sprite_resource_array_get_count(sprite_resource_array); ++i)
     {
-        TextureResource **ptr = realloc(data->backdrop_textures, sizeof *data->backdrop_textures * data->backdrop_textures_capacity * 2);
-        if (ptr == NULL)
+        SpriteResource *sprite_resource = sprite_resource_array_get(sprite_resource_array, i);
+        if (strcmp(sprite_resource_get_name(sprite_resource), name) == 0)
         {
-            fprintf(stderr, "Error reallocating backdrop textures array\n");
-            exit(1);
+            return sprite_resource;
         }
-        data->backdrop_textures_capacity *= 2;
-        data->backdrop_textures = ptr;
     }
 
-    data->backdrop_textures[data->backdrop_textures_count++] = texture_resource;
+    fprintf(stderr, "Error getting sprite resource '%s'\n", name);
+    exit(1);
+}
+
+static Sprite *get_sprite(SpriteResourceArray *sprite_resource_array, const char *name)
+{
+    return sprite_resource_get_sprite(get_sprite_resource(sprite_resource_array, name));
 }
