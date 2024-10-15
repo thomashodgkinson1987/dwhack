@@ -49,6 +49,12 @@ size_t map_get_height(Map *map) { return map->height; }
 
 int *map_get_data(Map *map) { return map->data; }
 
+void map_set_width(Map *map, size_t width) { map->width = width; }
+
+void map_set_height(Map *map, size_t height) { map->height = height; }
+
+void map_set_data(Map *map, int *data) { map->data = data; }
+
 int map_data_get_at(Map *map, size_t x, size_t y) { return map->data[y * map->width + x]; }
 
 void map_data_set_at(Map *map, size_t x, size_t y, int value) { map->data[y * map->width + x] = value; }
