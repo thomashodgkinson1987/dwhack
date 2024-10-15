@@ -5,7 +5,7 @@
 
 typedef struct sprite_resource_impl SpriteResource;
 
-SpriteResource *sprite_resource_create(void);
+SpriteResource *sprite_resource_create(char *name, Sprite *sprite);
 
 void sprite_resource_free(SpriteResource *sprite_resource);
 
