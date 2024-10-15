@@ -459,96 +459,93 @@ static void game_scene_init_textures(const Scene *scene)
 
     data->texture_resources = texture_resource_array_create();
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop01.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop02.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop03.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop04.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop05.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop06.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop07.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop08.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop09.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop10.png"));
-
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop11.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop12.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop13.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop14.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop15.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop16.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop17.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop18.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop19.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop20.png"));
-
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop21.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop22.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop23.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop24.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop25.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop26.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop27.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop28.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop29.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop30.png"));
-
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop31.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop32.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop33.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop34.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop35.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop36.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop01.png", LoadTexture("res/backdrops/backdrop01.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop02.png", LoadTexture("res/backdrops/backdrop02.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop03.png", LoadTexture("res/backdrops/backdrop03.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop04.png", LoadTexture("res/backdrops/backdrop04.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop05.png", LoadTexture("res/backdrops/backdrop05.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop06.png", LoadTexture("res/backdrops/backdrop06.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop07.png", LoadTexture("res/backdrops/backdrop07.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop08.png", LoadTexture("res/backdrops/backdrop08.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop09.png", LoadTexture("res/backdrops/backdrop09.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop10.png", LoadTexture("res/backdrops/backdrop10.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop11.png", LoadTexture("res/backdrops/backdrop11.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop12.png", LoadTexture("res/backdrops/backdrop12.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop13.png", LoadTexture("res/backdrops/backdrop13.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop14.png", LoadTexture("res/backdrops/backdrop14.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop15.png", LoadTexture("res/backdrops/backdrop15.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop16.png", LoadTexture("res/backdrops/backdrop16.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop17.png", LoadTexture("res/backdrops/backdrop17.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop18.png", LoadTexture("res/backdrops/backdrop18.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop19.png", LoadTexture("res/backdrops/backdrop19.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop20.png", LoadTexture("res/backdrops/backdrop20.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop21.png", LoadTexture("res/backdrops/backdrop21.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop22.png", LoadTexture("res/backdrops/backdrop22.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop23.png", LoadTexture("res/backdrops/backdrop23.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop24.png", LoadTexture("res/backdrops/backdrop24.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop25.png", LoadTexture("res/backdrops/backdrop25.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop26.png", LoadTexture("res/backdrops/backdrop26.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop27.png", LoadTexture("res/backdrops/backdrop27.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop28.png", LoadTexture("res/backdrops/backdrop28.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop29.png", LoadTexture("res/backdrops/backdrop29.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop30.png", LoadTexture("res/backdrops/backdrop30.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop31.png", LoadTexture("res/backdrops/backdrop31.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop32.png", LoadTexture("res/backdrops/backdrop32.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop33.png", LoadTexture("res/backdrops/backdrop33.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop34.png", LoadTexture("res/backdrops/backdrop34.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop35.png", LoadTexture("res/backdrops/backdrop35.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/backdrops/backdrop36.png", LoadTexture("res/backdrops/backdrop36.png")));
 
     //
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y0r.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y0l.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y0r.png", LoadTexture("res/xm1y0r.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y0l.png", LoadTexture("res/x1y0l.png")));
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y1f.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y1f.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y1f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y1f.png", LoadTexture("res/xm1y1f.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y1f.png", LoadTexture("res/x0y1f.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y1f.png", LoadTexture("res/x1y1f.png")));
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y1r.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y1l.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y1r.png", LoadTexture("res/xm1y1r.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y1l.png", LoadTexture("res/x1y1l.png")));
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y2f.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y2f.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y2f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y2f.png", LoadTexture("res/xm1y2f.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y2f.png", LoadTexture("res/x0y2f.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y2f.png", LoadTexture("res/x1y2f.png")));
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y2r.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y2r.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y2l.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y2l.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y2r.png", LoadTexture("res/xm2y2r.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y2r.png", LoadTexture("res/xm1y2r.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y2l.png", LoadTexture("res/x1y2l.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y2l.png", LoadTexture("res/x2y2l.png")));
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y3f.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y3f.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y3f.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y3f.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y3f.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y3f.png", LoadTexture("res/xm2y3f.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y3f.png", LoadTexture("res/xm1y3f.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x0y3f.png", LoadTexture("res/x0y3f.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y3f.png", LoadTexture("res/x1y3f.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y3f.png", LoadTexture("res/x2y3f.png")));
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y3r.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y3r.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y3l.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y3l.png"));
-
-    //
-
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/main5.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm2y3r.png", LoadTexture("res/xm2y3r.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/xm1y3r.png", LoadTexture("res/xm1y3r.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x1y3l.png", LoadTexture("res/x1y3l.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/x2y3l.png", LoadTexture("res/x2y3l.png")));
 
     //
 
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_inventory.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_button_camp.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_equipment.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_character_sheet.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_minimap.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_spells.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_portrait_hands.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_north.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_east.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_south.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_west.png"));
-    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_buttons_direction.png"));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/main5.png", LoadTexture("res/main5.png")));
+
+    //
+
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_inventory.png", LoadTexture("res/ui_inventory.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_button_camp.png", LoadTexture("res/ui_button_camp.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_equipment.png", LoadTexture("res/ui_equipment.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_character_sheet.png", LoadTexture("res/ui_character_sheet.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_minimap.png", LoadTexture("res/ui_minimap.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_spells.png", LoadTexture("res/ui_spells.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_portrait_hands.png", LoadTexture("res/ui_portrait_hands.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_north.png", LoadTexture("res/ui_compass_north.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_east.png", LoadTexture("res/ui_compass_east.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_south.png", LoadTexture("res/ui_compass_south.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_compass_west.png", LoadTexture("res/ui_compass_west.png")));
+    texture_resource_array_add(data->texture_resources, texture_resource_create("res/ui_buttons_direction.png", LoadTexture("res/ui_buttons_direction.png")));
 
     //
 
@@ -768,7 +765,7 @@ static void game_scene_free_textures(const Scene *scene)
     for (size_t i = 0; i < texture_resource_array_get_count(data->texture_resources); ++i)
     {
         TextureResource *texture_resource = texture_resource_array_get(data->texture_resources, i);
-        // TODO: UnloadTexture here instead of inside texture resource?
+        UnloadTexture(texture_resource_get_texture(texture_resource));
         texture_resource_free(texture_resource);
     }
 

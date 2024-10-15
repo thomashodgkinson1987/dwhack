@@ -10,7 +10,7 @@ struct texture_resource_impl
     Texture2D texture;
 };
 
-TextureResource *texture_resource_create(const char *filename)
+TextureResource *texture_resource_create(const char *name, Texture2D texture)
 {
     TextureResource *texture_resource = malloc(sizeof *texture_resource);
 
@@ -20,7 +20,7 @@ TextureResource *texture_resource_create(const char *filename)
         exit(1);
     }
 
-    texture_resource->name = malloc(strlen(filename) + 1);
+    texture_resource->name = malloc(strlen(name) + 1);
 
     if (texture_resource->name == NULL)
     {
@@ -28,9 +28,9 @@ TextureResource *texture_resource_create(const char *filename)
         exit(1);
     }
 
-    strncpy(texture_resource->name, filename, strlen(filename) + 1);
+    strncpy(texture_resource->name, name, strlen(name) + 1);
 
-    texture_resource->texture = LoadTexture(filename);
+    texture_resource->texture = texture;
 
     return texture_resource;
 }
@@ -38,7 +38,6 @@ TextureResource *texture_resource_create(const char *filename)
 void texture_resource_free(TextureResource *texture_resource)
 {
     free(texture_resource->name);
-    UnloadTexture(texture_resource->texture);
     free(texture_resource);
     texture_resource = NULL;
 }
