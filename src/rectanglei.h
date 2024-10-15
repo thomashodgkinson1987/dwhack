@@ -3,10 +3,13 @@
 
 struct rectanglei
 {
-    int x, y, w, h;
+    int x;
+    int y;
+    int width;
+    int height;
 };
 
-struct rectanglei rectanglei_create(int x, int y, int w, int h);
+struct rectanglei rectanglei_create(int x, int y, int width, int height);
 
 void rectanglei_free(struct rectanglei *rectanglei);
 
