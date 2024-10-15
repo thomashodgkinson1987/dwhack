@@ -5,7 +5,7 @@
 
 typedef struct texture_resource_impl TextureResource;
 
-TextureResource *texture_resource_create(const char *filename);
+TextureResource *texture_resource_create(const char *name, Texture2D texture);
 
 void texture_resource_free(TextureResource *texture_resource);
 
