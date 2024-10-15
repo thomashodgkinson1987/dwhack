@@ -107,9 +107,9 @@ void game_scene_tick(const Scene *scene, float delta)
 
     if (IsKeyPressed(KEY_Z))
     {
-        for (size_t i = 0; i < data->enemy_array.count; ++i)
+        for (size_t i = 0; i < enemy_array_get_count(data->enemy_array); ++i)
         {
-            Enemy *enemy = data->enemy_array.enemies[i];
+            Enemy *enemy = enemy_array_get(data->enemy_array, i);
 
             int move_state = GetRandomValue(0, 1);
             int dx = GetRandomValue(-1, 1);
@@ -278,9 +278,9 @@ static void game_scene_draw_world(const Scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (size_t j = 0; j < data->enemy_array.count; ++j)
+                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
                 {
-                    Enemy *enemy = data->enemy_array.enemies[j];
+                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
                     if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
@@ -316,9 +316,9 @@ static void game_scene_draw_world(const Scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (size_t j = 0; j < data->enemy_array.count; ++j)
+                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
                 {
-                    Enemy *enemy = data->enemy_array.enemies[j];
+                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
                     if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
@@ -350,9 +350,9 @@ static void game_scene_draw_world(const Scene *scene)
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
-                for (size_t j = 0; j < data->enemy_array.count; ++j)
+                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
                 {
-                    Enemy *enemy = data->enemy_array.enemies[j];
+                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
                     if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
                     {
                         DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
@@ -812,37 +812,12 @@ static void game_scene_init_enemies(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    data->enemy_array.count = 0;
-    data->enemy_array.capacity = 1;
-    data->enemy_array.enemies = malloc(sizeof *data->enemy_array.enemies * data->enemy_array.capacity);
-
-    if (data->enemy_array.enemies == NULL)
-    {
-        fprintf(stderr, "Error creating enemies array\n");
-        exit(1);
-    }
-
-    memset(data->enemy_array.enemies, 0, sizeof *data->enemy_array.enemies * data->enemy_array.capacity);
+    data->enemy_array = enemy_array_create();
 
     int num_enemies = 16;
 
     for (int i = 0; i < num_enemies; ++i)
     {
-        if (data->enemy_array.count == data->enemy_array.capacity)
-        {
-            Enemy **ptr = realloc(data->enemy_array.enemies, sizeof *data->enemy_array.enemies * data->enemy_array.capacity * 2);
-
-            if (ptr == NULL)
-            {
-                fprintf(stderr, "Error reallocating enemies array\n");
-                exit(1);
-            }
-
-            memset(&ptr[data->enemy_array.capacity], 0, sizeof *data->enemy_array.enemies * data->enemy_array.capacity);
-            data->enemy_array.enemies = ptr;
-            data->enemy_array.capacity *= 2;
-        }
-
         int x = GetRandomValue(1, map_get_width(data->map) - 2);
         int y = GetRandomValue(1, map_get_height(data->map) - 2);
         CardinalDirection facing = CARDINAL_DIRECTION_NORTH;
@@ -854,7 +829,7 @@ static void game_scene_init_enemies(const Scene *scene)
 
         Enemy *enemy = enemy_create(x, y, facing, health, color);
 
-        data->enemy_array.enemies[data->enemy_array.count++] = enemy;
+        enemy_array_add(data->enemy_array, enemy);
     }
 }
 static void game_scene_init_dungeon_camera(const Scene *scene)
@@ -936,14 +911,13 @@ static void game_scene_free_enemies(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    for (size_t i = 0; i < data->enemy_array.count; ++i)
+    for (size_t i = 0; i < enemy_array_get_count(data->enemy_array); ++i)
     {
-        Enemy *enemy = data->enemy_array.enemies[i];
+        Enemy *enemy = enemy_array_get(data->enemy_array, i);
         enemy_free(enemy);
     }
 
-    free(data->enemy_array.enemies);
-    data->enemy_array = (EnemyArray){0};
+    enemy_array_free(data->enemy_array);
 }
 static void game_scene_free_dungeon_camera(const Scene *scene)
 {

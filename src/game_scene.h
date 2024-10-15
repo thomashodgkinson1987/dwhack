@@ -6,6 +6,7 @@
 #include "coords.h"
 #include "dungeon_camera.h"
 #include "enemy.h"
+#include "enemy_array.h"
 #include "map.h"
 #include "player.h"
 #include "sprite.h"
@@ -13,13 +14,6 @@
 #include "raylib.h"
 
 extern size_t GAME_SCENE_TAG;
-
-typedef struct
-{
-    size_t count;
-    size_t capacity;
-    Enemy **enemies;
-} EnemyArray;
 
 typedef struct
 {
@@ -108,7 +102,7 @@ struct game_scene_data
 
     Player *player;
 
-    EnemyArray enemy_array;
+    EnemyArray *enemy_array;
 
     DungeonCamera *dungeon_camera;
 };
