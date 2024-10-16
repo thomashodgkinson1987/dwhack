@@ -643,7 +643,7 @@ static void game_scene_init_map(const Scene *scene)
     {
         for (size_t x = 1; x < map_get_width(data->map) - 1; ++x)
         {
-            map_data_set_at(data->map, x, y, GetRandomValue(0, 100) > 75 ? 1 : 0);
+            map_data_set_at(data->map, x, y, GetRandomValue(0, 100) > 80 ? 1 : 0);
         }
     }
 }
@@ -778,28 +778,28 @@ static void game_scene_update_compass(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    TextureResource *texture_resource = NULL;
+    char *texture_name;
 
     switch (player_get_facing(data->player))
     {
     case 0:
-        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_north.png");
+        texture_name = "res/ui_compass_north.png";
         break;
     case 1:
-        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_east.png");
+        texture_name = "res/ui_compass_east.png";
         break;
     case 2:
-        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_south.png");
+        texture_name = "res/ui_compass_south.png";
         break;
     case 3:
-        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_west.png");
+        texture_name = "res/ui_compass_west.png";
         break;
     default:
-        texture_resource = get_texture_resource(data->texture_resources, "res/ui_compass_north.png");
+        texture_name = "res/ui_compass_north.png";
         break;
     }
 
-    Texture2D texture = texture_resource_get_texture(texture_resource);
+    Texture2D texture = texture_resource_get_texture(get_texture_resource(data->texture_resources, texture_name));
 
     sprite_set_texture(get_sprite(data->sprite_resources, "ui_compass"), texture);
 }
