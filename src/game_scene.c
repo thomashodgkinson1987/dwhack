@@ -161,8 +161,7 @@ void game_scene_tick(const Scene *scene, float delta)
 
         for (size_t i = 0; i < sizeof(sprites) / sizeof *sprites; ++i)
         {
-            Sprite *sprite = sprites[i];
-            sprite_set_is_visible(sprite, !sprite_get_is_visible(sprite));
+            sprite_set_is_visible(sprites[i], !sprite_get_is_visible(sprites[i]));
         }
     }
 
