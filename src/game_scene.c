@@ -41,6 +41,8 @@ static Texture2D get_texture(TextureResourceArray *texture_resource_array, const
 static SpriteResource *get_sprite_resource(SpriteResourceArray *sprite_resource_array, const char *name);
 static Sprite *get_sprite(SpriteResourceArray *sprite_resource_array, const char *name);
 
+static int direction_vectors[4][2] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+
 size_t GAME_SCENE_TAG = 0;
 
 Scene *game_scene_create(void)
@@ -115,29 +117,36 @@ void game_scene_tick(const Scene *scene, float delta)
         {
             Enemy *enemy = enemy_array_get(data->enemy_array, i);
 
-            int move_state = GetRandomValue(0, 1);
-            int dx = GetRandomValue(-1, 1);
-            int dy = GetRandomValue(-1, 1);
+            int position_checks[4][2] = {
+                {enemy_get_x(enemy), enemy_get_y(enemy) - 1},
+                {enemy_get_x(enemy) + 1, enemy_get_y(enemy)},
+                {enemy_get_x(enemy), enemy_get_y(enemy) + 1},
+                {enemy_get_x(enemy) - 1, enemy_get_y(enemy)}};
 
-            if (move_state == 0)
-            {
-                dy = 0;
-            }
-            else if (move_state == 1)
-            {
-                dx = 0;
-            }
+            int valid_indexes_count = 0;
+            int valid_indexes[4] = {0};
 
-            int new_x = enemy_get_x(enemy) + dx;
-            int new_y = enemy_get_y(enemy) + dy;
-
-            if (new_x >= 0 && new_x < (int)map_get_width(data->map) && new_y >= 0 && new_y < (int)map_get_height(data->map))
+            for (int j = 0; j < 4; ++j)
             {
-                if (map_data_get_at(data->map, new_x, new_y) == 0)
+                int x_check = position_checks[j][0];
+                int y_check = position_checks[j][1];
+
+                if (x_check >= 0 && x_check < (int)map_get_width(data->map) && y_check >= 0 && y_check < (int)map_get_height(data->map))
                 {
-                    enemy_set_x(enemy, new_x);
-                    enemy_set_y(enemy, new_y);
+                    if (map_data_get_at(data->map, x_check, y_check) == 0)
+                    {
+                        valid_indexes[valid_indexes_count++] = j;
+                    }
                 }
+            }
+
+            if (valid_indexes_count > 0)
+            {
+                int index = valid_indexes[GetRandomValue(0, valid_indexes_count - 1)];
+                int new_x = position_checks[index][0];
+                int new_y = position_checks[index][1];
+                enemy_set_x(enemy, new_x);
+                enemy_set_y(enemy, new_y);
             }
         }
     }
@@ -177,35 +186,29 @@ void game_scene_tick(const Scene *scene, float delta)
     }
     else
     {
-        int dir_vecs[4][2] = {
-            {0, -1},
-            {1, 0},
-            {0, 1},
-            {-1, 0}};
-
         int movement_vec[2] = {0, 0};
 
         if (IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
         {
-            movement_vec[0] += dir_vecs[player_get_facing(data->player)][0];
-            movement_vec[1] += dir_vecs[player_get_facing(data->player)][1];
+            movement_vec[0] += direction_vectors[player_get_facing(data->player)][0];
+            movement_vec[1] += direction_vectors[player_get_facing(data->player)][1];
         }
         else if (!IsKeyPressed(KEY_W) && IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
         {
-            movement_vec[0] -= dir_vecs[player_get_facing(data->player)][0];
-            movement_vec[1] -= dir_vecs[player_get_facing(data->player)][1];
+            movement_vec[0] -= direction_vectors[player_get_facing(data->player)][0];
+            movement_vec[1] -= direction_vectors[player_get_facing(data->player)][1];
         }
         else if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
         {
             int left_f = (player_get_facing(data->player) + 3) % 4;
-            movement_vec[0] += dir_vecs[left_f][0];
-            movement_vec[1] += dir_vecs[left_f][1];
+            movement_vec[0] += direction_vectors[left_f][0];
+            movement_vec[1] += direction_vectors[left_f][1];
         }
         if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && IsKeyPressed(KEY_D))
         {
             int right_f = (player_get_facing(data->player) + 1) % 4;
-            movement_vec[0] += dir_vecs[right_f][0];
-            movement_vec[1] += dir_vecs[right_f][1];
+            movement_vec[0] += direction_vectors[right_f][0];
+            movement_vec[1] += direction_vectors[right_f][1];
         }
 
         if (movement_vec[0] != 0 || movement_vec[1] != 0)
@@ -241,20 +244,14 @@ static void game_scene_draw_world(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    int map_width = (int)map_get_width(data->map);
-    int map_height = (int)map_get_height(data->map);
+    const int map_width = (int)map_get_width(data->map);
+    const int map_height = (int)map_get_height(data->map);
 
-    int dir_vecs[4][2] = {
-        {0, -1},
-        {1, 0},
-        {0, 1},
-        {-1, 0}};
+    const int front_f = dungeon_camera_get_facing(data->dungeon_camera);
+    const int right_f = (front_f + 1) % 4;
 
-    int front_f = dungeon_camera_get_facing(data->dungeon_camera);
-    int right_f = (front_f + 1) % 4;
-
-    int *front_vec = dir_vecs[front_f];
-    int *right_vec = dir_vecs[right_f];
+    const int *front_vec = direction_vectors[front_f];
+    const int *right_vec = direction_vectors[right_f];
 
     struct enemy_position_check
     {
@@ -284,8 +281,8 @@ static void game_scene_draw_world(const Scene *scene)
         {
             struct enemy_position_check *check = &checks[i];
 
-            int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+            const int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+            const int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
@@ -874,19 +871,13 @@ static void game_scene_recalculate_visible_walls(const Scene *scene)
         sprite_set_is_visible(sprite, false);
     }
 
-    int dir_vecs[4][2] = {
-        {0, -1},
-        {1, 0},
-        {0, 1},
-        {-1, 0}};
-
     int front_f = dungeon_camera_get_facing(data->dungeon_camera);
     int left_f = (front_f + 3) % 4;
     int right_f = (front_f + 1) % 4;
 
-    int *front_vec = dir_vecs[front_f];
-    int *left_vec = dir_vecs[left_f];
-    int *right_vec = dir_vecs[right_f];
+    int *front_vec = direction_vectors[front_f];
+    int *left_vec = direction_vectors[left_f];
+    int *right_vec = direction_vectors[right_f];
 
     struct position_check
     {
@@ -923,8 +914,8 @@ static void game_scene_recalculate_visible_walls(const Scene *scene)
     {
         struct position_check *check = &checks[i];
 
-        int target_x;
-        int target_y;
+        int target_x = 0;
+        int target_y = 0;
 
         int *side_vec = check->sizeways_distance < 0 ? left_vec : right_vec;
         int sideways_distance = abs(check->sizeways_distance);
@@ -951,17 +942,19 @@ static void game_scene_flip_backdrop(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    Rectangle source = sprite_get_source(get_sprite(data->sprite_resources, "backdrop"));
+    Sprite *backdrop_sprite = get_sprite(data->sprite_resources, "backdrop");
+
+    Rectangle source = sprite_get_source(backdrop_sprite);
 
     source.width *= -1;
 
-    sprite_set_source(get_sprite(data->sprite_resources, "backdrop"), source);
+    sprite_set_source(backdrop_sprite, source);
 }
 
-static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *dir_vec, int forward_distance, int *side_vec, int sideways_distance)
+static void game_scene_calculate_target_position(int *target_x, int *target_y, int x, int y, int *direction_vector, int forward_distance, int *side_vec, int sideways_distance)
 {
-    *target_x = x + dir_vec[0] * forward_distance + side_vec[0] * sideways_distance;
-    *target_y = y + dir_vec[1] * forward_distance + side_vec[1] * sideways_distance;
+    *target_x = x + direction_vector[0] * forward_distance + side_vec[0] * sideways_distance;
+    *target_y = y + direction_vector[1] * forward_distance + side_vec[1] * sideways_distance;
 }
 
 static bool game_scene_is_wall_at(Map *map, int x, int y)
