@@ -280,8 +280,8 @@ static void game_scene_draw_world(const Scene *scene)
         {
             struct enemy_position_check *check = &checks[i];
 
-            const int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            const int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+            int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+            int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
             if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
             {
