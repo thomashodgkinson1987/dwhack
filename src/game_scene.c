@@ -7,6 +7,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct enemy_position_check
+{
+    int forward_distance;
+    int sizeways_distance;
+    int offset_x;
+    int offset_y;
+    float radius;
+};
+
 static void game_scene_init_coords(const Scene *scene);
 static void game_scene_init_textures(const Scene *scene);
 static void game_scene_init_sprites(const Scene *scene);
@@ -40,6 +49,8 @@ static Texture2D get_texture(TextureResourceArray *texture_resource_array, const
 
 static SpriteResource *get_sprite_resource(SpriteResourceArray *sprite_resource_array, const char *name);
 static Sprite *get_sprite(SpriteResourceArray *sprite_resource_array, const char *name);
+
+static void draw_visible_enemies(struct game_scene_data *data, struct enemy_position_check checks[], int checks_count, int *front_vec, int *right_vec);
 
 static int direction_vectors[4][2] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 
@@ -243,23 +254,11 @@ static void game_scene_draw_world(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    const int map_width = (int)map_get_width(data->map);
-    const int map_height = (int)map_get_height(data->map);
+    int front_f = dungeon_camera_get_facing(data->dungeon_camera);
+    int right_f = (front_f + 1) % 4;
 
-    const int front_f = dungeon_camera_get_facing(data->dungeon_camera);
-    const int right_f = (front_f + 1) % 4;
-
-    const int *front_vec = direction_vectors[front_f];
-    const int *right_vec = direction_vectors[right_f];
-
-    struct enemy_position_check
-    {
-        int forward_distance;
-        int sizeways_distance;
-        int offset_x;
-        int offset_y;
-        float radius;
-    };
+    int *front_vec = direction_vectors[front_f];
+    int *right_vec = direction_vectors[right_f];
 
     sprite_draw(get_sprite(data->sprite_resources, "backdrop"));
 
@@ -276,25 +275,7 @@ static void game_scene_draw_world(const Scene *scene)
             {3, 1, data->coords.x1y3f.x + data->coords.x1y3f.width - 30, data->coords.x1y3f.y + 12, 4.0f},
             {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.width - 40, data->coords.x2y3f.y + 12, 4.0f}};
 
-        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
-        {
-            struct enemy_position_check *check = &checks[i];
-
-            int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
-
-            if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-            {
-                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
-                {
-                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
-                    if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
-                    {
-                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
-                    }
-                }
-            }
-        }
+        draw_visible_enemies(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
     }
 
     sprite_draw(get_sprite(data->sprite_resources, "xm2y3f"));
@@ -314,25 +295,7 @@ static void game_scene_draw_world(const Scene *scene)
             {2, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 8.0f},
             {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f}};
 
-        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
-        {
-            struct enemy_position_check *check = &checks[i];
-
-            int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
-
-            if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-            {
-                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
-                {
-                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
-                    if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
-                    {
-                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
-                    }
-                }
-            }
-        }
+        draw_visible_enemies(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
     }
 
     sprite_draw(get_sprite(data->sprite_resources, "xm1y2f"));
@@ -348,25 +311,7 @@ static void game_scene_draw_world(const Scene *scene)
             {1, 0, data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 16.0f},
             {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f}};
 
-        for (size_t i = 0; i < sizeof(checks) / sizeof(checks[0]); ++i)
-        {
-            struct enemy_position_check *check = &checks[i];
-
-            int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
-            int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
-
-            if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
-            {
-                for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
-                {
-                    Enemy *enemy = enemy_array_get(data->enemy_array, j);
-                    if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
-                    {
-                        DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
-                    }
-                }
-            }
-        }
+        draw_visible_enemies(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
     }
 
     sprite_draw(get_sprite(data->sprite_resources, "xm1y1f"));
@@ -1004,4 +949,30 @@ static SpriteResource *get_sprite_resource(SpriteResourceArray *sprite_resource_
 static Sprite *get_sprite(SpriteResourceArray *sprite_resource_array, const char *name)
 {
     return sprite_resource_get_sprite(get_sprite_resource(sprite_resource_array, name));
+}
+
+static void draw_visible_enemies(struct game_scene_data *data, struct enemy_position_check checks[], int checks_count, int *front_vec, int *right_vec)
+{
+    int map_width = (int)map_get_width(data->map);
+    int map_height = (int)map_get_height(data->map);
+
+    for (int i = 0; i < checks_count; ++i)
+    {
+        struct enemy_position_check *check = &checks[i];
+
+        int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
+        int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
+
+        if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
+        {
+            for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
+            {
+                Enemy *enemy = enemy_array_get(data->enemy_array, j);
+                if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
+                {
+                    DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
+                }
+            }
+        }
+    }
 }
