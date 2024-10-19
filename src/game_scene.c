@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct enemy_position_check
+struct actor_position_check
 {
     int forward_distance;
     int sizeways_distance;
@@ -36,7 +36,7 @@ static void game_scene_draw_world(const Scene *scene);
 static void game_scene_draw_main(const Scene *scene);
 static void game_scene_draw_ui(const Scene *scene);
 
-static void game_scene_update_dungeon_camera(const Scene *scene);
+static void game_scene_update_dungeon_camera(const Scene *scene, Actor *actor);
 static void game_scene_update_compass(const Scene *scene);
 static void game_scene_recalculate_visible_walls(const Scene *scene);
 static void game_scene_flip_backdrop(const Scene *scene);
@@ -50,9 +50,14 @@ static Texture2D get_texture(TextureResourceArray *texture_resource_array, const
 static SpriteResource *get_sprite_resource(SpriteResourceArray *sprite_resource_array, const char *name);
 static Sprite *get_sprite(SpriteResourceArray *sprite_resource_array, const char *name);
 
-static void draw_visible_enemies(struct game_scene_data *data, struct enemy_position_check checks[], int checks_count, int *front_vec, int *right_vec);
+static void draw_visible_actors(struct game_scene_data *data, struct actor_position_check checks[], int checks_count, int *front_vec, int *right_vec);
+
+static void foo(const Scene *scene);
+static void bar(const Scene *scene);
 
 static int direction_vectors[4][2] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+
+static Actor *camera_target = NULL;
 
 size_t GAME_SCENE_TAG = 0;
 
@@ -106,7 +111,9 @@ void game_scene_enter(const Scene *scene)
         sprite_set_texture(sprite, texture);
     }
 
-    game_scene_update_dungeon_camera(scene);
+    camera_target = data->player;
+
+    game_scene_update_dungeon_camera(scene, data->player);
     game_scene_update_compass(scene);
     game_scene_recalculate_visible_walls(scene);
 }
@@ -124,15 +131,15 @@ void game_scene_tick(const Scene *scene, float delta)
 
     if (IsKeyPressed(KEY_Z))
     {
-        for (size_t i = 0; i < enemy_array_get_count(data->enemy_array); ++i)
+        for (size_t i = 0; i < actor_array_get_count(data->enemies); ++i)
         {
-            Enemy *enemy = enemy_array_get(data->enemy_array, i);
+            Actor *enemy = actor_array_get(data->enemies, i);
 
             int position_checks[4][2] = {
-                {enemy_get_x(enemy), enemy_get_y(enemy) - 1},
-                {enemy_get_x(enemy) + 1, enemy_get_y(enemy)},
-                {enemy_get_x(enemy), enemy_get_y(enemy) + 1},
-                {enemy_get_x(enemy) - 1, enemy_get_y(enemy)}};
+                {actor_get_x(enemy), actor_get_y(enemy) - 1},
+                {actor_get_x(enemy) + 1, actor_get_y(enemy)},
+                {actor_get_x(enemy), actor_get_y(enemy) + 1},
+                {actor_get_x(enemy) - 1, actor_get_y(enemy)}};
 
             int valid_indexes_count = 0;
             int valid_indexes[4] = {0};
@@ -156,8 +163,8 @@ void game_scene_tick(const Scene *scene, float delta)
                 int index = valid_indexes[GetRandomValue(0, valid_indexes_count - 1)];
                 int new_x = position_checks[index][0];
                 int new_y = position_checks[index][1];
-                enemy_set_x(enemy, new_x);
-                enemy_set_y(enemy, new_y);
+                actor_set_x(enemy, new_x);
+                actor_set_y(enemy, new_y);
             }
         }
     }
@@ -176,69 +183,7 @@ void game_scene_tick(const Scene *scene, float delta)
         }
     }
 
-    if (IsKeyPressed(KEY_Q) && !IsKeyPressed(KEY_E))
-    {
-        CardinalDirection new_facing = (CardinalDirection)((player_get_facing(data->player) + 3) % 4);
-        player_set_facing(data->player, new_facing);
-        game_scene_update_dungeon_camera(scene);
-        game_scene_update_compass(scene);
-        game_scene_flip_backdrop(scene);
-        game_scene_recalculate_visible_walls(scene);
-    }
-    else if (!IsKeyPressed(KEY_Q) && IsKeyPressed(KEY_E))
-    {
-        CardinalDirection new_facing = (CardinalDirection)((player_get_facing(data->player) + 1) % 4);
-        player_set_facing(data->player, new_facing);
-        game_scene_update_dungeon_camera(scene);
-        game_scene_update_compass(scene);
-        game_scene_flip_backdrop(scene);
-        game_scene_recalculate_visible_walls(scene);
-    }
-    else
-    {
-        int movement_vec[2] = {0, 0};
-
-        if (IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
-        {
-            movement_vec[0] += direction_vectors[player_get_facing(data->player)][0];
-            movement_vec[1] += direction_vectors[player_get_facing(data->player)][1];
-        }
-        else if (!IsKeyPressed(KEY_W) && IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
-        {
-            movement_vec[0] -= direction_vectors[player_get_facing(data->player)][0];
-            movement_vec[1] -= direction_vectors[player_get_facing(data->player)][1];
-        }
-        else if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
-        {
-            int left_f = (player_get_facing(data->player) + 3) % 4;
-            movement_vec[0] += direction_vectors[left_f][0];
-            movement_vec[1] += direction_vectors[left_f][1];
-        }
-        if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && IsKeyPressed(KEY_D))
-        {
-            int right_f = (player_get_facing(data->player) + 1) % 4;
-            movement_vec[0] += direction_vectors[right_f][0];
-            movement_vec[1] += direction_vectors[right_f][1];
-        }
-
-        if (movement_vec[0] != 0 || movement_vec[1] != 0)
-        {
-            int new_x = player_get_x(data->player) + movement_vec[0];
-            int new_y = player_get_y(data->player) + movement_vec[1];
-
-            if (new_x >= 0 && new_x < (int)map_get_width(data->map) && new_y >= 0 && new_y < (int)map_get_height(data->map))
-            {
-                if (map_data_get_at(data->map, new_x, new_y) == 0)
-                {
-                    player_set_x(data->player, new_x);
-                    player_set_y(data->player, new_y);
-                    game_scene_update_dungeon_camera(scene);
-                    game_scene_flip_backdrop(scene);
-                    game_scene_recalculate_visible_walls(scene);
-                }
-            }
-        }
-    }
+    foo(scene);
 }
 void game_scene_draw(const Scene *scene)
 {
@@ -268,14 +213,14 @@ static void game_scene_draw_world(const Scene *scene)
     sprite_draw(get_sprite(data->sprite_resources, "x2y3l"));
 
     {
-        struct enemy_position_check checks[] = {
+        struct actor_position_check checks[] = {
             {3, -2, data->coords.xm2y3f.x + 40, data->coords.xm2y3f.y + 12, 4.0f},
             {3, -1, data->coords.xm1y3f.x + 30, data->coords.xm1y3f.y + 12, 4.0f},
             {3, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 12, 4.0f},
             {3, 1, data->coords.x1y3f.x + data->coords.x1y3f.width - 30, data->coords.x1y3f.y + 12, 4.0f},
             {3, 2, data->coords.x2y3f.x + data->coords.x2y3f.width - 40, data->coords.x2y3f.y + 12, 4.0f}};
 
-        draw_visible_enemies(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
+        draw_visible_actors(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
     }
 
     sprite_draw(get_sprite(data->sprite_resources, "xm2y3f"));
@@ -290,12 +235,12 @@ static void game_scene_draw_world(const Scene *scene)
     sprite_draw(get_sprite(data->sprite_resources, "x2y2l"));
 
     {
-        struct enemy_position_check checks[] = {
+        struct actor_position_check checks[] = {
             {2, -1, data->coords.xm1y3f.x + 24, data->coords.xm1y3f.y + 16, 8.0f},
             {2, 0, data->coords.x0y3f.x + 24, data->coords.x0y3f.y + 16, 8.0f},
             {2, 1, data->coords.x1y3f.x + 24, data->coords.x1y3f.y + 16, 8.0f}};
 
-        draw_visible_enemies(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
+        draw_visible_actors(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
     }
 
     sprite_draw(get_sprite(data->sprite_resources, "xm1y2f"));
@@ -306,12 +251,12 @@ static void game_scene_draw_world(const Scene *scene)
     sprite_draw(get_sprite(data->sprite_resources, "x1y1l"));
 
     {
-        struct enemy_position_check checks[] = {
+        struct actor_position_check checks[] = {
             {1, -1, data->coords.xm1y2f.x + 40, data->coords.xm1y2f.y + 30, 16.0f},
             {1, 0, data->coords.x0y2f.x + 40, data->coords.x0y2f.y + 30, 16.0f},
             {1, 1, data->coords.x1y2f.x + 40, data->coords.x1y2f.y + 30, 16.0f}};
 
-        draw_visible_enemies(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
+        draw_visible_actors(data, checks, sizeof(checks) / sizeof *checks, front_vec, right_vec);
     }
 
     sprite_draw(get_sprite(data->sprite_resources, "xm1y1f"));
@@ -657,13 +602,13 @@ static void game_scene_init_player(const Scene *scene)
     int health = 10;
     Color color = (Color){255, 255, 255, 255};
 
-    data->player = player_create(x, y, facing, health, color);
+    data->player = actor_create(x, y, facing, health, color);
 }
 static void game_scene_init_enemies(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    data->enemy_array = enemy_array_create();
+    data->enemies = actor_array_create();
 
     int num_enemies = 16;
 
@@ -678,9 +623,9 @@ static void game_scene_init_enemies(const Scene *scene)
         unsigned char b = GetRandomValue(0, 255);
         Color color = (Color){r, g, b, 255};
 
-        Enemy *enemy = enemy_create(x, y, facing, health, color);
+        Actor *enemy = actor_create(x, y, facing, health, color);
 
-        enemy_array_add(data->enemy_array, enemy);
+        actor_array_add(data->enemies, enemy);
     }
 }
 static void game_scene_init_dungeon_camera(const Scene *scene)
@@ -740,19 +685,19 @@ static void game_scene_free_player(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    player_free(data->player);
+    actor_free(data->player);
 }
 static void game_scene_free_enemies(const Scene *scene)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    for (size_t i = 0; i < enemy_array_get_count(data->enemy_array); ++i)
+    for (size_t i = 0; i < actor_array_get_count(data->enemies); ++i)
     {
-        Enemy *enemy = enemy_array_get(data->enemy_array, i);
-        enemy_free(enemy);
+        Actor *enemy = actor_array_get(data->enemies, i);
+        actor_free(enemy);
     }
 
-    enemy_array_free(data->enemy_array);
+    actor_array_free(data->enemies);
 }
 static void game_scene_free_dungeon_camera(const Scene *scene)
 {
@@ -761,13 +706,13 @@ static void game_scene_free_dungeon_camera(const Scene *scene)
     dungeon_camera_free(data->dungeon_camera);
 }
 
-static void game_scene_update_dungeon_camera(const Scene *scene)
+static void game_scene_update_dungeon_camera(const Scene *scene, Actor *actor)
 {
     struct game_scene_data *data = scene_get_data(scene);
 
-    int x = player_get_x(data->player);
-    int y = player_get_y(data->player);
-    CardinalDirection facing = player_get_facing(data->player);
+    int x = actor_get_x(actor);
+    int y = actor_get_y(actor);
+    CardinalDirection facing = actor_get_facing(actor);
 
     dungeon_camera_set_x(data->dungeon_camera, x);
     dungeon_camera_set_y(data->dungeon_camera, y);
@@ -780,7 +725,7 @@ static void game_scene_update_compass(const Scene *scene)
 
     char *texture_name;
 
-    switch (player_get_facing(data->player))
+    switch (dungeon_camera_get_facing(data->dungeon_camera))
     {
     case 0:
         texture_name = "res/ui_compass_north.png";
@@ -951,26 +896,162 @@ static Sprite *get_sprite(SpriteResourceArray *sprite_resource_array, const char
     return sprite_resource_get_sprite(get_sprite_resource(sprite_resource_array, name));
 }
 
-static void draw_visible_enemies(struct game_scene_data *data, struct enemy_position_check checks[], int checks_count, int *front_vec, int *right_vec)
+static void draw_visible_actors(struct game_scene_data *data, struct actor_position_check checks[], int checks_count, int *front_vec, int *right_vec)
 {
     int map_width = (int)map_get_width(data->map);
     int map_height = (int)map_get_height(data->map);
 
     for (int i = 0; i < checks_count; ++i)
     {
-        struct enemy_position_check *check = &checks[i];
+        struct actor_position_check *check = &checks[i];
 
         int target_x = dungeon_camera_get_x(data->dungeon_camera) + front_vec[0] * check->forward_distance + right_vec[0] * check->sizeways_distance;
         int target_y = dungeon_camera_get_y(data->dungeon_camera) + front_vec[1] * check->forward_distance + right_vec[1] * check->sizeways_distance;
 
         if (target_x >= 0 && target_x < map_width && target_y >= 0 && target_y < map_height)
         {
-            for (size_t j = 0; j < enemy_array_get_count(data->enemy_array); ++j)
+            for (size_t j = 0; j < actor_array_get_count(data->enemies); ++j)
             {
-                Enemy *enemy = enemy_array_get(data->enemy_array, j);
-                if (enemy_get_x(enemy) == target_x && enemy_get_y(enemy) == target_y)
+                Actor *enemy = actor_array_get(data->enemies, j);
+                if (actor_get_x(enemy) == target_x && actor_get_y(enemy) == target_y)
                 {
-                    DrawCircle(check->offset_x, check->offset_y, check->radius, enemy_get_color(enemy));
+                    DrawCircle(check->offset_x, check->offset_y, check->radius, actor_get_color(enemy));
+                }
+            }
+            if (actor_get_x(data->player) == target_x && actor_get_y(data->player) == target_y)
+            {
+                DrawCircle(check->offset_x, check->offset_y, check->radius, actor_get_color(data->player));
+            }
+        }
+    }
+}
+
+static void foo(const Scene *scene)
+{
+    struct game_scene_data *data = scene_get_data(scene);
+
+    if (IsKeyPressed(KEY_Q) && !IsKeyPressed(KEY_E))
+    {
+        CardinalDirection new_facing = (CardinalDirection)((dungeon_camera_get_facing(data->dungeon_camera) + 3) % 4);
+        dungeon_camera_set_facing(data->dungeon_camera, new_facing);
+        game_scene_update_compass(scene);
+        game_scene_flip_backdrop(scene);
+        game_scene_recalculate_visible_walls(scene);
+    }
+    else if (!IsKeyPressed(KEY_Q) && IsKeyPressed(KEY_E))
+    {
+        CardinalDirection new_facing = (CardinalDirection)((dungeon_camera_get_facing(data->dungeon_camera) + 1) % 4);
+        dungeon_camera_set_facing(data->dungeon_camera, new_facing);
+        game_scene_update_compass(scene);
+        game_scene_flip_backdrop(scene);
+        game_scene_recalculate_visible_walls(scene);
+    }
+    else
+    {
+        int movement_vec[2] = {0, 0};
+
+        if (IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
+        {
+            movement_vec[0] += direction_vectors[dungeon_camera_get_facing(data->dungeon_camera)][0];
+            movement_vec[1] += direction_vectors[dungeon_camera_get_facing(data->dungeon_camera)][1];
+        }
+        else if (!IsKeyPressed(KEY_W) && IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
+        {
+            movement_vec[0] -= direction_vectors[dungeon_camera_get_facing(data->dungeon_camera)][0];
+            movement_vec[1] -= direction_vectors[dungeon_camera_get_facing(data->dungeon_camera)][1];
+        }
+        else if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
+        {
+            int left_f = (dungeon_camera_get_facing(data->dungeon_camera) + 3) % 4;
+            movement_vec[0] += direction_vectors[left_f][0];
+            movement_vec[1] += direction_vectors[left_f][1];
+        }
+        if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && IsKeyPressed(KEY_D))
+        {
+            int right_f = (dungeon_camera_get_facing(data->dungeon_camera) + 1) % 4;
+            movement_vec[0] += direction_vectors[right_f][0];
+            movement_vec[1] += direction_vectors[right_f][1];
+        }
+
+        if (movement_vec[0] != 0 || movement_vec[1] != 0)
+        {
+            int new_x = dungeon_camera_get_x(data->dungeon_camera) + movement_vec[0];
+            int new_y = dungeon_camera_get_y(data->dungeon_camera) + movement_vec[1];
+
+            if (new_x >= 0 && new_x < (int)map_get_width(data->map) && new_y >= 0 && new_y < (int)map_get_height(data->map))
+            {
+                dungeon_camera_set_x(data->dungeon_camera, new_x);
+                dungeon_camera_set_y(data->dungeon_camera, new_y);
+                game_scene_flip_backdrop(scene);
+                game_scene_recalculate_visible_walls(scene);
+            }
+        }
+    }
+}
+
+static void bar(const Scene *scene)
+{
+    struct game_scene_data *data = scene_get_data(scene);
+
+    if (IsKeyPressed(KEY_Q) && !IsKeyPressed(KEY_E))
+    {
+        CardinalDirection new_facing = (CardinalDirection)((actor_get_facing(data->player) + 3) % 4);
+        actor_set_facing(data->player, new_facing);
+        game_scene_update_dungeon_camera(scene, data->player);
+        game_scene_update_compass(scene);
+        game_scene_flip_backdrop(scene);
+        game_scene_recalculate_visible_walls(scene);
+    }
+    else if (!IsKeyPressed(KEY_Q) && IsKeyPressed(KEY_E))
+    {
+        CardinalDirection new_facing = (CardinalDirection)((actor_get_facing(data->player) + 1) % 4);
+        actor_set_facing(data->player, new_facing);
+        game_scene_update_dungeon_camera(scene, data->player);
+        game_scene_update_compass(scene);
+        game_scene_flip_backdrop(scene);
+        game_scene_recalculate_visible_walls(scene);
+    }
+    else
+    {
+        int movement_vec[2] = {0, 0};
+
+        if (IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
+        {
+            movement_vec[0] += direction_vectors[actor_get_facing(data->player)][0];
+            movement_vec[1] += direction_vectors[actor_get_facing(data->player)][1];
+        }
+        else if (!IsKeyPressed(KEY_W) && IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
+        {
+            movement_vec[0] -= direction_vectors[actor_get_facing(data->player)][0];
+            movement_vec[1] -= direction_vectors[actor_get_facing(data->player)][1];
+        }
+        else if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && IsKeyPressed(KEY_A) && !IsKeyPressed(KEY_D))
+        {
+            int left_f = (actor_get_facing(data->player) + 3) % 4;
+            movement_vec[0] += direction_vectors[left_f][0];
+            movement_vec[1] += direction_vectors[left_f][1];
+        }
+        if (!IsKeyPressed(KEY_W) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A) && IsKeyPressed(KEY_D))
+        {
+            int right_f = (actor_get_facing(data->player) + 1) % 4;
+            movement_vec[0] += direction_vectors[right_f][0];
+            movement_vec[1] += direction_vectors[right_f][1];
+        }
+
+        if (movement_vec[0] != 0 || movement_vec[1] != 0)
+        {
+            int new_x = actor_get_x(data->player) + movement_vec[0];
+            int new_y = actor_get_y(data->player) + movement_vec[1];
+
+            if (new_x >= 0 && new_x < (int)map_get_width(data->map) && new_y >= 0 && new_y < (int)map_get_height(data->map))
+            {
+                if (map_data_get_at(data->map, new_x, new_y) == 0)
+                {
+                    actor_set_x(data->player, new_x);
+                    actor_set_y(data->player, new_y);
+                    game_scene_update_dungeon_camera(scene, data->player);
+                    game_scene_flip_backdrop(scene);
+                    game_scene_recalculate_visible_walls(scene);
                 }
             }
         }
