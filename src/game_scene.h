@@ -5,9 +5,8 @@
 
 #include "coords.h"
 #include "dungeon_camera.h"
-#include "enemy_array.h"
+#include "actor_array.h"
 #include "map.h"
-#include "player.h"
 #include "sprite_resource_array.h"
 #include "texture_resource_array.h"
 
@@ -35,9 +34,9 @@ struct game_scene_data
 
     Map *map;
 
-    Player *player;
+    Actor *player;
 
-    EnemyArray *enemy_array;
+    ActorArray *enemies;
 
     DungeonCamera *dungeon_camera;
 };
