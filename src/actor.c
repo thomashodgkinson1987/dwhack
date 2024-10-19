@@ -43,17 +43,17 @@ void actor_free(Actor *actor)
 
 // getters
 
-int actor_get_x(const Actor *actor) { return actor->x; }
+int actor_get_x(Actor *actor) { return actor->x; }
 
-int actor_get_y(const Actor *actor) { return actor->y; }
+int actor_get_y(Actor *actor) { return actor->y; }
 
-CardinalDirection actor_get_facing(const Actor *actor) { return actor->facing; }
+CardinalDirection actor_get_facing(Actor *actor) { return actor->facing; }
 
-int actor_get_health(const Actor *actor) { return actor->health; }
+int actor_get_health(Actor *actor) { return actor->health; }
 
-int actor_get_max_health(const Actor *actor) { return actor->max_health; }
+int actor_get_max_health(Actor *actor) { return actor->max_health; }
 
-Color actor_get_color(const Actor *actor) { return actor->color; }
+Color actor_get_color(Actor *actor) { return actor->color; }
 
 // setters
 
@@ -65,14 +65,6 @@ void actor_set_facing(Actor *actor, CardinalDirection facing) { actor->facing = 
 
 void actor_set_health(Actor *actor, int health) { actor->health = health; }
 
-void actor_set_max_health(Actor *actor, int health) { actor->health = health; }
+void actor_set_max_health(Actor *actor, int max_health) { actor->max_health = max_health; }
 
 void actor_set_color(Actor *actor, Color color) { actor->color = color; }
-
-// helpers
-
-void actor_set_position(Actor *actor, int x, int y)
-{
-    actor_set_x(actor, x);
-    actor_set_y(actor, y);
-}

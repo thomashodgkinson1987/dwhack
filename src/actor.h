@@ -7,23 +7,25 @@
 
 typedef struct actor_impl Actor;
 
+// create and free
+
 Actor *actor_create(int x, int y, CardinalDirection facing, int health, Color color);
 
 void actor_free(Actor *actor);
 
 // getters
 
-int actor_get_x(const Actor *actor);
+int actor_get_x(Actor *actor);
 
-int actor_get_y(const Actor *actor);
+int actor_get_y(Actor *actor);
 
-CardinalDirection actor_get_facing(const Actor *actor);
+CardinalDirection actor_get_facing(Actor *actor);
 
-int actor_get_health(const Actor *actor);
+int actor_get_health(Actor *actor);
 
-int actor_get_max_health(const Actor *actor);
+int actor_get_max_health(Actor *actor);
 
-Color actor_get_color(const Actor *actor);
+Color actor_get_color(Actor *actor);
 
 // setters
 
@@ -38,9 +40,5 @@ void actor_set_health(Actor *actor, int health);
 void actor_set_max_health(Actor *actor, int max_health);
 
 void actor_set_color(Actor *actor, Color color);
-
-// helpers
-
-void actor_set_position(Actor *actor, int x, int y);
 
 #endif
